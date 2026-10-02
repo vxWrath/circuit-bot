@@ -55,12 +55,15 @@ A **window** is a four-day period. Every team plays **two games** per window, wi
 
 A circuit, day by day:
 
-```
-Window 1 (days 1-4)   - teams join their pods and play 2 games; ratings update
-Window 2 (days 5-8)   - new pods; 2 more games; ratings update
-Window 3 (days 9-12)  - final window for teams to join or leave
-Window 4 (days 13-16) - final games; the top teams by rating advance to the tournament
-```
+| Phase | Length | Description |
+| --- | --- | ---|
+| Window 1 | length of tournament, hopefully ~4 days | teams join their pods and play 2 games; ratings update |
+| Window 2 | days 5-8 | new pods; 2 more games; ratings update |
+| Window 3 | days 9-12 | final window for teams to join or leave |
+| break | 12-18 hours | records finalized; Window 4 roster selections are made |
+| Window 4 | days 13-16 | final games; the top teams by rating advance to the tournament |
+| break | 12-18 hours | records finalized; tournament roster selections are made; preparations next circuit begin |
+| Tournament/next circuit | | the top teams by rating advance to the tournament and play in a double-elimination bracket |
 
 The tournament then runs during Window 1 of the next circuit, and the cycle repeats.
 
@@ -72,6 +75,10 @@ A **pod** is a group of 8 teams at a similar rating - the circuit's equivalent o
 - A team **cannot play the same opponent twice** in a window.
 
 Pods keep teams competing against opponents near their level, but because pods reshuffle every window, a team is never locked into the same group for long - two or three games, then a new set of opponents.
+
+Pods are numbered by rating from the top down - **Pod 1** is the strongest pod.
+
+Because the league size is rarely a multiple of eight, the **lowest pod** absorbs the remainder: it may hold anywhere from 8 to 15 teams. If the lowest pod shrinks to 7 teams, it merges with the pod above it to form a new lowest pod. If it grows to 16 teams, it splits into two pods of eight.
 
 ## Scheduling Games
 
@@ -98,6 +105,7 @@ Every team carries a rating across circuits - the league's cumulative record of 
 - **Every game affects the rating.** With only eight games per circuit, there is no room to coast.
 - **Margin of victory matters, within limits.** Blowouts count for more than narrow wins, but the weight is capped so running up the score against weak opponents is not rewarded.
 - **Inactivity is penalized.** Missed games carry escalating penalties - a team missing four or five games in a circuit will see its rating fall sharply.
+- **New teams start at the bottom.** A team entering the league - new or returning - starts at the lowest rating in the league and works its way up. Multiple circuits are how a new team reaches the top.
 
 The rating model is currently in development; it will be validated against historical game data before launch.
 
@@ -110,7 +118,7 @@ After Window 4, the **top teams** in the league enter the **Circuit Tournament**
 - **16 teams** at 128 teams - the cap, regardless of further growth
 
 - The tournament runs during **Window 1 of the next circuit**, so tournament teams start their next circuit in Window 2.
-- To be eligible, a team must play **a minimum of seven games** in a circuit to qualify for the tournament. This doesn't matter if your team joined in window 1 or 3. However, if a team participated in the previous circuit's tournament, that team only needs to play a minimum of five games since they start in window 2.
+- To be eligible, a team must play **a minimum of seven games** in a circuit to qualify for the tournament, regardless of when it joined. A team joining in Window 3 can play at most six games, so it cannot qualify for that circuit's tournament - by design, it builds toward the next circuit. A team that played in the previous circuit's tournament starts in Window 2 and needs only **five games**.
 
 ## Teams & Players
 
@@ -124,14 +132,14 @@ The roster rules are built around flexibility, tightening progressively over the
 
 **The open weeks (Windows 1-3)**
 
-- Teams may join or leave. A team that leaves in Window 2 may return the following circuit. A team that leaves in Window 3 is out for the remainder of the circuit *and* the next one.
+- Teams may join or leave. A team joining mid-circuit is admitted between windows - a team that signs up during a window begins play at the start of the next window. In reverse, a team that requests removal stays in the league until the window closes - it plays out the remainder of the window, then leaves. A team that leaves in Window 2 may return the following circuit. A team that leaves in Window 3 is out for the remainder of the circuit *and* the next one.
 - Players may play for any team, at any time. There is no limit on games played.
 
 **Window 4 - the locks**
 
 - Each player selects **three teams** to play for in the final window. Each selected team must have had the player on its roster at some point during the first three windows.
 - Rosters are **frozen** - no signings, releases, or demands.
-- Selections are made during the downtime between Windows 3 and 4, while the league finalizes all records. If a player misses the deadline, the bot selects automatically: the player's top three teams by games played, with time on roster as the tiebreaker. Players do not have to be on a team's current roster to select that team.
+- Selections are made during the 12-18 hour break between Windows 3 and 4, while the league finalizes all records. If a player misses the deadline, the bot selects automatically: the player's top three teams by games played, with time on roster as the tiebreaker. Players do not have to be on a team's current roster to select that team.
 
 **The tournament**
 
@@ -139,11 +147,11 @@ The roster rules are built around flexibility, tightening progressively over the
 
 **Scope of these rules**
 
-The roster rules apply only to teams **still in contention** for the tournament (or already in it). If a team is mathematically eliminated, players may play for it freely - it does not consume one of their selections. Players competing in the tournament may also play for non-tournament teams, which are simply starting Window 1 of the next circuit.
+The roster rules apply only to teams **still in contention** for the tournament (or already in it). A team is **mathematically eliminated** once it can no longer reach a tournament-qualifying rating by the end of Window 4. From that point, players may play for it freely - it does not consume one of their selections. Players competing in the tournament may also play for non-tournament teams, which are simply starting Window 1 of the next circuit.
 
 **Roster count**
 
-A team in contention must have **eight players rostered** entering Window 4; otherwise it is **frozen**. Frozen teams remain frozen until they fill their roster with newcomers. If a team has fewer than eight players when the tournament begins, it forfeits its place and the bid passes to the next-ranked team.
+A team in contention must have **eight players rostered** entering Window 4; otherwise it is **frozen**. The same applies if its roster drops below eight during Window 4. Frozen teams remain frozen until they fill their roster with newcomers. If a team has fewer than eight players when the tournament begins, it forfeits its place and the bid passes to the next-ranked team.
 
 **Shared players**
 
@@ -152,6 +160,17 @@ No two teams may share more than **four players**. A signing that would create a
 **Newcomers**
 
 A newcomer is a player who joins the league in Window 4, or a player whose tournament-eligible teams all disbanded or were frozen entering Window 4. Newcomers select **one** Window 4 tournament-eligible team to play for, and are locked to that team for Window 4 and the tournament (if applicable).
+
+**Hiatus**
+
+A team that wants a break without leaving the league and starting over may request a **hiatus** instead of removal:
+
+- A hiatus lasts a **minimum of one window and a maximum of one circuit**.
+- The team **does not play** during the hiatus - it sits out of pods and is exempt from scheduling requirements and missed-game penalties.
+- The team's rating **stays roughly in place**: it moves with the ratings of the teams around it, holding its placement in the league, with a small penalty applied.
+- Requests are submitted by ticket and **approved or denied manually** by staff.
+
+For example: a team whose quarterback is away for a week puts in a ticket, sits out two windows, and returns with its rating roughly intact.
 
 ## Owners & Coaches
 
@@ -169,7 +188,7 @@ Coaches hold the same abilities as owners - signing and releasing players, sched
 
 ## Awards
 
-Awards are based on **per-game averages** rather than totals, since players may play an unlimited number of games per circuit and totals would reward volume of play. Eligibility requires **eight games** (or **six** for players who made the previous tournament). Awards are expected to be limited to players who competed in top pods.
+Awards are based on **per-game averages** rather than totals, since players may play an unlimited number of games per circuit and totals would reward volume of play. Eligibility requires **eight games** (or **six** for players who made the previous tournament). Awards are limited to players who competed in the top pods - Pod 1, Pod 2, and so on down from the strongest.
 
 ## Known Risks & Mitigations
 
