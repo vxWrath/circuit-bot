@@ -1,0 +1,4822 @@
+[
+    {
+        "id": 1,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "56",
+        "team_two_id": "1329901053776494592",
+        "team_two_name": "FAY",
+        "team_two_score": "28",
+        "timestamp": "2026-05-11T03:03:29.021000+00:00"
+    },
+    {
+        "id": 2,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "40",
+        "team_two_id": "1284393329165074474",
+        "team_two_name": "TOR",
+        "team_two_score": "26",
+        "timestamp": "2026-05-10T03:04:30.889000+00:00"
+    },
+    {
+        "id": 3,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "24",
+        "team_two_id": "1237040703385632899",
+        "team_two_name": "TB",
+        "team_two_score": "22",
+        "timestamp": "2026-05-08T01:54:42.930000+00:00"
+    },
+    {
+        "id": 4,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "55",
+        "team_two_id": "1237040352578244618",
+        "team_two_name": "CLT",
+        "team_two_score": "38",
+        "timestamp": "2026-05-09T03:34:15.862000+00:00"
+    },
+    {
+        "id": 5,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "48",
+        "team_two_id": "1237040703385632899",
+        "team_two_name": "TB",
+        "team_two_score": "44",
+        "timestamp": "2026-05-12T03:25:13.646000+00:00"
+    },
+    {
+        "id": 6,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "47",
+        "team_two_id": "1237040683513155635",
+        "team_two_name": "NO",
+        "team_two_score": "41",
+        "timestamp": "2026-05-11T02:24:57.061000+00:00"
+    },
+    {
+        "id": 7,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "60",
+        "team_two_id": "1237040344521244672",
+        "team_two_name": "BAL",
+        "team_two_score": "54",
+        "timestamp": "2026-05-09T06:00:01.666000+00:00"
+    },
+    {
+        "id": 8,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "45",
+        "team_two_id": "1284393329165074474",
+        "team_two_name": "TOR",
+        "team_two_score": "27",
+        "timestamp": "2026-05-11T02:55:14.578000+00:00"
+    },
+    {
+        "id": 9,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "47",
+        "team_two_id": "1329901053776494592",
+        "team_two_name": "FAY",
+        "team_two_score": "31",
+        "timestamp": "2026-05-10T02:58:39.108000+00:00"
+    },
+    {
+        "id": 10,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "60",
+        "team_two_id": "1237040683513155635",
+        "team_two_name": "NO",
+        "team_two_score": "30",
+        "timestamp": "2026-05-13T03:51:47.386000+00:00"
+    },
+    {
+        "id": 11,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "41",
+        "team_two_id": "1237040703385632899",
+        "team_two_name": "TB",
+        "team_two_score": "34",
+        "timestamp": "2026-05-13T03:14:18.229000+00:00"
+    },
+    {
+        "id": 12,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "46",
+        "team_two_id": "1284393329165074474",
+        "team_two_name": "TOR",
+        "team_two_score": "32",
+        "timestamp": "2026-05-12T02:48:37.918000+00:00"
+    },
+    {
+        "id": 13,
+        "team_one_id": "1237040355044757624",
+        "team_one_name": "CHI",
+        "team_one_score": "62",
+        "team_two_id": "1237040678123602032",
+        "team_two_name": "NSH",
+        "team_two_score": "49",
+        "timestamp": "2026-05-11T03:32:09.330000+00:00"
+    },
+    {
+        "id": 14,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "55",
+        "team_two_id": "1284408625040986143",
+        "team_two_name": "PAR",
+        "team_two_score": "35",
+        "timestamp": "2026-05-10T03:30:20.520000+00:00"
+    },
+    {
+        "id": 16,
+        "team_one_id": "1237399620598890567",
+        "team_one_name": "TAC",
+        "team_one_score": "54",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "48",
+        "timestamp": "2026-05-13T02:49:09.024000+00:00"
+    },
+    {
+        "id": 17,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "35",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "0",
+        "timestamp": "2026-05-09T03:34:00.459000+00:00"
+    },
+    {
+        "id": 18,
+        "team_one_id": "1284408501279391885",
+        "team_one_name": "Tucson",
+        "team_one_score": "58",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "55",
+        "timestamp": "2026-05-09T02:05:28.969000+00:00"
+    },
+    {
+        "id": 19,
+        "team_one_id": "1237040362477060236",
+        "team_one_name": "DAL",
+        "team_one_score": "62",
+        "team_two_id": "1237394022121734248",
+        "team_two_name": "NOR",
+        "team_two_score": "40",
+        "timestamp": "2026-05-12T02:55:57.105000+00:00"
+    },
+    {
+        "id": 20,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "47",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "42",
+        "timestamp": "2026-05-11T02:23:26.947000+00:00"
+    },
+    {
+        "id": 21,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "62",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "60",
+        "timestamp": "2026-05-13T03:30:40.785000+00:00"
+    },
+    {
+        "id": 22,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "57",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "41",
+        "timestamp": "2026-05-13T03:35:48.473000+00:00"
+    },
+    {
+        "id": 23,
+        "team_one_id": "1237394022121734248",
+        "team_one_name": "NOR",
+        "team_one_score": "51",
+        "team_two_id": "1237399609031000235",
+        "team_two_name": "PRV",
+        "team_two_score": "33",
+        "timestamp": "2026-05-13T02:56:23.010000+00:00"
+    },
+    {
+        "id": 24,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "54",
+        "team_two_id": "1237399620598890567",
+        "team_two_name": "TAC",
+        "team_two_score": "35",
+        "timestamp": "2026-05-10T02:30:25.199000+00:00"
+    },
+    {
+        "id": 25,
+        "team_one_id": "1237040678123602032",
+        "team_one_name": "NSH",
+        "team_one_score": "53",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "31",
+        "timestamp": "2026-05-11T02:21:30.913000+00:00"
+    },
+    {
+        "id": 26,
+        "team_one_id": "1284408501279391885",
+        "team_one_name": "Tucson",
+        "team_one_score": "56",
+        "team_two_id": "1284408625040986143",
+        "team_two_name": "PAR",
+        "team_two_score": "32",
+        "timestamp": "2026-05-12T02:51:10.282000+00:00"
+    },
+    {
+        "id": 27,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "63",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "26",
+        "timestamp": "2026-05-10T02:46:57.539000+00:00"
+    },
+    {
+        "id": 28,
+        "team_one_id": "1237398922398404638",
+        "team_one_name": "EUG",
+        "team_one_score": "41",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "40",
+        "timestamp": "2026-05-10T02:50:51.907000+00:00"
+    },
+    {
+        "id": 29,
+        "team_one_id": "1237040355044757624",
+        "team_one_name": "CHI",
+        "team_one_score": "41",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "7",
+        "timestamp": "2026-05-09T02:42:20.137000+00:00"
+    },
+    {
+        "id": 30,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "67",
+        "team_two_id": "1284408501279391885",
+        "team_two_name": "Tucson",
+        "team_two_score": "45",
+        "timestamp": "2026-05-09T03:06:59.812000+00:00"
+    },
+    {
+        "id": 32,
+        "team_one_id": "1284393339076087848",
+        "team_one_name": "RAL",
+        "team_one_score": "38",
+        "team_two_id": "1237399620598890567",
+        "team_two_name": "TAC",
+        "team_two_score": "28",
+        "timestamp": "2026-05-13T01:51:01.204000+00:00"
+    },
+    {
+        "id": 33,
+        "team_one_id": "1237040678123602032",
+        "team_one_name": "NSH",
+        "team_one_score": "44",
+        "team_two_id": "1237040668791144560",
+        "team_two_name": "LV",
+        "team_two_score": "35",
+        "timestamp": "2026-05-12T02:56:51.154000+00:00"
+    },
+    {
+        "id": 34,
+        "team_one_id": "1237399308215652362",
+        "team_one_name": "FTW",
+        "team_one_score": "47",
+        "team_two_id": "1284408625040986143",
+        "team_two_name": "PAR",
+        "team_two_score": "45",
+        "timestamp": "2026-05-13T05:10:16.937000+00:00"
+    },
+    {
+        "id": 35,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "46",
+        "team_two_id": "1237394022121734248",
+        "team_two_name": "NOR",
+        "team_two_score": "19",
+        "timestamp": "2026-05-09T03:48:26.949000+00:00"
+    },
+    {
+        "id": 36,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "44",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "9",
+        "timestamp": "2026-05-13T01:48:39.943000+00:00"
+    },
+    {
+        "id": 37,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "52",
+        "team_two_id": "1329901031697551380",
+        "team_two_name": "AKR",
+        "team_two_score": "13",
+        "timestamp": "2026-05-12T00:50:25.095000+00:00"
+    },
+    {
+        "id": 38,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "62",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "23",
+        "timestamp": "2026-05-11T04:11:54.593000+00:00"
+    },
+    {
+        "id": 39,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "34",
+        "team_two_id": "1237040686050574406",
+        "team_two_name": "NY",
+        "team_two_score": "34",
+        "timestamp": "2026-05-10T03:58:43.419000+00:00"
+    },
+    {
+        "id": 40,
+        "team_one_id": "1284393334340718653",
+        "team_one_name": "LEX",
+        "team_one_score": "61",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "25",
+        "timestamp": "2026-05-09T02:49:25.217000+00:00"
+    },
+    {
+        "id": 41,
+        "team_one_id": "1237040681042841662",
+        "team_one_name": "NEW",
+        "team_one_score": "55",
+        "team_two_id": "1329901073699311687",
+        "team_two_name": "TKY",
+        "team_two_score": "48",
+        "timestamp": "2026-05-12T02:14:45.229000+00:00"
+    },
+    {
+        "id": 42,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "58",
+        "team_two_id": "1284408499484229725",
+        "team_two_name": "SYR",
+        "team_two_score": "35",
+        "timestamp": "2026-05-13T02:25:45.240000+00:00"
+    },
+    {
+        "id": 43,
+        "team_one_id": "1329901467125026938",
+        "team_one_name": "WIL",
+        "team_one_score": "70",
+        "team_two_id": "1329901055978246174",
+        "team_two_name": "LON",
+        "team_two_score": "42",
+        "timestamp": "2026-05-12T02:56:38.278000+00:00"
+    },
+    {
+        "id": 44,
+        "team_one_id": "1237040688655241277",
+        "team_one_name": "PHI",
+        "team_one_score": "49",
+        "team_two_id": "1329901091013398548",
+        "team_two_name": "RVS",
+        "team_two_score": "20",
+        "timestamp": "2026-05-12T04:00:32.057000+00:00"
+    },
+    {
+        "id": 45,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "55",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "45",
+        "timestamp": "2026-05-11T02:41:30.443000+00:00"
+    },
+    {
+        "id": 47,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "41",
+        "team_two_id": "1329901055978246174",
+        "team_two_name": "LON",
+        "team_two_score": "6",
+        "timestamp": "2026-05-10T02:34:10.861000+00:00"
+    },
+    {
+        "id": 48,
+        "team_one_id": "1329901091013398548",
+        "team_one_name": "RVS",
+        "team_one_score": "21",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "49",
+        "timestamp": "2026-05-12T04:05:09.921000+00:00"
+    },
+    {
+        "id": 50,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "35",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "29",
+        "timestamp": "2026-05-08T03:18:28.286000+00:00"
+    },
+    {
+        "id": 51,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "45",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "19",
+        "timestamp": "2026-05-09T01:50:41.210000+00:00"
+    },
+    {
+        "id": 52,
+        "team_one_id": "1284393334340718653",
+        "team_one_name": "LEX",
+        "team_one_score": "47",
+        "team_two_id": "1237040688655241277",
+        "team_two_name": "PHI",
+        "team_two_score": "9",
+        "timestamp": "2026-05-10T03:33:32.213000+00:00"
+    },
+    {
+        "id": 54,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "44",
+        "team_two_id": "1237040701301198938",
+        "team_two_name": "SEA",
+        "team_two_score": "35",
+        "timestamp": "2026-05-11T04:10:22.600000+00:00"
+    },
+    {
+        "id": 55,
+        "team_one_id": "1329901467125026938",
+        "team_one_name": "WIL",
+        "team_one_score": "60",
+        "team_two_id": "1329901066526920714",
+        "team_two_name": "HAR",
+        "team_two_score": "47",
+        "timestamp": "2026-05-11T02:58:22.969000+00:00"
+    },
+    {
+        "id": 56,
+        "team_one_id": "1237040688655241277",
+        "team_one_name": "PHI",
+        "team_one_score": "40",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "35",
+        "timestamp": "2026-05-12T03:07:01.927000+00:00"
+    },
+    {
+        "id": 57,
+        "team_one_id": "1237040681042841662",
+        "team_one_name": "NEW",
+        "team_one_score": "38",
+        "team_two_id": "1329901031697551380",
+        "team_two_name": "AKR",
+        "team_two_score": "9",
+        "timestamp": "2026-05-13T01:02:49.740000+00:00"
+    },
+    {
+        "id": 58,
+        "team_one_id": "1237394005730263141",
+        "team_one_name": "CHP",
+        "team_one_score": "54",
+        "team_two_id": "1284408499484229725",
+        "team_two_name": "SYR",
+        "team_two_score": "14",
+        "timestamp": "2026-05-10T03:18:58.858000+00:00"
+    },
+    {
+        "id": 59,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "55",
+        "team_two_id": "1329901055978246174",
+        "team_two_name": "LON",
+        "team_two_score": "13",
+        "timestamp": "2026-05-13T01:40:45.507000+00:00"
+    },
+    {
+        "id": 60,
+        "team_one_id": "1329901091013398548",
+        "team_one_name": "RVS",
+        "team_one_score": "39",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "31",
+        "timestamp": "2026-05-12T01:57:01.825000+00:00"
+    },
+    {
+        "id": 61,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "47",
+        "team_two_id": "1237398951783567441",
+        "team_two_name": "OMA",
+        "team_two_score": "10",
+        "timestamp": "2026-05-08T02:47:09.173000+00:00"
+    },
+    {
+        "id": 62,
+        "team_one_id": "1329901058897608837",
+        "team_one_name": "FTC",
+        "team_one_score": "30",
+        "team_two_id": "1237398945622392902",
+        "team_two_name": "KNO",
+        "team_two_score": "10",
+        "timestamp": "2026-05-12T03:50:39.657000+00:00"
+    },
+    {
+        "id": 63,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "49",
+        "team_two_id": "1237040674071773206",
+        "team_two_name": "MIA",
+        "team_two_score": "48",
+        "timestamp": "2026-05-13T03:31:05.652000+00:00"
+    },
+    {
+        "id": 64,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "53",
+        "team_two_id": "1237399624260653117",
+        "team_two_name": "TAL",
+        "team_two_score": "26",
+        "timestamp": "2026-05-13T01:57:37.450000+00:00"
+    },
+    {
+        "id": 65,
+        "team_one_id": "1237393989280206948",
+        "team_one_name": "ANN",
+        "team_one_score": "38",
+        "team_two_id": "1284408500193067048",
+        "team_two_name": "TOP",
+        "team_two_score": "16",
+        "timestamp": "2026-05-12T01:00:40.803000+00:00"
+    },
+    {
+        "id": 66,
+        "team_one_id": "1329901070570225687",
+        "team_one_name": "HNL",
+        "team_one_score": "44",
+        "team_two_id": "1329901063935098953",
+        "team_two_name": "HAR",
+        "team_two_score": "42",
+        "timestamp": "2026-05-10T02:10:28.042000+00:00"
+    },
+    {
+        "id": 68,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "57",
+        "team_two_id": "1237399301374611497",
+        "team_two_name": "OKC",
+        "team_two_score": "27",
+        "timestamp": "2026-05-12T01:22:19.169000+00:00"
+    },
+    {
+        "id": 70,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "53",
+        "team_two_id": "1329901042544152627",
+        "team_two_name": "ELP",
+        "team_two_score": "20",
+        "timestamp": "2026-05-10T02:00:34.165000+00:00"
+    },
+    {
+        "id": 71,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "28",
+        "team_two_id": "1284393328531472384",
+        "team_two_name": "CHE",
+        "team_two_score": "21",
+        "timestamp": "2026-05-13T00:59:55.144000+00:00"
+    },
+    {
+        "id": 74,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "64",
+        "team_two_id": "1237398945622392902",
+        "team_two_name": "KNO",
+        "team_two_score": "31",
+        "timestamp": "2026-05-08T03:26:00.409000+00:00"
+    },
+    {
+        "id": 75,
+        "team_one_id": "1237040674071773206",
+        "team_one_name": "MIA",
+        "team_one_score": "26",
+        "team_two_id": "1284393325188878337",
+        "team_two_name": "ANA",
+        "team_two_score": "9",
+        "timestamp": "2026-05-10T00:57:21.950000+00:00"
+    },
+    {
+        "id": 77,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "34",
+        "team_two_id": "1237393989280206948",
+        "team_two_name": "ANN",
+        "team_two_score": "12",
+        "timestamp": "2026-05-08T01:51:15.312000+00:00"
+    },
+    {
+        "id": 78,
+        "team_one_id": "1329901070570225687",
+        "team_one_name": "HNL",
+        "team_one_score": "38",
+        "team_two_id": "1329901039490437254",
+        "team_two_name": "DAV",
+        "team_two_score": "35",
+        "timestamp": "2026-05-12T03:51:02.919000+00:00"
+    },
+    {
+        "id": 79,
+        "team_one_id": "1284393333954842687",
+        "team_one_name": "GRB",
+        "team_one_score": "45",
+        "team_two_id": "1237398951783567441",
+        "team_two_name": "OMA",
+        "team_two_score": "17",
+        "timestamp": "2026-05-10T02:09:03.945000+00:00"
+    },
+    {
+        "id": 80,
+        "team_one_id": "1237399301374611497",
+        "team_one_name": "OKC",
+        "team_one_score": "60",
+        "team_two_id": "1329901058897608837",
+        "team_two_name": "FTC",
+        "team_two_score": "27",
+        "timestamp": "2026-05-13T01:55:40.453000+00:00"
+    },
+    {
+        "id": 81,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "40",
+        "team_two_id": "1237398915523940484",
+        "team_two_name": "COL",
+        "team_two_score": "28",
+        "timestamp": "2026-05-13T01:53:25.395000+00:00"
+    },
+    {
+        "id": 82,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "46",
+        "team_two_id": "1237399624260653117",
+        "team_two_name": "TAL",
+        "team_two_score": "6",
+        "timestamp": "2026-05-10T02:40:43.477000+00:00"
+    },
+    {
+        "id": 84,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "44",
+        "team_two_id": "1329901063935098953",
+        "team_two_name": "HAR",
+        "team_two_score": "25",
+        "timestamp": "2026-05-09T01:52:19.481000+00:00"
+    },
+    {
+        "id": 85,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "55",
+        "team_two_id": "1284393333954842687",
+        "team_two_name": "GRB",
+        "team_two_score": "26",
+        "timestamp": "2026-05-13T03:00:16.138000+00:00"
+    },
+    {
+        "id": 88,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "48",
+        "team_two_id": "1237399294622040074",
+        "team_two_name": "MAD",
+        "team_two_score": "32",
+        "timestamp": "2026-05-12T02:01:20.505000+00:00"
+    },
+    {
+        "id": 89,
+        "team_one_id": "1284393328531472384",
+        "team_one_name": "CHE",
+        "team_one_score": "34",
+        "team_two_id": "1237393989280206948",
+        "team_two_name": "ANN",
+        "team_two_score": "26",
+        "timestamp": "2026-05-10T01:59:19.564000+00:00"
+    },
+    {
+        "id": 90,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "42",
+        "team_two_id": "1329901070570225687",
+        "team_two_name": "HNL",
+        "team_two_score": "3",
+        "timestamp": "2026-05-12T03:23:33.720000+00:00"
+    },
+    {
+        "id": 91,
+        "team_one_id": "1237393998432436307",
+        "team_one_name": "AUS",
+        "team_one_score": "45",
+        "team_two_id": "1237398951783567441",
+        "team_two_name": "OMA",
+        "team_two_score": "42",
+        "timestamp": "2026-05-12T01:24:57.583000+00:00"
+    },
+    {
+        "id": 92,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "62",
+        "team_two_id": "1329901058897608837",
+        "team_two_name": "FTC",
+        "team_two_score": "27",
+        "timestamp": "2026-05-13T01:05:52.163000+00:00"
+    },
+    {
+        "id": 93,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "47",
+        "team_two_id": "1284393325188878337",
+        "team_two_name": "ANA",
+        "team_two_score": "7",
+        "timestamp": "2026-05-12T02:32:55.547000+00:00"
+    },
+    {
+        "id": 95,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "36",
+        "team_two_id": "1284408500193067048",
+        "team_two_name": "TOP",
+        "team_two_score": "30",
+        "timestamp": "2026-05-10T00:52:02.150000+00:00"
+    },
+    {
+        "id": 96,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "56",
+        "team_two_id": "1329901063935098953",
+        "team_two_name": "HAR",
+        "team_two_score": "35",
+        "timestamp": "2026-05-11T03:02:00.115000+00:00"
+    },
+    {
+        "id": 97,
+        "team_one_id": "1237399297155272714",
+        "team_one_name": "MGM",
+        "team_one_score": "56",
+        "team_two_id": "1329901095711014942",
+        "team_two_name": "ROC",
+        "team_two_score": "34",
+        "timestamp": "2026-05-11T02:19:27.135000+00:00"
+    },
+    {
+        "id": 98,
+        "team_one_id": "1237393986201718795",
+        "team_one_name": "ING",
+        "team_one_score": "28",
+        "team_two_id": "1329901085959131206",
+        "team_two_name": "NAPER",
+        "team_two_score": "6",
+        "timestamp": "2026-05-11T02:57:07.186000+00:00"
+    },
+    {
+        "id": 100,
+        "team_one_id": "1237040359742115902",
+        "team_one_name": "CLE",
+        "team_one_score": "44",
+        "team_two_id": "1237399310690422964",
+        "team_two_name": "PAS",
+        "team_two_score": "6",
+        "timestamp": "2026-05-12T02:36:59.226000+00:00"
+    },
+    {
+        "id": 101,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "43",
+        "team_two_id": "1284393336936992822",
+        "team_two_name": "ORL",
+        "team_two_score": "7",
+        "timestamp": "2026-05-09T04:38:31.792000+00:00"
+    },
+    {
+        "id": 102,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "60",
+        "team_two_id": "1237040364750114858",
+        "team_two_name": "DEN",
+        "team_two_score": "42",
+        "timestamp": "2026-05-13T02:59:30.279000+00:00"
+    },
+    {
+        "id": 104,
+        "team_one_id": "1237040349684301854",
+        "team_one_name": "BUF",
+        "team_one_score": "28",
+        "team_two_id": "1329901459780931686",
+        "team_two_name": "VB",
+        "team_two_score": "0",
+        "timestamp": "2026-05-10T01:29:16.046000+00:00"
+    },
+    {
+        "id": 107,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "63",
+        "team_two_id": "1284393336454643772",
+        "team_two_name": "OAK",
+        "team_two_score": "56",
+        "timestamp": "2026-05-10T03:08:22.033000+00:00"
+    },
+    {
+        "id": 110,
+        "team_one_id": "1237040690505060435",
+        "team_one_name": "PHX",
+        "team_one_score": "31",
+        "team_two_id": "1329901049158434816",
+        "team_two_name": "BKN",
+        "team_two_score": "28",
+        "timestamp": "2026-05-08T04:16:19.335000+00:00"
+    },
+    {
+        "id": 111,
+        "team_one_id": "1237398937766461574",
+        "team_one_name": "HAR",
+        "team_one_score": "34",
+        "team_two_id": "1284393338128306190",
+        "team_two_name": "PRO",
+        "team_two_score": "33",
+        "timestamp": "2026-05-11T03:03:12.871000+00:00"
+    },
+    {
+        "id": 112,
+        "team_one_id": "1237040346769395744",
+        "team_one_name": "BOS",
+        "team_one_score": "45",
+        "team_two_id": "1329901081186140322",
+        "team_two_name": "MIL",
+        "team_two_score": "40",
+        "timestamp": "2026-05-10T03:21:32.215000+00:00"
+    },
+    {
+        "id": 113,
+        "team_one_id": "1237399297155272714",
+        "team_one_name": "MGM",
+        "team_one_score": "38",
+        "team_two_id": "1284408623333773432",
+        "team_two_name": "MXC",
+        "team_two_score": "20",
+        "timestamp": "2026-05-12T02:01:52.840000+00:00"
+    },
+    {
+        "id": 115,
+        "team_one_id": "1237394019688906792",
+        "team_one_name": "BOU",
+        "team_one_score": "57",
+        "team_two_id": "1329901076144590918",
+        "team_two_name": "LIS",
+        "team_two_score": "42",
+        "timestamp": "2026-05-12T01:56:18.608000+00:00"
+    },
+    {
+        "id": 117,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "48",
+        "team_two_id": "1284408498746036294",
+        "team_two_name": "StPaul",
+        "team_two_score": "38",
+        "timestamp": "2026-05-10T02:57:59.496000+00:00"
+    },
+    {
+        "id": 118,
+        "team_one_id": "1237040364750114858",
+        "team_one_name": "DEN",
+        "team_one_score": "48",
+        "team_two_id": "1329901049158434816",
+        "team_two_name": "BKN",
+        "team_two_score": "47",
+        "timestamp": "2026-05-10T03:01:33.195000+00:00"
+    },
+    {
+        "id": 119,
+        "team_one_id": "1237398953562214534",
+        "team_one_name": "LIT",
+        "team_one_score": "47",
+        "team_two_id": "1284393338128306190",
+        "team_two_name": "PRO",
+        "team_two_score": "36",
+        "timestamp": "2026-05-13T03:19:39.440000+00:00"
+    },
+    {
+        "id": 120,
+        "team_one_id": "1237040346769395744",
+        "team_one_name": "BOS",
+        "team_one_score": "59",
+        "team_two_id": "1329901459780931686",
+        "team_two_name": "VB",
+        "team_two_score": "22",
+        "timestamp": "2026-05-11T01:53:09.286000+00:00"
+    },
+    {
+        "id": 121,
+        "team_one_id": "1237040341563998300",
+        "team_one_name": "ATL",
+        "team_one_score": "32",
+        "team_two_id": "1329901095711014942",
+        "team_two_name": "ROC",
+        "team_two_score": "25",
+        "timestamp": "2026-05-12T03:00:19.239000+00:00"
+    },
+    {
+        "id": 122,
+        "team_one_id": "1329901100647710800",
+        "team_one_name": "SPR",
+        "team_one_score": "52",
+        "team_two_id": "1329901085959131206",
+        "team_two_name": "NAPER",
+        "team_two_score": "28",
+        "timestamp": "2026-05-10T12:01:57.855000+00:00"
+    },
+    {
+        "id": 124,
+        "team_one_id": "1237399321658523718",
+        "team_one_name": "TUL",
+        "team_one_score": "54",
+        "team_two_id": "1237040359742115902",
+        "team_two_name": "CLE",
+        "team_two_score": "41",
+        "timestamp": "2026-05-10T02:54:02.063000+00:00"
+    },
+    {
+        "id": 125,
+        "team_one_id": "1284393336936992822",
+        "team_one_name": "ORL",
+        "team_one_score": "34",
+        "team_two_id": "1284393341030760458",
+        "team_two_name": "SJ",
+        "team_two_score": "31",
+        "timestamp": "2026-05-11T00:58:21.029000+00:00"
+    },
+    {
+        "id": 126,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "53",
+        "team_two_id": "1237040690505060435",
+        "team_two_name": "PHX",
+        "team_two_score": "37",
+        "timestamp": "2026-05-08T02:50:46.382000+00:00"
+    },
+    {
+        "id": 128,
+        "team_one_id": "1237040349684301854",
+        "team_one_name": "BUF",
+        "team_one_score": "54",
+        "team_two_id": "1329901081186140322",
+        "team_two_name": "MIL",
+        "team_two_score": "26",
+        "timestamp": "2026-05-13T02:19:44.718000+00:00"
+    },
+    {
+        "id": 130,
+        "team_one_id": "1237393986201718795",
+        "team_one_name": "ING",
+        "team_one_score": "53",
+        "team_two_id": "1329901100647710800",
+        "team_two_name": "SPR",
+        "team_two_score": "22",
+        "timestamp": "2026-05-11T02:35:55.396000+00:00"
+    },
+    {
+        "id": 132,
+        "team_one_id": "1237399321658523718",
+        "team_one_name": "TUL",
+        "team_one_score": "28",
+        "team_two_id": "1237399310690422964",
+        "team_two_name": "PAS",
+        "team_two_score": "27",
+        "timestamp": "2026-05-08T02:24:02.684000+00:00"
+    },
+    {
+        "id": 134,
+        "team_one_id": "1237040364750114858",
+        "team_one_name": "DEN",
+        "team_one_score": "29",
+        "team_two_id": "1237040690505060435",
+        "team_two_name": "PHX",
+        "team_two_score": "19",
+        "timestamp": "2026-05-11T03:04:02.015000+00:00"
+    },
+    {
+        "id": 137,
+        "team_one_id": "1329901095711014942",
+        "team_one_name": "ROC",
+        "team_one_score": "43",
+        "team_two_id": "1284408623333773432",
+        "team_two_name": "MXC",
+        "team_two_score": "40",
+        "timestamp": "2026-05-13T01:52:15.186000+00:00"
+    },
+    {
+        "id": 138,
+        "team_one_id": "1329901085959131206",
+        "team_one_name": "NAPER",
+        "team_one_score": "57",
+        "team_two_id": "1237040380394868806",
+        "team_two_name": "KC",
+        "team_two_score": "21",
+        "timestamp": "2026-05-09T04:34:33.617000+00:00"
+    },
+    {
+        "id": 139,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "43",
+        "team_two_id": "1284408496397353052",
+        "team_two_name": "STL",
+        "team_two_score": "7",
+        "timestamp": "2026-05-09T01:35:58.015000+00:00"
+    },
+    {
+        "id": 140,
+        "team_one_id": "1237040359742115902",
+        "team_one_name": "CLE",
+        "team_one_score": "42",
+        "team_two_id": "1329901061284040795",
+        "team_two_name": "SEO",
+        "team_two_score": "7",
+        "timestamp": "2026-05-11T00:43:33.462000+00:00"
+    },
+    {
+        "id": 141,
+        "team_one_id": "1284393336936992822",
+        "team_one_name": "ORL",
+        "team_one_score": "28",
+        "team_two_id": "1284408498746036294",
+        "team_two_name": "StPaul",
+        "team_two_score": "13",
+        "timestamp": "2026-05-10T03:44:56.627000+00:00"
+    },
+    {
+        "id": 142,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "44",
+        "team_two_id": "1329901049158434816",
+        "team_two_name": "BKN",
+        "team_two_score": "28",
+        "timestamp": "2026-05-09T02:58:40.954000+00:00"
+    },
+    {
+        "id": 144,
+        "team_one_id": "1237040349684301854",
+        "team_one_name": "BUF",
+        "team_one_score": "35",
+        "team_two_id": "1237040346769395744",
+        "team_two_name": "BOS",
+        "team_two_score": "28",
+        "timestamp": "2026-05-09T01:59:46.062000+00:00"
+    },
+    {
+        "id": 145,
+        "team_one_id": "1284393326531051520",
+        "team_one_name": "BIL",
+        "team_one_score": "36",
+        "team_two_id": "1329901453564842085",
+        "team_two_name": "TOL",
+        "team_two_score": "35",
+        "timestamp": "2026-05-13T03:07:42.171000+00:00"
+    },
+    {
+        "id": 148,
+        "team_one_id": "1329901462767276175",
+        "team_one_name": "SAO",
+        "team_one_score": "41",
+        "team_two_id": "1284393328195932251",
+        "team_two_name": "CHS",
+        "team_two_score": "20",
+        "timestamp": "2026-05-13T03:00:37.411000+00:00"
+    },
+    {
+        "id": 152,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "37",
+        "team_two_id": "1329901078442938409",
+        "team_two_name": "MEM",
+        "team_two_score": "0",
+        "timestamp": "2026-05-10T02:23:06.386000+00:00"
+    },
+    {
+        "id": 153,
+        "team_one_id": "1237040671282696235",
+        "team_one_name": "LA",
+        "team_one_score": "41",
+        "team_two_id": "1329901083476365412",
+        "team_two_name": "MOB",
+        "team_two_score": "28",
+        "timestamp": "2026-05-09T03:04:39.070000+00:00"
+    },
+    {
+        "id": 154,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "64",
+        "team_two_id": "1237040377467371562",
+        "team_two_name": "JAX",
+        "team_two_score": "25",
+        "timestamp": "2026-05-09T04:03:17.037000+00:00"
+    },
+    {
+        "id": 155,
+        "team_one_id": "1284393327059275867",
+        "team_one_name": "BOI",
+        "team_one_score": "52",
+        "team_two_id": "1284393335489822771",
+        "team_two_name": "LUB",
+        "team_two_score": "14",
+        "timestamp": "2026-05-08T02:00:19.237000+00:00"
+    },
+    {
+        "id": 157,
+        "team_one_id": "1237394032498577429",
+        "team_one_name": "CLO",
+        "team_one_score": "29",
+        "team_two_id": "1329901088400216094",
+        "team_two_name": "RNO",
+        "team_two_score": "28",
+        "timestamp": "2026-05-12T02:22:10.413000+00:00"
+    },
+    {
+        "id": 158,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "50",
+        "team_two_id": "1329901469968633997",
+        "team_two_name": "WSA",
+        "team_two_score": "14",
+        "timestamp": "2026-05-09T01:31:48.102000+00:00"
+    },
+    {
+        "id": 161,
+        "team_one_id": "1237040671282696235",
+        "team_one_name": "LA",
+        "team_one_score": "39",
+        "team_two_id": "1329901453564842085",
+        "team_two_name": "TOL",
+        "team_two_score": "32",
+        "timestamp": "2026-05-08T01:55:02.171000+00:00"
+    },
+    {
+        "id": 164,
+        "team_one_id": "1329901462767276175",
+        "team_one_name": "SAO",
+        "team_one_score": "56",
+        "team_two_id": "1237398934998224967",
+        "team_two_name": "GRE",
+        "team_two_score": "20",
+        "timestamp": "2026-05-11T01:53:45.757000+00:00"
+    },
+    {
+        "id": 166,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "50",
+        "team_two_id": "1284393327638351882",
+        "team_two_name": "CED",
+        "team_two_score": "10",
+        "timestamp": "2026-05-08T01:53:25.278000+00:00"
+    },
+    {
+        "id": 167,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "35",
+        "team_two_id": "1329901028145102868",
+        "team_two_name": "BAK",
+        "team_two_score": "0",
+        "timestamp": "2026-05-10T01:31:46.692000+00:00"
+    },
+    {
+        "id": 169,
+        "team_one_id": "1284393326531051520",
+        "team_one_name": "BIL",
+        "team_one_score": "40",
+        "team_two_id": "1329901083476365412",
+        "team_two_name": "MOB",
+        "team_two_score": "13",
+        "timestamp": "2026-05-10T02:46:43.055000+00:00"
+    },
+    {
+        "id": 170,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "56",
+        "team_two_id": "1284393340485374002",
+        "team_two_name": "SLC",
+        "team_two_score": "20",
+        "timestamp": "2026-05-12T01:56:02.543000+00:00"
+    },
+    {
+        "id": 173,
+        "team_one_id": "1329901088400216094",
+        "team_one_name": "RNO",
+        "team_one_score": "51",
+        "team_two_id": "1329901033308164228",
+        "team_two_name": "ALB",
+        "team_two_score": "35",
+        "timestamp": "2026-05-10T01:53:27.353000+00:00"
+    },
+    {
+        "id": 179,
+        "team_one_id": "1284393335489822771",
+        "team_one_name": "LUB",
+        "team_one_score": "14",
+        "team_two_id": "1284408492660232253",
+        "team_two_name": "PEO",
+        "team_two_score": "0",
+        "timestamp": "2026-05-12T01:26:03.255000+00:00"
+    },
+    {
+        "id": 180,
+        "team_one_id": "1329901462767276175",
+        "team_one_name": "SAO",
+        "team_one_score": "27",
+        "team_two_id": "1284393343513526414",
+        "team_two_name": "SPO",
+        "team_two_score": "0",
+        "timestamp": "2026-05-10T01:24:12.765000+00:00"
+    },
+    {
+        "id": 182,
+        "team_one_id": "1284393327638351882",
+        "team_one_name": "CED",
+        "team_one_score": "47",
+        "team_two_id": "1329901469968633997",
+        "team_two_name": "WSA",
+        "team_two_score": "13",
+        "timestamp": "2026-05-10T02:25:12.604000+00:00"
+    },
+    {
+        "id": 183,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "39",
+        "team_two_id": "1284393330217586800",
+        "team_two_name": "EVA",
+        "team_two_score": "24",
+        "timestamp": "2026-05-09T02:58:36.898000+00:00"
+    },
+    {
+        "id": 184,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "63",
+        "team_two_id": "1329901098353299648",
+        "team_two_name": "SAC",
+        "team_two_score": "24",
+        "timestamp": "2026-05-09T01:46:28.862000+00:00"
+    },
+    {
+        "id": 185,
+        "team_one_id": "1284393326531051520",
+        "team_one_name": "BIL",
+        "team_one_score": "39",
+        "team_two_id": "1237040671282696235",
+        "team_two_name": "LA",
+        "team_two_score": "34",
+        "timestamp": "2026-05-11T02:20:02.866000+00:00"
+    },
+    {
+        "id": 186,
+        "team_one_id": "1237040377467371562",
+        "team_one_name": "JAX",
+        "team_one_score": "65",
+        "team_two_id": "1284393340485374002",
+        "team_two_name": "SLC",
+        "team_two_score": "37",
+        "timestamp": "2026-05-13T03:40:51.581000+00:00"
+    },
+    {
+        "id": 188,
+        "team_one_id": "1284393328195932251",
+        "team_one_name": "CHS",
+        "team_one_score": "45",
+        "team_two_id": "1237398934998224967",
+        "team_two_name": "GRE",
+        "team_two_score": "20",
+        "timestamp": "2026-05-13T03:15:59.777000+00:00"
+    },
+    {
+        "id": 189,
+        "team_one_id": "1237394032498577429",
+        "team_one_name": "CLO",
+        "team_one_score": "44",
+        "team_two_id": "1329901033308164228",
+        "team_two_name": "ALB",
+        "team_two_score": "23",
+        "timestamp": "2026-05-13T01:42:58.465000+00:00"
+    },
+    {
+        "id": 194,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "42",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "40",
+        "timestamp": "2026-05-20T03:22:54.774000+00:00"
+    },
+    {
+        "id": 195,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "60",
+        "team_two_id": "1237040344521244672",
+        "team_two_name": "BAL",
+        "team_two_score": "61",
+        "timestamp": "2026-05-17T03:40:47.276000+00:00"
+    },
+    {
+        "id": 196,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "58",
+        "team_two_id": "1237040352578244618",
+        "team_two_name": "CLT",
+        "team_two_score": "51",
+        "timestamp": "2026-05-18T02:01:26.664000+00:00"
+    },
+    {
+        "id": 197,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "49",
+        "team_two_id": "1237394000856617063",
+        "team_two_name": "BTR",
+        "team_two_score": "35",
+        "timestamp": "2026-05-16T03:24:08.362000+00:00"
+    },
+    {
+        "id": 198,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "41",
+        "team_two_id": "1237040693327695882",
+        "team_two_name": "PIT",
+        "team_two_score": "41",
+        "timestamp": "2026-05-19T03:17:32.314000+00:00"
+    },
+    {
+        "id": 199,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "36",
+        "team_two_id": "1237040374992863263",
+        "team_two_name": "IND",
+        "team_two_score": "33",
+        "timestamp": "2026-05-18T03:24:04.094000+00:00"
+    },
+    {
+        "id": 200,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "44",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "12",
+        "timestamp": "2026-05-19T02:22:37.852000+00:00"
+    },
+    {
+        "id": 201,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "40",
+        "team_two_id": "1237040344521244672",
+        "team_two_name": "BAL",
+        "team_two_score": "39",
+        "timestamp": "2026-05-20T03:31:59.632000+00:00"
+    },
+    {
+        "id": 202,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "71",
+        "team_two_id": "1237040352578244618",
+        "team_two_name": "CLT",
+        "team_two_score": "42",
+        "timestamp": "2026-05-17T03:09:12.112000+00:00"
+    },
+    {
+        "id": 203,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "49",
+        "team_two_id": "1237040374992863263",
+        "team_two_name": "IND",
+        "team_two_score": "48",
+        "timestamp": "2026-05-15T03:31:34.492000+00:00"
+    },
+    {
+        "id": 204,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "45",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "29",
+        "timestamp": "2026-05-16T02:51:12.476000+00:00"
+    },
+    {
+        "id": 205,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "57",
+        "team_two_id": "1237040683513155635",
+        "team_two_name": "NO",
+        "team_two_score": "34",
+        "timestamp": "2026-05-20T03:41:49.098000+00:00"
+    },
+    {
+        "id": 206,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "61",
+        "team_two_id": "1237040686050574406",
+        "team_two_name": "NY",
+        "team_two_score": "55",
+        "timestamp": "2026-05-19T02:58:45.164000+00:00"
+    },
+    {
+        "id": 207,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "50",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "35",
+        "timestamp": "2026-05-14T05:36:18.067000+00:00"
+    },
+    {
+        "id": 208,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "32",
+        "team_two_id": "1284393329165074474",
+        "team_two_name": "TOR",
+        "team_two_score": "24",
+        "timestamp": "2026-05-15T10:31:24.540000+00:00"
+    },
+    {
+        "id": 209,
+        "team_one_id": "1237040678123602032",
+        "team_one_name": "NSH",
+        "team_one_score": "23",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "17",
+        "timestamp": "2026-05-16T02:54:54.257000+00:00"
+    },
+    {
+        "id": 210,
+        "team_one_id": "1284408501279391885",
+        "team_one_name": "Tucson",
+        "team_one_score": "30",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "34",
+        "timestamp": "2026-05-19T02:05:22.592000+00:00"
+    },
+    {
+        "id": 211,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "60",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "37",
+        "timestamp": "2026-05-17T02:54:46.357000+00:00"
+    },
+    {
+        "id": 212,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "48",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "13",
+        "timestamp": "2026-05-19T01:42:40.649000+00:00"
+    },
+    {
+        "id": 213,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "43",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "42",
+        "timestamp": "2026-05-15T02:57:35.587000+00:00"
+    },
+    {
+        "id": 214,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "76",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "37",
+        "timestamp": "2026-05-20T01:55:06.583000+00:00"
+    },
+    {
+        "id": 215,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "67",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "38",
+        "timestamp": "2026-05-15T02:48:48.658000+00:00"
+    },
+    {
+        "id": 216,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "52",
+        "team_two_id": "1284393329165074474",
+        "team_two_name": "TOR",
+        "team_two_score": "13",
+        "timestamp": "2026-05-20T03:21:05.412000+00:00"
+    },
+    {
+        "id": 217,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "53",
+        "team_two_id": "1237040678123602032",
+        "team_two_name": "NSH",
+        "team_two_score": "28",
+        "timestamp": "2026-05-20T03:41:57.334000+00:00"
+    },
+    {
+        "id": 218,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "47",
+        "team_two_id": "1284408501279391885",
+        "team_two_name": "Tucson",
+        "team_two_score": "40",
+        "timestamp": "2026-05-15T01:54:14.323000+00:00"
+    },
+    {
+        "id": 219,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "48",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "43",
+        "timestamp": "2026-05-16T02:58:27.659000+00:00"
+    },
+    {
+        "id": 220,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "53",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "26",
+        "timestamp": "2026-05-18T01:54:20.094000+00:00"
+    },
+    {
+        "id": 221,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "63",
+        "team_two_id": "1237040678123602032",
+        "team_two_name": "NSH",
+        "team_two_score": "31",
+        "timestamp": "2026-05-18T02:54:22.309000+00:00"
+    },
+    {
+        "id": 222,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "53",
+        "team_two_id": "1284408501279391885",
+        "team_two_name": "Tucson",
+        "team_two_score": "21",
+        "timestamp": "2026-05-16T03:58:16.096000+00:00"
+    },
+    {
+        "id": 223,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "40",
+        "team_two_id": "1329901053776494592",
+        "team_two_name": "FAY",
+        "team_two_score": "33",
+        "timestamp": "2026-05-18T01:52:35.264000+00:00"
+    },
+    {
+        "id": 224,
+        "team_one_id": "1237040362477060236",
+        "team_one_name": "DAL",
+        "team_one_score": "48",
+        "team_two_id": "1284393329165074474",
+        "team_two_name": "TOR",
+        "team_two_score": "41",
+        "timestamp": "2026-05-18T00:03:29.085000+00:00"
+    },
+    {
+        "id": 225,
+        "team_one_id": "1284393339076087848",
+        "team_one_name": "RAL",
+        "team_one_score": "56",
+        "team_two_id": "1237399640308060210",
+        "team_two_name": "TUS",
+        "team_two_score": "56",
+        "timestamp": "2026-05-19T02:00:41.632000+00:00"
+    },
+    {
+        "id": 226,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "69",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "37",
+        "timestamp": "2026-05-17T03:56:42.066000+00:00"
+    },
+    {
+        "id": 228,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "48",
+        "team_two_id": "1329901066526920714",
+        "team_two_name": "HAR",
+        "team_two_score": "39",
+        "timestamp": "2026-05-19T02:59:03.316000+00:00"
+    },
+    {
+        "id": 229,
+        "team_one_id": "1237399620598890567",
+        "team_one_name": "TAC",
+        "team_one_score": "43",
+        "team_two_id": "1284393341844197467",
+        "team_two_name": "SCT",
+        "team_two_score": "37",
+        "timestamp": "2026-05-15T03:15:39.403000+00:00"
+    },
+    {
+        "id": 230,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "47",
+        "team_two_id": "1237394022121734248",
+        "team_two_name": "NOR",
+        "team_two_score": "28",
+        "timestamp": "2026-05-19T01:52:39.929000+00:00"
+    },
+    {
+        "id": 231,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "36",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "33",
+        "timestamp": "2026-05-15T03:08:15.850000+00:00"
+    },
+    {
+        "id": 232,
+        "team_one_id": "1284408625040986143",
+        "team_one_name": "PAR",
+        "team_one_score": "46",
+        "team_two_id": "1237040357351362620",
+        "team_two_name": "CIN",
+        "team_two_score": "23",
+        "timestamp": "2026-05-20T02:39:39.465000+00:00"
+    },
+    {
+        "id": 233,
+        "team_one_id": "1237040688655241277",
+        "team_one_name": "PHI",
+        "team_one_score": "35",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "0",
+        "timestamp": "2026-05-19T01:42:44.256000+00:00"
+    },
+    {
+        "id": 234,
+        "team_one_id": "1237394005730263141",
+        "team_one_name": "CHP",
+        "team_one_score": "59",
+        "team_two_id": "1237399609031000235",
+        "team_two_name": "PRV",
+        "team_two_score": "48",
+        "timestamp": "2026-05-18T03:02:38.627000+00:00"
+    },
+    {
+        "id": 235,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "70",
+        "team_two_id": "1284393339818479668",
+        "team_two_name": "RCH",
+        "team_two_score": "34",
+        "timestamp": "2026-05-20T02:01:28.732000+00:00"
+    },
+    {
+        "id": 236,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "34",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "20",
+        "timestamp": "2026-05-19T02:31:46.958000+00:00"
+    },
+    {
+        "id": 237,
+        "team_one_id": "1237399620598890567",
+        "team_one_name": "TAC",
+        "team_one_score": "55",
+        "team_two_id": "1237040688655241277",
+        "team_two_name": "PHI",
+        "team_two_score": "17",
+        "timestamp": "2026-05-20T02:52:09.935000+00:00"
+    },
+    {
+        "id": 238,
+        "team_one_id": "1237394005730263141",
+        "team_one_name": "CHP",
+        "team_one_score": "45",
+        "team_two_id": "1237394022121734248",
+        "team_two_name": "NOR",
+        "team_two_score": "44",
+        "timestamp": "2026-05-15T03:05:18.706000+00:00"
+    },
+    {
+        "id": 240,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "45",
+        "team_two_id": "1284408625040986143",
+        "team_two_name": "PAR",
+        "team_two_score": "33",
+        "timestamp": "2026-05-15T01:56:16.417000+00:00"
+    },
+    {
+        "id": 241,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "38",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "2",
+        "timestamp": "2026-05-14T14:45:05.934000+00:00"
+    },
+    {
+        "id": 243,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "34",
+        "team_two_id": "1237394017302478861",
+        "team_two_name": "SOU",
+        "team_two_score": "12",
+        "timestamp": "2026-05-18T01:41:49.939000+00:00"
+    },
+    {
+        "id": 244,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "51",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "50",
+        "timestamp": "2026-05-20T01:40:08.821000+00:00"
+    },
+    {
+        "id": 245,
+        "team_one_id": "1237399620598890567",
+        "team_one_name": "TAC",
+        "team_one_score": "42",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "7",
+        "timestamp": "2026-05-18T02:42:28.716000+00:00"
+    },
+    {
+        "id": 247,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "59",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "23",
+        "timestamp": "2026-05-19T02:54:20.096000+00:00"
+    },
+    {
+        "id": 248,
+        "team_one_id": "1284408625040986143",
+        "team_one_name": "PAR",
+        "team_one_score": "60",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "33",
+        "timestamp": "2026-05-16T03:14:08.070000+00:00"
+    },
+    {
+        "id": 249,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "62",
+        "team_two_id": "1237040688655241277",
+        "team_two_name": "PHI",
+        "team_two_score": "26",
+        "timestamp": "2026-05-19T02:53:41.205000+00:00"
+    },
+    {
+        "id": 250,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "68",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "58",
+        "timestamp": "2026-05-15T02:58:20.802000+00:00"
+    },
+    {
+        "id": 251,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "64",
+        "team_two_id": "1284393339818479668",
+        "team_two_name": "RCH",
+        "team_two_score": "56",
+        "timestamp": "2026-05-17T02:00:12.706000+00:00"
+    },
+    {
+        "id": 252,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "68",
+        "team_two_id": "1237040357351362620",
+        "team_two_name": "CIN",
+        "team_two_score": "62",
+        "timestamp": "2026-05-17T01:03:50.490000+00:00"
+    },
+    {
+        "id": 253,
+        "team_one_id": "1237399321658523718",
+        "team_one_name": "TUL",
+        "team_one_score": "31",
+        "team_two_id": "1329901091013398548",
+        "team_two_name": "RVS",
+        "team_two_score": "28",
+        "timestamp": "2026-05-15T01:56:31.168000+00:00"
+    },
+    {
+        "id": 254,
+        "team_one_id": "1237040346769395744",
+        "team_one_name": "BOS",
+        "team_one_score": "56",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "16",
+        "timestamp": "2026-05-18T02:07:20.718000+00:00"
+    },
+    {
+        "id": 258,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "35",
+        "team_two_id": "1329901055978246174",
+        "team_two_name": "LON",
+        "team_two_score": "34",
+        "timestamp": "2026-05-15T03:11:05.765000+00:00"
+    },
+    {
+        "id": 259,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "50",
+        "team_two_id": "1237040349684301854",
+        "team_two_name": "BUF",
+        "team_two_score": "47",
+        "timestamp": "2026-05-19T02:51:58.357000+00:00"
+    },
+    {
+        "id": 261,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "43",
+        "team_two_id": "1237399301374611497",
+        "team_two_name": "OKC",
+        "team_two_score": "32",
+        "timestamp": "2026-05-19T02:01:49.567000+00:00"
+    },
+    {
+        "id": 262,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "49",
+        "team_two_id": "1284393328531472384",
+        "team_two_name": "CHE",
+        "team_two_score": "27",
+        "timestamp": "2026-05-19T01:59:22.886000+00:00"
+    },
+    {
+        "id": 264,
+        "team_one_id": "1237040359742115902",
+        "team_one_name": "CLE",
+        "team_one_score": "47",
+        "team_two_id": "1237040674071773206",
+        "team_two_name": "MIA",
+        "team_two_score": "33",
+        "timestamp": "2026-05-15T01:57:48.875000+00:00"
+    },
+    {
+        "id": 265,
+        "team_one_id": "1329901091013398548",
+        "team_one_name": "RVS",
+        "team_one_score": "45",
+        "team_two_id": "1237040349684301854",
+        "team_two_name": "BUF",
+        "team_two_score": "26",
+        "timestamp": "2026-05-18T02:21:50.593000+00:00"
+    },
+    {
+        "id": 266,
+        "team_one_id": "1237393986201718795",
+        "team_one_name": "ING",
+        "team_one_score": "60",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "47",
+        "timestamp": "2026-05-14T04:58:05.098000+00:00"
+    },
+    {
+        "id": 267,
+        "team_one_id": "1329901073699311687",
+        "team_one_name": "TKY",
+        "team_one_score": "55",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "38",
+        "timestamp": "2026-05-20T01:59:03.776000+00:00"
+    },
+    {
+        "id": 269,
+        "team_one_id": "1237399297155272714",
+        "team_one_name": "MGM",
+        "team_one_score": "75",
+        "team_two_id": "1329901031697551380",
+        "team_two_name": "AKR",
+        "team_two_score": "69",
+        "timestamp": "2026-05-19T01:06:47.945000+00:00"
+    },
+    {
+        "id": 270,
+        "team_one_id": "1237040359742115902",
+        "team_one_name": "CLE",
+        "team_one_score": "54",
+        "team_two_id": "1329901055978246174",
+        "team_two_name": "LON",
+        "team_two_score": "41",
+        "timestamp": "2026-05-16T02:58:47.092000+00:00"
+    },
+    {
+        "id": 271,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "52",
+        "team_two_id": "1237399321658523718",
+        "team_two_name": "TUL",
+        "team_two_score": "13",
+        "timestamp": "2026-05-18T02:22:46.161000+00:00"
+    },
+    {
+        "id": 272,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "41",
+        "team_two_id": "1237040346769395744",
+        "team_two_name": "BOS",
+        "team_two_score": "35",
+        "timestamp": "2026-05-20T02:11:41.380000+00:00"
+    },
+    {
+        "id": 273,
+        "team_one_id": "1237398937766461574",
+        "team_one_name": "HAR",
+        "team_one_score": "33",
+        "team_two_id": "1237399301374611497",
+        "team_two_name": "OKC",
+        "team_two_score": "13",
+        "timestamp": "2026-05-18T01:53:00.712000+00:00"
+    },
+    {
+        "id": 274,
+        "team_one_id": "1284393336454643772",
+        "team_one_name": "OAK",
+        "team_one_score": "56",
+        "team_two_id": "1284393328531472384",
+        "team_two_name": "CHE",
+        "team_two_score": "42",
+        "timestamp": "2026-05-20T02:30:14.194000+00:00"
+    },
+    {
+        "id": 275,
+        "team_one_id": "1284393333954842687",
+        "team_one_name": "GRB",
+        "team_one_score": "58",
+        "team_two_id": "1329901462767276175",
+        "team_two_name": "SAO",
+        "team_two_score": "34",
+        "timestamp": "2026-05-17T03:03:49.156000+00:00"
+    },
+    {
+        "id": 276,
+        "team_one_id": "1237040674071773206",
+        "team_one_name": "MIA",
+        "team_one_score": "44",
+        "team_two_id": "1237398932682702928",
+        "team_two_name": "GNS",
+        "team_two_score": "41",
+        "timestamp": "2026-05-14T18:52:15.585000+00:00"
+    },
+    {
+        "id": 277,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "42",
+        "team_two_id": "1329901091013398548",
+        "team_two_name": "RVS",
+        "team_two_score": "28",
+        "timestamp": "2026-05-16T03:52:49.530000+00:00"
+    },
+    {
+        "id": 278,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "41",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "6",
+        "timestamp": "2026-05-16T03:17:43.517000+00:00"
+    },
+    {
+        "id": 279,
+        "team_one_id": "1329901073699311687",
+        "team_one_name": "TKY",
+        "team_one_score": "50",
+        "team_two_id": "1237399301374611497",
+        "team_two_name": "OKC",
+        "team_two_score": "19",
+        "timestamp": "2026-05-20T02:50:12.021000+00:00"
+    },
+    {
+        "id": 282,
+        "team_one_id": "1329901055978246174",
+        "team_one_name": "LON",
+        "team_one_score": "38",
+        "team_two_id": "1237040674071773206",
+        "team_two_name": "MIA",
+        "team_two_score": "35",
+        "timestamp": "2026-05-16T03:56:08.720000+00:00"
+    },
+    {
+        "id": 283,
+        "team_one_id": "1237040349684301854",
+        "team_one_name": "BUF",
+        "team_one_score": "47",
+        "team_two_id": "1237399321658523718",
+        "team_two_name": "TUL",
+        "team_two_score": "22",
+        "timestamp": "2026-05-15T02:53:34.995000+00:00"
+    },
+    {
+        "id": 284,
+        "team_one_id": "1237393986201718795",
+        "team_one_name": "ING",
+        "team_one_score": "41",
+        "team_two_id": "1237040346769395744",
+        "team_two_name": "BOS",
+        "team_two_score": "32",
+        "timestamp": "2026-05-19T01:26:47.579000+00:00"
+    },
+    {
+        "id": 285,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "69",
+        "team_two_id": "1237398937766461574",
+        "team_two_name": "HAR",
+        "team_two_score": "35",
+        "timestamp": "2026-05-17T03:47:42.669000+00:00"
+    },
+    {
+        "id": 286,
+        "team_one_id": "1284393336454643772",
+        "team_one_name": "OAK",
+        "team_one_score": "76",
+        "team_two_id": "1237393994124754994",
+        "team_two_name": "ATH",
+        "team_two_score": "62",
+        "timestamp": "2026-05-18T03:33:57.511000+00:00"
+    },
+    {
+        "id": 287,
+        "team_one_id": "1329901462767276175",
+        "team_one_name": "SAO",
+        "team_one_score": "39",
+        "team_two_id": "1237399297155272714",
+        "team_two_name": "MGM",
+        "team_two_score": "29",
+        "timestamp": "2026-05-18T02:14:03.275000+00:00"
+    },
+    {
+        "id": 288,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "44",
+        "team_two_id": "1237040359742115902",
+        "team_two_name": "CLE",
+        "team_two_score": "29",
+        "timestamp": "2026-05-17T03:28:38.605000+00:00"
+    },
+    {
+        "id": 289,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "58",
+        "team_two_id": "1237393989280206948",
+        "team_two_name": "ANN",
+        "team_two_score": "29",
+        "timestamp": "2026-05-17T02:56:05.665000+00:00"
+    },
+    {
+        "id": 290,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "55",
+        "team_two_id": "1284393326531051520",
+        "team_two_name": "BIL",
+        "team_two_score": "41",
+        "timestamp": "2026-05-17T03:00:18.336000+00:00"
+    },
+    {
+        "id": 291,
+        "team_one_id": "1237394032498577429",
+        "team_one_name": "CLO",
+        "team_one_score": "44",
+        "team_two_id": "1329901070570225687",
+        "team_two_name": "HNL",
+        "team_two_score": "37",
+        "timestamp": "2026-05-18T02:34:26.286000+00:00"
+    },
+    {
+        "id": 292,
+        "team_one_id": "1237393998432436307",
+        "team_one_name": "AUS",
+        "team_one_score": "37",
+        "team_two_id": "1237040671282696235",
+        "team_two_name": "LA",
+        "team_two_score": "36",
+        "timestamp": "2026-05-18T02:11:02.398000+00:00"
+    },
+    {
+        "id": 294,
+        "team_one_id": "1237399624260653117",
+        "team_one_name": "TAL",
+        "team_one_score": "62",
+        "team_two_id": "1284393327059275867",
+        "team_two_name": "BOI",
+        "team_two_score": "48",
+        "timestamp": "2026-05-20T02:02:18.702000+00:00"
+    },
+    {
+        "id": 295,
+        "team_one_id": "1329901063935098953",
+        "team_one_name": "HAR",
+        "team_one_score": "58",
+        "team_two_id": "1284393327638351882",
+        "team_two_name": "CED",
+        "team_two_score": "31",
+        "timestamp": "2026-05-14T10:40:38.566000+00:00"
+    },
+    {
+        "id": 296,
+        "team_one_id": "1284393330217586800",
+        "team_one_name": "EVA",
+        "team_one_score": "33",
+        "team_two_id": "1284408500193067048",
+        "team_two_name": "TOP",
+        "team_two_score": "14",
+        "timestamp": "2026-05-17T00:02:19.650000+00:00"
+    },
+    {
+        "id": 298,
+        "team_one_id": "1284393336936992822",
+        "team_one_name": "ORL",
+        "team_one_score": "57",
+        "team_two_id": "1237398945622392902",
+        "team_two_name": "KNO",
+        "team_two_score": "49",
+        "timestamp": "2026-05-16T03:49:41.687000+00:00"
+    },
+    {
+        "id": 301,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "50",
+        "team_two_id": "1237040690505060435",
+        "team_two_name": "PHX",
+        "team_two_score": "14",
+        "timestamp": "2026-05-16T02:16:18.105000+00:00"
+    },
+    {
+        "id": 302,
+        "team_one_id": "1237040364750114858",
+        "team_one_name": "DEN",
+        "team_one_score": "50",
+        "team_two_id": "1329901081186140322",
+        "team_two_name": "MIL",
+        "team_two_score": "37",
+        "timestamp": "2026-05-17T02:11:10.932000+00:00"
+    },
+    {
+        "id": 303,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "57",
+        "team_two_id": "1237394019688906792",
+        "team_two_name": "BOU",
+        "team_two_score": "30",
+        "timestamp": "2026-05-16T02:55:45.056000+00:00"
+    },
+    {
+        "id": 306,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "48",
+        "team_two_id": "1284393336936992822",
+        "team_two_name": "ORL",
+        "team_two_score": "26",
+        "timestamp": "2026-05-17T03:52:14.722000+00:00"
+    },
+    {
+        "id": 307,
+        "team_one_id": "1329901070570225687",
+        "team_one_name": "HNL",
+        "team_one_score": "29",
+        "team_two_id": "1329901085959131206",
+        "team_two_name": "NAPER",
+        "team_two_score": "0",
+        "timestamp": "2026-05-17T03:03:17.540000+00:00"
+    },
+    {
+        "id": 311,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "49",
+        "team_two_id": "1329901063935098953",
+        "team_two_name": "HAR",
+        "team_two_score": "17",
+        "timestamp": "2026-05-18T01:53:58.829000+00:00"
+    },
+    {
+        "id": 312,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "34",
+        "team_two_id": "1284408500193067048",
+        "team_two_name": "TOP",
+        "team_two_score": "18",
+        "timestamp": "2026-05-17T01:43:56.923000+00:00"
+    },
+    {
+        "id": 313,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "55",
+        "team_two_id": "1237398951783567441",
+        "team_two_name": "OMA",
+        "team_two_score": "19",
+        "timestamp": "2026-05-15T01:55:26.653000+00:00"
+    },
+    {
+        "id": 315,
+        "team_one_id": "1237394032498577429",
+        "team_one_name": "CLO",
+        "team_one_score": "48",
+        "team_two_id": "1284393325188878337",
+        "team_two_name": "ANA",
+        "team_two_score": "12",
+        "timestamp": "2026-05-15T02:59:37.191000+00:00"
+    },
+    {
+        "id": 317,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "60",
+        "team_two_id": "1284393328195932251",
+        "team_two_name": "CHS",
+        "team_two_score": "56",
+        "timestamp": "2026-05-15T02:59:34.999000+00:00"
+    },
+    {
+        "id": 318,
+        "team_one_id": "1237040364750114858",
+        "team_one_name": "DEN",
+        "team_one_score": "33",
+        "team_two_id": "1284393327059275867",
+        "team_two_name": "BOI",
+        "team_two_score": "32",
+        "timestamp": "2026-05-17T03:51:53.162000+00:00"
+    },
+    {
+        "id": 321,
+        "team_one_id": "1237398951783567441",
+        "team_one_name": "OMA",
+        "team_one_score": "48",
+        "team_two_id": "1237393989280206948",
+        "team_two_name": "ANN",
+        "team_two_score": "38",
+        "timestamp": "2026-05-16T02:04:10.659000+00:00"
+    },
+    {
+        "id": 325,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "55",
+        "team_two_id": "1329901058897608837",
+        "team_two_name": "FTC",
+        "team_two_score": "46",
+        "timestamp": "2026-05-17T02:05:00.574000+00:00"
+    },
+    {
+        "id": 326,
+        "team_one_id": "1237040364750114858",
+        "team_one_name": "DEN",
+        "team_one_score": "52",
+        "team_two_id": "1237399624260653117",
+        "team_two_name": "TAL",
+        "team_two_score": "36",
+        "timestamp": "2026-05-16T03:57:29.673000+00:00"
+    },
+    {
+        "id": 327,
+        "team_one_id": "1329901063935098953",
+        "team_one_name": "HAR",
+        "team_one_score": "33",
+        "team_two_id": "1237394019688906792",
+        "team_two_name": "BOU",
+        "team_two_score": "28",
+        "timestamp": "2026-05-17T04:02:17.435000+00:00"
+    },
+    {
+        "id": 329,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "48",
+        "team_two_id": "1237040341563998300",
+        "team_two_name": "ATL",
+        "team_two_score": "41",
+        "timestamp": "2026-05-16T02:31:19.257000+00:00"
+    },
+    {
+        "id": 331,
+        "team_one_id": "1237394032498577429",
+        "team_one_name": "CLO",
+        "team_one_score": "64",
+        "team_two_id": "1329901085959131206",
+        "team_two_name": "NAPER",
+        "team_two_score": "38",
+        "timestamp": "2026-05-20T02:44:00.816000+00:00"
+    },
+    {
+        "id": 332,
+        "team_one_id": "1237040671282696235",
+        "team_one_name": "LA",
+        "team_one_score": "47",
+        "team_two_id": "1284408498746036294",
+        "team_two_name": "StPaul",
+        "team_two_score": "27",
+        "timestamp": "2026-05-17T03:19:00.998000+00:00"
+    },
+    {
+        "id": 333,
+        "team_one_id": "1284393328195932251",
+        "team_one_name": "CHS",
+        "team_one_score": "50",
+        "team_two_id": "1237040690505060435",
+        "team_two_name": "PHX",
+        "team_two_score": "37",
+        "timestamp": "2026-05-16T04:00:08.833000+00:00"
+    },
+    {
+        "id": 335,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "66",
+        "team_two_id": "1284393327638351882",
+        "team_two_name": "CED",
+        "team_two_score": "58",
+        "timestamp": "2026-05-19T01:52:12.439000+00:00"
+    },
+    {
+        "id": 336,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "42",
+        "team_two_id": "1284393330217586800",
+        "team_two_name": "EVA",
+        "team_two_score": "38",
+        "timestamp": "2026-05-18T01:52:07.222000+00:00"
+    },
+    {
+        "id": 344,
+        "team_one_id": "1329901028145102868",
+        "team_one_name": "BAK",
+        "team_one_score": "50",
+        "team_two_id": "1284408496397353052",
+        "team_two_name": "STL",
+        "team_two_score": "40",
+        "timestamp": "2026-05-17T01:01:23.971000+00:00"
+    },
+    {
+        "id": 345,
+        "team_one_id": "1237398934998224967",
+        "team_one_name": "GRE",
+        "team_one_score": "42",
+        "team_two_id": "1237394030229454908",
+        "team_two_name": "CST",
+        "team_two_score": "6",
+        "timestamp": "2026-05-19T05:06:38.808000+00:00"
+    },
+    {
+        "id": 347,
+        "team_one_id": "1329901061284040795",
+        "team_one_name": "SEO",
+        "team_one_score": "40",
+        "team_two_id": "1329901469968633997",
+        "team_two_name": "WSA",
+        "team_two_score": "37",
+        "timestamp": "2026-05-17T03:04:15.695000+00:00"
+    },
+    {
+        "id": 348,
+        "team_one_id": "1329901453564842085",
+        "team_one_name": "TOL",
+        "team_one_score": "51",
+        "team_two_id": "1329901459780931686",
+        "team_two_name": "VB",
+        "team_two_score": "31",
+        "timestamp": "2026-05-18T02:00:15.903000+00:00"
+    },
+    {
+        "id": 349,
+        "team_one_id": "1329901088400216094",
+        "team_one_name": "RNO",
+        "team_one_score": "56",
+        "team_two_id": "1284408500969279488",
+        "team_two_name": "Trenton",
+        "team_two_score": "27",
+        "timestamp": "2026-05-17T02:09:13.772000+00:00"
+    },
+    {
+        "id": 350,
+        "team_one_id": "1284393338002341923",
+        "team_one_name": "POR",
+        "team_one_score": "52",
+        "team_two_id": "1284393325696122931",
+        "team_two_name": "AUG",
+        "team_two_score": "37",
+        "timestamp": "2026-05-20T01:08:17.199000+00:00"
+    },
+    {
+        "id": 354,
+        "team_one_id": "1237399310690422964",
+        "team_one_name": "PAS",
+        "team_one_score": "36",
+        "team_two_id": "1284393340485374002",
+        "team_two_name": "SLC",
+        "team_two_score": "13",
+        "timestamp": "2026-05-16T03:45:09.547000+00:00"
+    },
+    {
+        "id": 355,
+        "team_one_id": "1329901049158434816",
+        "team_one_name": "BKN",
+        "team_one_score": "53",
+        "team_two_id": "1329901469968633997",
+        "team_two_name": "WSA",
+        "team_two_score": "45",
+        "timestamp": "2026-05-15T00:15:47.203000+00:00"
+    },
+    {
+        "id": 357,
+        "team_one_id": "1284408500969279488",
+        "team_one_name": "Trenton",
+        "team_one_score": "22",
+        "team_two_id": "1284393338128306190",
+        "team_two_name": "PRO",
+        "team_two_score": "15",
+        "timestamp": "2026-05-16T03:58:37.940000+00:00"
+    },
+    {
+        "id": 359,
+        "team_one_id": "1329901033308164228",
+        "team_one_name": "ALB",
+        "team_one_score": "32",
+        "team_two_id": "1284393341030760458",
+        "team_two_name": "SJ",
+        "team_two_score": "14",
+        "timestamp": "2026-05-18T04:19:36.323000+00:00"
+    },
+    {
+        "id": 366,
+        "team_one_id": "1284393338002341923",
+        "team_one_name": "POR",
+        "team_one_score": "47",
+        "team_two_id": "1329901098353299648",
+        "team_two_name": "SAC",
+        "team_two_score": "41",
+        "timestamp": "2026-05-20T01:09:02.061000+00:00"
+    },
+    {
+        "id": 371,
+        "team_one_id": "1329901061284040795",
+        "team_one_name": "SEO",
+        "team_one_score": "33",
+        "team_two_id": "1329901049158434816",
+        "team_two_name": "BKN",
+        "team_two_score": "29",
+        "timestamp": "2026-05-18T02:23:33.727000+00:00"
+    },
+    {
+        "id": 375,
+        "team_one_id": "1237040377467371562",
+        "team_one_name": "JAX",
+        "team_one_score": "57",
+        "team_two_id": "1284393341030760458",
+        "team_two_name": "SJ",
+        "team_two_score": "24",
+        "timestamp": "2026-05-17T01:28:24.209000+00:00"
+    },
+    {
+        "id": 380,
+        "team_one_id": "1329901453564842085",
+        "team_one_name": "TOL",
+        "team_one_score": "48",
+        "team_two_id": "1329901035711365141",
+        "team_two_name": "ABQ",
+        "team_two_score": "63",
+        "timestamp": "2026-05-19T11:42:49.131000+00:00"
+    },
+    {
+        "id": 381,
+        "team_one_id": "1284408500969279488",
+        "team_one_name": "Trenton",
+        "team_one_score": "54",
+        "team_two_id": "1329901078442938409",
+        "team_two_name": "MEM",
+        "team_two_score": "37",
+        "timestamp": "2026-05-19T03:13:16.911000+00:00"
+    },
+    {
+        "id": 382,
+        "team_one_id": "1284393325696122931",
+        "team_one_name": "AUG",
+        "team_one_score": "43",
+        "team_two_id": "1329901098353299648",
+        "team_two_name": "SAC",
+        "team_two_score": "3",
+        "timestamp": "2026-05-20T01:39:14.445000+00:00"
+    },
+    {
+        "id": 384,
+        "team_one_id": "1329901083476365412",
+        "team_one_name": "MOB",
+        "team_one_score": "42",
+        "team_two_id": "1329901028145102868",
+        "team_two_name": "BAK",
+        "team_two_score": "7",
+        "timestamp": "2026-05-20T03:42:50.081000+00:00"
+    },
+    {
+        "id": 385,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "48",
+        "team_two_id": "1237040668791144560",
+        "team_two_name": "LV",
+        "team_two_score": "42",
+        "timestamp": "2026-05-24T06:09:56.854000+00:00"
+    },
+    {
+        "id": 387,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "52",
+        "team_two_id": "1237398929079799838",
+        "team_two_name": "FLD",
+        "team_two_score": "44",
+        "timestamp": "2026-05-21T03:02:31.549000+00:00"
+    },
+    {
+        "id": 388,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "55",
+        "team_two_id": "1237040344521244672",
+        "team_two_name": "BAL",
+        "team_two_score": "33",
+        "timestamp": "2026-05-26T02:14:07.244000+00:00"
+    },
+    {
+        "id": 389,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "57",
+        "team_two_id": "1237398929079799838",
+        "team_two_name": "FLD",
+        "team_two_score": "23",
+        "timestamp": "2026-05-26T03:40:33.773000+00:00"
+    },
+    {
+        "id": 390,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "49",
+        "team_two_id": "1237040676265263185",
+        "team_two_name": "MIN",
+        "team_two_score": "35",
+        "timestamp": "2026-05-22T03:00:00.398000+00:00"
+    },
+    {
+        "id": 391,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "59",
+        "team_two_id": "1237040693327695882",
+        "team_two_name": "PIT",
+        "team_two_score": "32",
+        "timestamp": "2026-05-26T02:57:57.055000+00:00"
+    },
+    {
+        "id": 392,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "41",
+        "team_two_id": "1237399640308060210",
+        "team_two_name": "TUS",
+        "team_two_score": "34",
+        "timestamp": "2026-05-22T03:51:02.557000+00:00"
+    },
+    {
+        "id": 393,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "34",
+        "team_two_id": "1237040369766498384",
+        "team_two_name": "GB",
+        "team_two_score": "33",
+        "timestamp": "2026-05-22T03:07:19.523000+00:00"
+    },
+    {
+        "id": 394,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "53",
+        "team_two_id": "1237040344521244672",
+        "team_two_name": "BAL",
+        "team_two_score": "34",
+        "timestamp": "2026-05-25T03:06:23.204000+00:00"
+    },
+    {
+        "id": 395,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "45",
+        "team_two_id": "1237040668791144560",
+        "team_two_name": "LV",
+        "team_two_score": "40",
+        "timestamp": "2026-05-25T02:27:47.852000+00:00"
+    },
+    {
+        "id": 396,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "49",
+        "team_two_id": "1237399640308060210",
+        "team_two_name": "TUS",
+        "team_two_score": "30",
+        "timestamp": "2026-05-25T03:26:35.595000+00:00"
+    },
+    {
+        "id": 397,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "55",
+        "team_two_id": "1284393341844197467",
+        "team_two_name": "SCT",
+        "team_two_score": "20",
+        "timestamp": "2026-05-23T03:51:57.078000+00:00"
+    },
+    {
+        "id": 398,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "59",
+        "team_two_id": "1237398942904356864",
+        "team_two_name": "JAC",
+        "team_two_score": "33",
+        "timestamp": "2026-05-24T03:56:01.438000+00:00"
+    },
+    {
+        "id": 400,
+        "team_one_id": "1237040355044757624",
+        "team_one_name": "CHI",
+        "team_one_score": "54",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "20",
+        "timestamp": "2026-05-22T03:27:14.881000+00:00"
+    },
+    {
+        "id": 401,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "64",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "42",
+        "timestamp": "2026-05-25T02:54:25.931000+00:00"
+    },
+    {
+        "id": 402,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "74",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "40",
+        "timestamp": "2026-05-25T03:00:39.776000+00:00"
+    },
+    {
+        "id": 403,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "47",
+        "team_two_id": "1237040701301198938",
+        "team_two_name": "SEA",
+        "team_two_score": "42",
+        "timestamp": "2026-05-26T03:15:34.225000+00:00"
+    },
+    {
+        "id": 404,
+        "team_one_id": "1237399620598890567",
+        "team_one_name": "TAC",
+        "team_one_score": "41",
+        "team_two_id": "1237040683513155635",
+        "team_two_name": "NO",
+        "team_two_score": "0",
+        "timestamp": "2026-05-22T02:40:32.705000+00:00"
+    },
+    {
+        "id": 405,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "58",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "20",
+        "timestamp": "2026-05-26T02:47:46.584000+00:00"
+    },
+    {
+        "id": 406,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "55",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "28",
+        "timestamp": "2026-05-22T02:25:35.820000+00:00"
+    },
+    {
+        "id": 407,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "48",
+        "team_two_id": "1237040374992863263",
+        "team_two_name": "IND",
+        "team_two_score": "13",
+        "timestamp": "2026-05-24T03:15:00.909000+00:00"
+    },
+    {
+        "id": 408,
+        "team_one_id": "1237040355044757624",
+        "team_one_name": "CHI",
+        "team_one_score": "32",
+        "team_two_id": "1237399620598890567",
+        "team_two_name": "TAC",
+        "team_two_score": "21",
+        "timestamp": "2026-05-24T02:51:12.887000+00:00"
+    },
+    {
+        "id": 409,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "40",
+        "team_two_id": "1284393341844197467",
+        "team_two_name": "SCT",
+        "team_two_score": "27",
+        "timestamp": "2026-05-25T03:53:52.415000+00:00"
+    },
+    {
+        "id": 410,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "56",
+        "team_two_id": "1237398942904356864",
+        "team_two_name": "JAC",
+        "team_two_score": "31",
+        "timestamp": "2026-05-24T02:49:19.486000+00:00"
+    },
+    {
+        "id": 411,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "47",
+        "team_two_id": "1284408625040986143",
+        "team_two_name": "PAR",
+        "team_two_score": "28",
+        "timestamp": "2026-05-26T03:12:08.402000+00:00"
+    },
+    {
+        "id": 412,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "67",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "28",
+        "timestamp": "2026-05-21T02:46:26.339000+00:00"
+    },
+    {
+        "id": 413,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "54",
+        "team_two_id": "1237394000856617063",
+        "team_two_name": "BTR",
+        "team_two_score": "48",
+        "timestamp": "2026-05-26T03:53:57.466000+00:00"
+    },
+    {
+        "id": 414,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "48",
+        "team_two_id": "1237040686050574406",
+        "team_two_name": "NY",
+        "team_two_score": "41",
+        "timestamp": "2026-05-21T02:26:03.721000+00:00"
+    },
+    {
+        "id": 415,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "47",
+        "team_two_id": "1237040374992863263",
+        "team_two_name": "IND",
+        "team_two_score": "34",
+        "timestamp": "2026-05-25T03:39:44.406000+00:00"
+    },
+    {
+        "id": 416,
+        "team_one_id": "1237040355044757624",
+        "team_one_name": "CHI",
+        "team_one_score": "55",
+        "team_two_id": "1237040683513155635",
+        "team_two_name": "NO",
+        "team_two_score": "37",
+        "timestamp": "2026-05-26T02:16:28.795000+00:00"
+    },
+    {
+        "id": 417,
+        "team_one_id": "1284393339076087848",
+        "team_one_name": "RAL",
+        "team_one_score": "39",
+        "team_two_id": "1284393341844197467",
+        "team_two_name": "SCT",
+        "team_two_score": "30",
+        "timestamp": "2026-05-21T04:02:09.603000+00:00"
+    },
+    {
+        "id": 418,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "41",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "35",
+        "timestamp": "2026-05-21T00:53:21.969000+00:00"
+    },
+    {
+        "id": 419,
+        "team_one_id": "1237040701301198938",
+        "team_one_name": "SEA",
+        "team_one_score": "58",
+        "team_two_id": "1284408625040986143",
+        "team_two_name": "PAR",
+        "team_two_score": "20",
+        "timestamp": "2026-05-23T03:28:25.130000+00:00"
+    },
+    {
+        "id": 420,
+        "team_one_id": "1237399620598890567",
+        "team_one_name": "TAC",
+        "team_one_score": "54",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "13",
+        "timestamp": "2026-05-25T03:20:06.677000+00:00"
+    },
+    {
+        "id": 421,
+        "team_one_id": "1284393336454643772",
+        "team_one_name": "OAK",
+        "team_one_score": "38",
+        "team_two_id": "1284408501279391885",
+        "team_two_name": "Tucson",
+        "team_two_score": "10",
+        "timestamp": "2026-05-25T02:30:59.191000+00:00"
+    },
+    {
+        "id": 422,
+        "team_one_id": "1237040678123602032",
+        "team_one_name": "NSH",
+        "team_one_score": "54",
+        "team_two_id": "1237393986201718795",
+        "team_two_name": "ING",
+        "team_two_score": "45",
+        "timestamp": "2026-05-22T02:34:29.658000+00:00"
+    },
+    {
+        "id": 423,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "50",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "14",
+        "timestamp": "2026-05-26T02:42:07.502000+00:00"
+    },
+    {
+        "id": 424,
+        "team_one_id": "1284393334340718653",
+        "team_one_name": "LEX",
+        "team_one_score": "32",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "29",
+        "timestamp": "2026-05-24T03:44:26.754000+00:00"
+    },
+    {
+        "id": 426,
+        "team_one_id": "1237399308215652362",
+        "team_one_name": "FTW",
+        "team_one_score": "61",
+        "team_two_id": "1237394022121734248",
+        "team_two_name": "NOR",
+        "team_two_score": "28",
+        "timestamp": "2026-05-22T02:00:07.123000+00:00"
+    },
+    {
+        "id": 427,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "41",
+        "team_two_id": "1237398915523940484",
+        "team_two_name": "COL",
+        "team_two_score": "27",
+        "timestamp": "2026-05-24T02:32:38.389000+00:00"
+    },
+    {
+        "id": 428,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "48",
+        "team_two_id": "1284393333954842687",
+        "team_two_name": "GRB",
+        "team_two_score": "37",
+        "timestamp": "2026-05-24T02:54:11.857000+00:00"
+    },
+    {
+        "id": 429,
+        "team_one_id": "1329901467125026938",
+        "team_one_name": "WIL",
+        "team_one_score": "40",
+        "team_two_id": "1284408501279391885",
+        "team_two_name": "Tucson",
+        "team_two_score": "34",
+        "timestamp": "2026-05-25T01:58:45.518000+00:00"
+    },
+    {
+        "id": 431,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "63",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "46",
+        "timestamp": "2026-05-22T02:28:47.575000+00:00"
+    },
+    {
+        "id": 432,
+        "team_one_id": "1284393334340718653",
+        "team_one_name": "LEX",
+        "team_one_score": "59",
+        "team_two_id": "1284393333954842687",
+        "team_two_name": "GRB",
+        "team_two_score": "25",
+        "timestamp": "2026-05-25T01:52:42.229000+00:00"
+    },
+    {
+        "id": 434,
+        "team_one_id": "1237399308215652362",
+        "team_one_name": "FTW",
+        "team_one_score": "44",
+        "team_two_id": "1237393986201718795",
+        "team_two_name": "ING",
+        "team_two_score": "33",
+        "timestamp": "2026-05-24T03:49:13.412000+00:00"
+    },
+    {
+        "id": 435,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "61",
+        "team_two_id": "1237040372291604520",
+        "team_two_name": "HOU",
+        "team_two_score": "26",
+        "timestamp": "2026-05-26T02:16:09.235000+00:00"
+    },
+    {
+        "id": 436,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "49",
+        "team_two_id": "1237394017302478861",
+        "team_two_name": "SOU",
+        "team_two_score": "32",
+        "timestamp": "2026-05-26T02:53:41.848000+00:00"
+    },
+    {
+        "id": 438,
+        "team_one_id": "1237040678123602032",
+        "team_one_name": "NSH",
+        "team_one_score": "45",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "34",
+        "timestamp": "2026-05-25T03:12:41.677000+00:00"
+    },
+    {
+        "id": 439,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "51",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "35",
+        "timestamp": "2026-05-25T02:54:13.488000+00:00"
+    },
+    {
+        "id": 440,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "58",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "56",
+        "timestamp": "2026-05-22T01:56:02.734000+00:00"
+    },
+    {
+        "id": 441,
+        "team_one_id": "1329901467125026938",
+        "team_one_name": "WIL",
+        "team_one_score": "41",
+        "team_two_id": "1284393336454643772",
+        "team_two_name": "OAK",
+        "team_two_score": "30",
+        "timestamp": "2026-05-22T02:28:00.826000+00:00"
+    },
+    {
+        "id": 442,
+        "team_one_id": "1237393986201718795",
+        "team_one_name": "ING",
+        "team_one_score": "43",
+        "team_two_id": "1237394022121734248",
+        "team_two_name": "NOR",
+        "team_two_score": "15",
+        "timestamp": "2026-05-21T02:07:13.446000+00:00"
+    },
+    {
+        "id": 443,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "41",
+        "team_two_id": "1237399294622040074",
+        "team_two_name": "MAD",
+        "team_two_score": "34",
+        "timestamp": "2026-05-25T03:48:51.921000+00:00"
+    },
+    {
+        "id": 444,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "45",
+        "team_two_id": "1284393333954842687",
+        "team_two_name": "GRB",
+        "team_two_score": "43",
+        "timestamp": "2026-05-23T02:42:49.685000+00:00"
+    },
+    {
+        "id": 445,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "61",
+        "team_two_id": "1237040688655241277",
+        "team_two_name": "PHI",
+        "team_two_score": "28",
+        "timestamp": "2026-05-25T01:50:15.855000+00:00"
+    },
+    {
+        "id": 446,
+        "team_one_id": "1237393998432436307",
+        "team_one_name": "AUS",
+        "team_one_score": "60",
+        "team_two_id": "1237040357351362620",
+        "team_two_name": "CIN",
+        "team_two_score": "36",
+        "timestamp": "2026-05-24T02:05:25.085000+00:00"
+    },
+    {
+        "id": 447,
+        "team_one_id": "1237040671282696235",
+        "team_one_name": "LA",
+        "team_one_score": "42",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "40",
+        "timestamp": "2026-05-26T02:39:46.423000+00:00"
+    },
+    {
+        "id": 448,
+        "team_one_id": "1284393330217586800",
+        "team_one_name": "EVA",
+        "team_one_score": "46",
+        "team_two_id": "1284393339818479668",
+        "team_two_name": "RCH",
+        "team_two_score": "40",
+        "timestamp": "2026-05-25T01:55:57.578000+00:00"
+    },
+    {
+        "id": 451,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "43",
+        "team_two_id": "1329901073699311687",
+        "team_two_name": "TKY",
+        "team_two_score": "36",
+        "timestamp": "2026-05-23T00:56:53.068000+00:00"
+    },
+    {
+        "id": 452,
+        "team_one_id": "1237394032498577429",
+        "team_one_name": "CLO",
+        "team_one_score": "52",
+        "team_two_id": "1237393994124754994",
+        "team_two_name": "ATH",
+        "team_two_score": "42",
+        "timestamp": "2026-05-26T03:31:36.371000+00:00"
+    },
+    {
+        "id": 453,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "46",
+        "team_two_id": "1237398932682702928",
+        "team_two_name": "GNS",
+        "team_two_score": "11",
+        "timestamp": "2026-05-23T02:30:10.103000+00:00"
+    },
+    {
+        "id": 454,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "34",
+        "team_two_id": "1237040359742115902",
+        "team_two_name": "CLE",
+        "team_two_score": "33",
+        "timestamp": "2026-05-22T01:56:22.938000+00:00"
+    },
+    {
+        "id": 455,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "61",
+        "team_two_id": "1329901091013398548",
+        "team_two_name": "RVS",
+        "team_two_score": "38",
+        "timestamp": "2026-05-21T02:58:45.538000+00:00"
+    },
+    {
+        "id": 456,
+        "team_one_id": "1237398937766461574",
+        "team_one_name": "HAR",
+        "team_one_score": "61",
+        "team_two_id": "1237040364750114858",
+        "team_two_name": "DEN",
+        "team_two_score": "40",
+        "timestamp": "2026-05-22T00:54:58.514000+00:00"
+    },
+    {
+        "id": 457,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "47",
+        "team_two_id": "1237040688655241277",
+        "team_two_name": "PHI",
+        "team_two_score": "25",
+        "timestamp": "2026-05-21T04:02:00.023000+00:00"
+    },
+    {
+        "id": 458,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "55",
+        "team_two_id": "1237394032498577429",
+        "team_two_name": "CLO",
+        "team_two_score": "26",
+        "timestamp": "2026-05-23T01:54:27.125000+00:00"
+    },
+    {
+        "id": 459,
+        "team_one_id": "1237398922398404638",
+        "team_one_name": "EUG",
+        "team_one_score": "38",
+        "team_two_id": "1237398947971207302",
+        "team_two_name": "LAN",
+        "team_two_score": "33",
+        "timestamp": "2026-05-24T03:07:34.364000+00:00"
+    },
+    {
+        "id": 460,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "39",
+        "team_two_id": "1284393339818479668",
+        "team_two_name": "RCH",
+        "team_two_score": "33",
+        "timestamp": "2026-05-23T03:59:41.575000+00:00"
+    },
+    {
+        "id": 462,
+        "team_one_id": "1237040364750114858",
+        "team_one_name": "DEN",
+        "team_one_score": "48",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "13",
+        "timestamp": "2026-05-25T02:00:39.394000+00:00"
+    },
+    {
+        "id": 463,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "51",
+        "team_two_id": "1329901073699311687",
+        "team_two_name": "TKY",
+        "team_two_score": "48",
+        "timestamp": "2026-05-26T02:15:18.170000+00:00"
+    },
+    {
+        "id": 464,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "46",
+        "team_two_id": "1237393998432436307",
+        "team_two_name": "AUS",
+        "team_two_score": "27",
+        "timestamp": "2026-05-26T03:36:00.442000+00:00"
+    },
+    {
+        "id": 465,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "60",
+        "team_two_id": "1237040671282696235",
+        "team_two_name": "LA",
+        "team_two_score": "20",
+        "timestamp": "2026-05-22T02:30:32.596000+00:00"
+    },
+    {
+        "id": 466,
+        "team_one_id": "1284393330217586800",
+        "team_one_name": "EVA",
+        "team_one_score": "52",
+        "team_two_id": "1237040359742115902",
+        "team_two_name": "CLE",
+        "team_two_score": "40",
+        "timestamp": "2026-05-24T01:59:41.411000+00:00"
+    },
+    {
+        "id": 468,
+        "team_one_id": "1237398937766461574",
+        "team_one_name": "HAR",
+        "team_one_score": "49",
+        "team_two_id": "1237398934998224967",
+        "team_two_name": "GRE",
+        "team_two_score": "42",
+        "timestamp": "2026-05-22T02:58:58.053000+00:00"
+    },
+    {
+        "id": 470,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "58",
+        "team_two_id": "1237040357351362620",
+        "team_two_name": "CIN",
+        "team_two_score": "18",
+        "timestamp": "2026-05-26T03:27:22.507000+00:00"
+    },
+    {
+        "id": 471,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "29",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "0",
+        "timestamp": "2026-05-21T02:05:34.425000+00:00"
+    },
+    {
+        "id": 472,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "47",
+        "team_two_id": "1237040359742115902",
+        "team_two_name": "CLE",
+        "team_two_score": "21",
+        "timestamp": "2026-05-26T03:49:36.490000+00:00"
+    },
+    {
+        "id": 474,
+        "team_one_id": "1237398937766461574",
+        "team_one_name": "HAR",
+        "team_one_score": "40",
+        "team_two_id": "1237040695924101231",
+        "team_two_name": "SanDiego",
+        "team_two_score": "14",
+        "timestamp": "2026-05-21T02:44:44.248000+00:00"
+    },
+    {
+        "id": 475,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "36",
+        "team_two_id": "1284393334923726899",
+        "team_two_name": "LOU",
+        "team_two_score": "35",
+        "timestamp": "2026-05-24T03:01:08.227000+00:00"
+    },
+    {
+        "id": 476,
+        "team_one_id": "1237393998432436307",
+        "team_one_name": "AUS",
+        "team_one_score": "55",
+        "team_two_id": "1237394032498577429",
+        "team_two_name": "CLO",
+        "team_two_score": "19",
+        "timestamp": "2026-05-25T01:55:23.157000+00:00"
+    },
+    {
+        "id": 477,
+        "team_one_id": "1237398947971207302",
+        "team_one_name": "LAN",
+        "team_one_score": "49",
+        "team_two_id": "1237040671282696235",
+        "team_two_name": "LA",
+        "team_two_score": "30",
+        "timestamp": "2026-05-25T01:39:37.848000+00:00"
+    },
+    {
+        "id": 478,
+        "team_one_id": "1284393330217586800",
+        "team_one_name": "EVA",
+        "team_one_score": "48",
+        "team_two_id": "1329901039490437254",
+        "team_two_name": "DAV",
+        "team_two_score": "40",
+        "timestamp": "2026-05-21T02:53:18.734000+00:00"
+    },
+    {
+        "id": 479,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "46",
+        "team_two_id": "1237399310690422964",
+        "team_two_name": "PAS",
+        "team_two_score": "19",
+        "timestamp": "2026-05-21T01:56:21.013000+00:00"
+    },
+    {
+        "id": 480,
+        "team_one_id": "1237398934998224967",
+        "team_one_name": "GRE",
+        "team_one_score": "34",
+        "team_two_id": "1237040364750114858",
+        "team_two_name": "DEN",
+        "team_two_score": "29",
+        "timestamp": "2026-05-25T03:01:01.427000+00:00"
+    },
+    {
+        "id": 482,
+        "team_one_id": "1237040346769395744",
+        "team_one_name": "BOS",
+        "team_one_score": "47",
+        "team_two_id": "1329901049158434816",
+        "team_two_name": "BKN",
+        "team_two_score": "11",
+        "timestamp": "2026-05-22T01:54:27.138000+00:00"
+    },
+    {
+        "id": 484,
+        "team_one_id": "1329901453564842085",
+        "team_one_name": "TOL",
+        "team_one_score": "37",
+        "team_two_id": "1237040674071773206",
+        "team_two_name": "MIA",
+        "team_two_score": "35",
+        "timestamp": "2026-05-22T03:34:05.191000+00:00"
+    },
+    {
+        "id": 485,
+        "team_one_id": "1284393328531472384",
+        "team_one_name": "CHE",
+        "team_one_score": "51",
+        "team_two_id": "1329901088400216094",
+        "team_two_name": "RNO",
+        "team_two_score": "31",
+        "timestamp": "2026-05-25T01:57:00.704000+00:00"
+    },
+    {
+        "id": 487,
+        "team_one_id": "1237399297155272714",
+        "team_one_name": "MGM",
+        "team_one_score": "50",
+        "team_two_id": "1329901469968633997",
+        "team_two_name": "WSA",
+        "team_two_score": "13",
+        "timestamp": "2026-05-21T00:34:55.339000+00:00"
+    },
+    {
+        "id": 493,
+        "team_one_id": "1329901081186140322",
+        "team_one_name": "MIL",
+        "team_one_score": "49",
+        "team_two_id": "1284393328195932251",
+        "team_two_name": "CHS",
+        "team_two_score": "35",
+        "timestamp": "2026-05-25T03:57:32.166000+00:00"
+    },
+    {
+        "id": 495,
+        "team_one_id": "1329901033308164228",
+        "team_one_name": "ALB",
+        "team_one_score": "53",
+        "team_two_id": "1284393326531051520",
+        "team_two_name": "BIL",
+        "team_two_score": "38",
+        "timestamp": "2026-05-24T04:12:16.518000+00:00"
+    },
+    {
+        "id": 497,
+        "team_one_id": "1329901462767276175",
+        "team_one_name": "SAO",
+        "team_one_score": "36",
+        "team_two_id": "1237398951783567441",
+        "team_two_name": "OMA",
+        "team_two_score": "26",
+        "timestamp": "2026-05-25T03:24:03.680000+00:00"
+    },
+    {
+        "id": 498,
+        "team_one_id": "1237040346769395744",
+        "team_one_name": "BOS",
+        "team_one_score": "51",
+        "team_two_id": "1284393325188878337",
+        "team_two_name": "ANA",
+        "team_two_score": "13",
+        "timestamp": "2026-05-21T01:44:36.965000+00:00"
+    },
+    {
+        "id": 500,
+        "team_one_id": "1237394019688906792",
+        "team_one_name": "BOU",
+        "team_one_score": "42",
+        "team_two_id": "1237040674071773206",
+        "team_two_name": "MIA",
+        "team_two_score": "28",
+        "timestamp": "2026-05-22T03:38:28.970000+00:00"
+    },
+    {
+        "id": 503,
+        "team_one_id": "1329901033308164228",
+        "team_one_name": "ALB",
+        "team_one_score": "35",
+        "team_two_id": "1237399297155272714",
+        "team_two_name": "MGM",
+        "team_two_score": "32",
+        "timestamp": "2026-05-23T04:40:41.890000+00:00"
+    },
+    {
+        "id": 506,
+        "team_one_id": "1329901031697551380",
+        "team_one_name": "AKR",
+        "team_one_score": "49",
+        "team_two_id": "1329901049158434816",
+        "team_two_name": "BKN",
+        "team_two_score": "32",
+        "timestamp": "2026-05-25T06:38:02.770000+00:00"
+    },
+    {
+        "id": 509,
+        "team_one_id": "1284393328195932251",
+        "team_one_name": "CHS",
+        "team_one_score": "44",
+        "team_two_id": "1329901088400216094",
+        "team_two_name": "RNO",
+        "team_two_score": "24",
+        "timestamp": "2026-05-22T02:57:14.355000+00:00"
+    },
+    {
+        "id": 510,
+        "team_one_id": "1237399624260653117",
+        "team_one_name": "TAL",
+        "team_one_score": "43",
+        "team_two_id": "1284408500969279488",
+        "team_two_name": "Trenton",
+        "team_two_score": "7",
+        "timestamp": "2026-05-20T23:43:21.058000+00:00"
+    },
+    {
+        "id": 512,
+        "team_one_id": "1329901063935098953",
+        "team_one_name": "HAR",
+        "team_one_score": "34",
+        "team_two_id": "1329901061284040795",
+        "team_two_name": "SEO",
+        "team_two_score": "5",
+        "timestamp": "2026-05-21T02:42:43.425000+00:00"
+    },
+    {
+        "id": 513,
+        "team_one_id": "1237399321658523718",
+        "team_one_name": "TUL",
+        "team_one_score": "60",
+        "team_two_id": "1329901462767276175",
+        "team_two_name": "SAO",
+        "team_two_score": "46",
+        "timestamp": "2026-05-26T03:38:50.522000+00:00"
+    },
+    {
+        "id": 515,
+        "team_one_id": "1237040349684301854",
+        "team_one_name": "BUF",
+        "team_one_score": "40",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "34",
+        "timestamp": "2026-05-22T03:05:35.973000+00:00"
+    },
+    {
+        "id": 518,
+        "team_one_id": "1237399624260653117",
+        "team_one_name": "TAL",
+        "team_one_score": "19",
+        "team_two_id": "1329901055978246174",
+        "team_two_name": "LON",
+        "team_two_score": "6",
+        "timestamp": "2026-05-24T02:56:25.393000+00:00"
+    },
+    {
+        "id": 519,
+        "team_one_id": "1237399297155272714",
+        "team_one_name": "MGM",
+        "team_one_score": "42",
+        "team_two_id": "1284393326531051520",
+        "team_two_name": "BIL",
+        "team_two_score": "16",
+        "timestamp": "2026-05-24T03:01:57.889000+00:00"
+    },
+    {
+        "id": 521,
+        "team_one_id": "1237398951783567441",
+        "team_one_name": "OMA",
+        "team_one_score": "56",
+        "team_two_id": "1284393338002341923",
+        "team_two_name": "POR",
+        "team_two_score": "49",
+        "timestamp": "2026-05-23T02:57:16.554000+00:00"
+    },
+    {
+        "id": 524,
+        "team_one_id": "1237394019688906792",
+        "team_one_name": "BOU",
+        "team_one_score": "39",
+        "team_two_id": "1329901453564842085",
+        "team_two_name": "TOL",
+        "team_two_score": "31",
+        "timestamp": "2026-05-26T02:38:16.060000+00:00"
+    },
+    {
+        "id": 525,
+        "team_one_id": "1329901081186140322",
+        "team_one_name": "MIL",
+        "team_one_score": "35",
+        "team_two_id": "1329901088400216094",
+        "team_two_name": "RNO",
+        "team_two_score": "9",
+        "timestamp": "2026-05-25T02:49:31.734000+00:00"
+    },
+    {
+        "id": 528,
+        "team_one_id": "1329901061284040795",
+        "team_one_name": "SEO",
+        "team_one_score": "35",
+        "team_two_id": "1329901035711365141",
+        "team_two_name": "ABQ",
+        "team_two_score": "0",
+        "timestamp": "2026-05-26T02:37:23.080000+00:00"
+    },
+    {
+        "id": 546,
+        "team_one_id": "1284408623333773432",
+        "team_one_name": "MXC",
+        "team_one_score": "36",
+        "team_two_id": "1237040690505060435",
+        "team_two_name": "PHX",
+        "team_two_score": "35",
+        "timestamp": "2026-05-25T02:55:55.545000+00:00"
+    },
+    {
+        "id": 547,
+        "team_one_id": "1329901045735882854",
+        "team_one_name": "CHA",
+        "team_one_score": "39",
+        "team_two_id": "1284393327059275867",
+        "team_two_name": "BOI",
+        "team_two_score": "24",
+        "timestamp": "2026-05-22T20:16:29.260000+00:00"
+    },
+    {
+        "id": 561,
+        "team_one_id": "1237040341563998300",
+        "team_one_name": "ATL",
+        "team_one_score": "41",
+        "team_two_id": "1284408498746036294",
+        "team_two_name": "StPaul",
+        "team_two_score": "7",
+        "timestamp": "2026-05-23T01:33:01.300000+00:00"
+    },
+    {
+        "id": 562,
+        "team_one_id": "1237040690505060435",
+        "team_one_name": "PHX",
+        "team_one_score": "34",
+        "team_two_id": "1329901085959131206",
+        "team_two_name": "NAPER",
+        "team_two_score": "7",
+        "timestamp": "2026-05-26T02:48:15.358000+00:00"
+    },
+    {
+        "id": 569,
+        "team_one_id": "1284393335489822771",
+        "team_one_name": "LUB",
+        "team_one_score": "68",
+        "team_two_id": "1329901028145102868",
+        "team_two_name": "BAK",
+        "team_two_score": "46",
+        "timestamp": "2026-05-26T02:48:00.113000+00:00"
+    },
+    {
+        "id": 576,
+        "team_one_id": "1237394030229454908",
+        "team_one_name": "CST",
+        "team_one_score": "47",
+        "team_two_id": "1329901459780931686",
+        "team_two_name": "VB",
+        "team_two_score": "37",
+        "timestamp": "2026-05-25T05:07:46.671000+00:00"
+    },
+    {
+        "id": 577,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "38",
+        "team_two_id": "1237040703385632899",
+        "team_two_name": "TB",
+        "team_two_score": "34",
+        "timestamp": "2026-05-31T01:52:34.870000+00:00"
+    },
+    {
+        "id": 579,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "53",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "36",
+        "timestamp": "2026-05-29T03:30:23.659000+00:00"
+    },
+    {
+        "id": 580,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "49",
+        "team_two_id": "1237040668791144560",
+        "team_two_name": "LV",
+        "team_two_score": "48",
+        "timestamp": "2026-05-30T03:56:17.918000+00:00"
+    },
+    {
+        "id": 581,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "45",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "39",
+        "timestamp": "2026-06-01T03:22:03.706000+00:00"
+    },
+    {
+        "id": 582,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "52",
+        "team_two_id": "1237040369766498384",
+        "team_two_name": "GB",
+        "team_two_score": "33",
+        "timestamp": "2026-06-01T02:13:17.921000+00:00"
+    },
+    {
+        "id": 583,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "54",
+        "team_two_id": "1237040676265263185",
+        "team_two_name": "MIN",
+        "team_two_score": "42",
+        "timestamp": "2026-05-27T02:59:30.513000+00:00"
+    },
+    {
+        "id": 585,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "47",
+        "team_two_id": "1237040676265263185",
+        "team_two_name": "MIN",
+        "team_two_score": "44",
+        "timestamp": "2026-05-31T02:59:52.733000+00:00"
+    },
+    {
+        "id": 586,
+        "team_one_id": "1237040668791144560",
+        "team_one_name": "LV",
+        "team_one_score": "48",
+        "team_two_id": "1237040369766498384",
+        "team_two_name": "GB",
+        "team_two_score": "42",
+        "timestamp": "2026-05-27T03:21:44.190000+00:00"
+    },
+    {
+        "id": 587,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "55",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "49",
+        "timestamp": "2026-05-30T04:26:42.328000+00:00"
+    },
+    {
+        "id": 588,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "40",
+        "team_two_id": "1237040701301198938",
+        "team_two_name": "SEA",
+        "team_two_score": "36",
+        "timestamp": "2026-05-28T02:53:47.218000+00:00"
+    },
+    {
+        "id": 589,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "47",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "40",
+        "timestamp": "2026-05-31T03:30:21.712000+00:00"
+    },
+    {
+        "id": 591,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "55",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "48",
+        "timestamp": "2026-06-01T03:51:09.488000+00:00"
+    },
+    {
+        "id": 592,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "51",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "34",
+        "timestamp": "2026-05-28T02:55:45.649000+00:00"
+    },
+    {
+        "id": 593,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "48",
+        "team_two_id": "1237394000856617063",
+        "team_two_name": "BTR",
+        "team_two_score": "40",
+        "timestamp": "2026-06-01T02:42:37.931000+00:00"
+    },
+    {
+        "id": 594,
+        "team_one_id": "1284393339076087848",
+        "team_one_name": "RAL",
+        "team_one_score": "34",
+        "team_two_id": "1329901066526920714",
+        "team_two_name": "HAR",
+        "team_two_score": "20",
+        "timestamp": "2026-05-27T02:55:43.407000+00:00"
+    },
+    {
+        "id": 595,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "51",
+        "team_two_id": "1237040686050574406",
+        "team_two_name": "NY",
+        "team_two_score": "47",
+        "timestamp": "2026-05-28T02:57:56.016000+00:00"
+    },
+    {
+        "id": 597,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "51",
+        "team_two_id": "1237040683513155635",
+        "team_two_name": "NO",
+        "team_two_score": "37",
+        "timestamp": "2026-05-30T02:53:13.396000+00:00"
+    },
+    {
+        "id": 598,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "40",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "30",
+        "timestamp": "2026-05-31T03:53:29.690000+00:00"
+    },
+    {
+        "id": 599,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "42",
+        "team_two_id": "1237399294622040074",
+        "team_two_name": "MAD",
+        "team_two_score": "38",
+        "timestamp": "2026-05-30T23:56:14.050000+00:00"
+    },
+    {
+        "id": 600,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "37",
+        "team_two_id": "1237040678123602032",
+        "team_two_name": "NSH",
+        "team_two_score": "19",
+        "timestamp": "2026-06-01T02:58:34.823000+00:00"
+    },
+    {
+        "id": 601,
+        "team_one_id": "1237394000856617063",
+        "team_one_name": "BTR",
+        "team_one_score": "55",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "39",
+        "timestamp": "2026-05-29T03:53:44.512000+00:00"
+    },
+    {
+        "id": 602,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "43",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "34",
+        "timestamp": "2026-05-29T03:07:36.497000+00:00"
+    },
+    {
+        "id": 603,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "46",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "43",
+        "timestamp": "2026-05-31T03:02:40.761000+00:00"
+    },
+    {
+        "id": 605,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "40",
+        "team_two_id": "1237394000856617063",
+        "team_two_name": "BTR",
+        "team_two_score": "39",
+        "timestamp": "2026-05-27T02:54:13.088000+00:00"
+    },
+    {
+        "id": 606,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "62",
+        "team_two_id": "1329901066526920714",
+        "team_two_name": "HAR",
+        "team_two_score": "27",
+        "timestamp": "2026-05-28T02:30:31.849000+00:00"
+    },
+    {
+        "id": 607,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "72",
+        "team_two_id": "1237040686050574406",
+        "team_two_name": "NY",
+        "team_two_score": "37",
+        "timestamp": "2026-06-01T02:54:18.529000+00:00"
+    },
+    {
+        "id": 608,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "40",
+        "team_two_id": "1237399620598890567",
+        "team_two_name": "TAC",
+        "team_two_score": "6",
+        "timestamp": "2026-05-29T02:48:25.488000+00:00"
+    },
+    {
+        "id": 609,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "57",
+        "team_two_id": "1329901467125026938",
+        "team_two_name": "WIL",
+        "team_two_score": "48",
+        "timestamp": "2026-05-28T01:56:56.736000+00:00"
+    },
+    {
+        "id": 610,
+        "team_one_id": "1284393339076087848",
+        "team_one_name": "RAL",
+        "team_one_score": "50",
+        "team_two_id": "1237399308215652362",
+        "team_two_name": "FTW",
+        "team_two_score": "28",
+        "timestamp": "2026-05-31T03:54:07.359000+00:00"
+    },
+    {
+        "id": 611,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "63",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "36",
+        "timestamp": "2026-05-30T02:50:47.047000+00:00"
+    },
+    {
+        "id": 612,
+        "team_one_id": "1237040367384137769",
+        "team_one_name": "DET",
+        "team_one_score": "45",
+        "team_two_id": "1237040678123602032",
+        "team_two_name": "NSH",
+        "team_two_score": "44",
+        "timestamp": "2026-05-29T03:06:05.313000+00:00"
+    },
+    {
+        "id": 613,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "40",
+        "team_two_id": "1237398947971207302",
+        "team_two_name": "LAN",
+        "team_two_score": "37",
+        "timestamp": "2026-06-01T03:22:25.045000+00:00"
+    },
+    {
+        "id": 616,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "48",
+        "team_two_id": "1237040374992863263",
+        "team_two_name": "IND",
+        "team_two_score": "47",
+        "timestamp": "2026-05-29T03:49:58.146000+00:00"
+    },
+    {
+        "id": 619,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "40",
+        "team_two_id": "1237398915523940484",
+        "team_two_name": "COL",
+        "team_two_score": "36",
+        "timestamp": "2026-05-27T01:52:31.331000+00:00"
+    },
+    {
+        "id": 620,
+        "team_one_id": "1284408501279391885",
+        "team_one_name": "Tucson",
+        "team_one_score": "61",
+        "team_two_id": "1237398937766461574",
+        "team_two_name": "HAR",
+        "team_two_score": "21",
+        "timestamp": "2026-05-29T00:52:50.363000+00:00"
+    },
+    {
+        "id": 621,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "48",
+        "team_two_id": "1237398942904356864",
+        "team_two_name": "JAC",
+        "team_two_score": "36",
+        "timestamp": "2026-05-28T03:32:42.552000+00:00"
+    },
+    {
+        "id": 622,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "16",
+        "team_two_id": "1237040372291604520",
+        "team_two_name": "HOU",
+        "team_two_score": "13",
+        "timestamp": "2026-05-30T01:00:27.268000+00:00"
+    },
+    {
+        "id": 623,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "47",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "31",
+        "timestamp": "2026-05-30T02:57:45.089000+00:00"
+    },
+    {
+        "id": 624,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "53",
+        "team_two_id": "1237398937766461574",
+        "team_two_name": "HAR",
+        "team_two_score": "22",
+        "timestamp": "2026-05-28T02:44:20.330000+00:00"
+    },
+    {
+        "id": 626,
+        "team_one_id": "1237393994124754994",
+        "team_one_name": "ATH",
+        "team_one_score": "49",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "42",
+        "timestamp": "2026-05-29T02:51:40.598000+00:00"
+    },
+    {
+        "id": 627,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "56",
+        "team_two_id": "1237393998432436307",
+        "team_two_name": "AUS",
+        "team_two_score": "19",
+        "timestamp": "2026-06-01T02:14:57.573000+00:00"
+    },
+    {
+        "id": 628,
+        "team_one_id": "1284408501279391885",
+        "team_one_name": "Tucson",
+        "team_one_score": "46",
+        "team_two_id": "1329901039490437254",
+        "team_two_name": "DAV",
+        "team_two_score": "41",
+        "timestamp": "2026-05-27T01:52:37.599000+00:00"
+    },
+    {
+        "id": 630,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "45",
+        "team_two_id": "1237394005730263141",
+        "team_two_name": "CHP",
+        "team_two_score": "20",
+        "timestamp": "2026-05-28T03:18:06.440000+00:00"
+    },
+    {
+        "id": 631,
+        "team_one_id": "1237398915523940484",
+        "team_one_name": "COL",
+        "team_one_score": "67",
+        "team_two_id": "1237040681042841662",
+        "team_two_name": "NEW",
+        "team_two_score": "47",
+        "timestamp": "2026-05-29T02:53:30.460000+00:00"
+    },
+    {
+        "id": 632,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "73",
+        "team_two_id": "1284408501279391885",
+        "team_two_name": "Tucson",
+        "team_two_score": "42",
+        "timestamp": "2026-06-01T03:13:49.292000+00:00"
+    },
+    {
+        "id": 633,
+        "team_one_id": "1237394017302478861",
+        "team_one_name": "SOU",
+        "team_one_score": "54",
+        "team_two_id": "1237398947971207302",
+        "team_two_name": "LAN",
+        "team_two_score": "49",
+        "timestamp": "2026-05-29T02:00:17.032000+00:00"
+    },
+    {
+        "id": 634,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "49",
+        "team_two_id": "1237393994124754994",
+        "team_two_name": "ATH",
+        "team_two_score": "35",
+        "timestamp": "2026-05-30T02:51:41.557000+00:00"
+    },
+    {
+        "id": 635,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "61",
+        "team_two_id": "1237393998432436307",
+        "team_two_name": "AUS",
+        "team_two_score": "34",
+        "timestamp": "2026-05-28T02:22:51.198000+00:00"
+    },
+    {
+        "id": 636,
+        "team_one_id": "1329901039490437254",
+        "team_one_name": "DAV",
+        "team_one_score": "48",
+        "team_two_id": "1237398937766461574",
+        "team_two_name": "HAR",
+        "team_two_score": "12",
+        "timestamp": "2026-05-31T02:46:02.083000+00:00"
+    },
+    {
+        "id": 637,
+        "team_one_id": "1237393986201718795",
+        "team_one_name": "ING",
+        "team_one_score": "49",
+        "team_two_id": "1237399321658523718",
+        "team_two_name": "TUL",
+        "team_two_score": "43",
+        "timestamp": "2026-05-27T08:15:04.201000+00:00"
+    },
+    {
+        "id": 640,
+        "team_one_id": "1237040362477060236",
+        "team_one_name": "DAL",
+        "team_one_score": "55",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "52",
+        "timestamp": "2026-05-29T03:08:51.930000+00:00"
+    },
+    {
+        "id": 645,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "48",
+        "team_two_id": "1237399624260653117",
+        "team_two_name": "TAL",
+        "team_two_score": "20",
+        "timestamp": "2026-05-31T02:57:51.146000+00:00"
+    },
+    {
+        "id": 646,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "40",
+        "team_two_id": "1237399297155272714",
+        "team_two_name": "MGM",
+        "team_two_score": "0",
+        "timestamp": "2026-05-26T23:27:32.289000+00:00"
+    },
+    {
+        "id": 647,
+        "team_one_id": "1329901063935098953",
+        "team_one_name": "HAR",
+        "team_one_score": "47",
+        "team_two_id": "1237040364750114858",
+        "team_two_name": "DEN",
+        "team_two_score": "46",
+        "timestamp": "2026-05-28T03:07:35.456000+00:00"
+    },
+    {
+        "id": 648,
+        "team_one_id": "1237394019688906792",
+        "team_one_name": "BOU",
+        "team_one_score": "43",
+        "team_two_id": "1284393330217586800",
+        "team_two_name": "EVA",
+        "team_two_score": "36",
+        "timestamp": "2026-05-27T02:56:16.823000+00:00"
+    },
+    {
+        "id": 652,
+        "team_one_id": "1237040362477060236",
+        "team_one_name": "DAL",
+        "team_one_score": "44",
+        "team_two_id": "1237399297155272714",
+        "team_two_name": "MGM",
+        "team_two_score": "38",
+        "timestamp": "2026-05-29T02:11:37.277000+00:00"
+    },
+    {
+        "id": 656,
+        "team_one_id": "1237398932682702928",
+        "team_one_name": "GNS",
+        "team_one_score": "45",
+        "team_two_id": "1237040349684301854",
+        "team_two_name": "BUF",
+        "team_two_score": "6",
+        "timestamp": "2026-05-28T02:54:10.079000+00:00"
+    },
+    {
+        "id": 657,
+        "team_one_id": "1329901093433511959",
+        "team_one_name": "SYD",
+        "team_one_score": "41",
+        "team_two_id": "1329901081186140322",
+        "team_two_name": "MIL",
+        "team_two_score": "14",
+        "timestamp": "2026-05-30T03:08:37.925000+00:00"
+    },
+    {
+        "id": 658,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "33",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "16",
+        "timestamp": "2026-05-30T04:06:25.983000+00:00"
+    },
+    {
+        "id": 661,
+        "team_one_id": "1284393334923726899",
+        "team_one_name": "LOU",
+        "team_one_score": "31",
+        "team_two_id": "1237393986201718795",
+        "team_two_name": "ING",
+        "team_two_score": "27",
+        "timestamp": "2026-05-28T01:58:16.033000+00:00"
+    },
+    {
+        "id": 662,
+        "team_one_id": "1284393336454643772",
+        "team_one_name": "OAK",
+        "team_one_score": "57",
+        "team_two_id": "1237398932682702928",
+        "team_two_name": "GNS",
+        "team_two_score": "54",
+        "timestamp": "2026-06-01T03:01:59.305000+00:00"
+    },
+    {
+        "id": 663,
+        "team_one_id": "1284393333954842687",
+        "team_one_name": "GRB",
+        "team_one_score": "48",
+        "team_two_id": "1329901093433511959",
+        "team_two_name": "SYD",
+        "team_two_score": "40",
+        "timestamp": "2026-05-28T03:04:16.482000+00:00"
+    },
+    {
+        "id": 664,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "55",
+        "team_two_id": "1237040362477060236",
+        "team_two_name": "DAL",
+        "team_two_score": "20",
+        "timestamp": "2026-05-27T01:50:04.153000+00:00"
+    },
+    {
+        "id": 669,
+        "team_one_id": "1237399624260653117",
+        "team_one_name": "TAL",
+        "team_one_score": "54",
+        "team_two_id": "1329901081186140322",
+        "team_two_name": "MIL",
+        "team_two_score": "18",
+        "timestamp": "2026-05-28T01:59:53.486000+00:00"
+    },
+    {
+        "id": 670,
+        "team_one_id": "1237399297155272714",
+        "team_one_name": "MGM",
+        "team_one_score": "50",
+        "team_two_id": "1237040705583710268",
+        "team_two_name": "WAS",
+        "team_two_score": "41",
+        "timestamp": "2026-05-27T01:58:25.914000+00:00"
+    },
+    {
+        "id": 671,
+        "team_one_id": "1284393335489822771",
+        "team_one_name": "LUB",
+        "team_one_score": "44",
+        "team_two_id": "1329901063935098953",
+        "team_two_name": "HAR",
+        "team_two_score": "41",
+        "timestamp": "2026-05-31T00:55:35.614000+00:00"
+    },
+    {
+        "id": 675,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "49",
+        "team_two_id": "1329901045735882854",
+        "team_two_name": "CHA",
+        "team_two_score": "18",
+        "timestamp": "2026-05-30T01:54:32.050000+00:00"
+    },
+    {
+        "id": 679,
+        "team_one_id": "1237040359742115902",
+        "team_one_name": "CLE",
+        "team_one_score": "14",
+        "team_two_id": "1329901085959131206",
+        "team_two_name": "NAPER",
+        "team_two_score": "6",
+        "timestamp": "2026-05-31T03:38:02.972000+00:00"
+    },
+    {
+        "id": 690,
+        "team_one_id": "1329901088400216094",
+        "team_one_name": "RNO",
+        "team_one_score": "51",
+        "team_two_id": "1237398922398404638",
+        "team_two_name": "EUG",
+        "team_two_score": "41",
+        "timestamp": "2026-05-27T02:04:30.928000+00:00"
+    },
+    {
+        "id": 691,
+        "team_one_id": "1237040357351362620",
+        "team_one_name": "CIN",
+        "team_one_score": "42",
+        "team_two_id": "1329901031697551380",
+        "team_two_name": "AKR",
+        "team_two_score": "7",
+        "timestamp": "2026-06-01T01:35:25.735000+00:00"
+    },
+    {
+        "id": 695,
+        "team_one_id": "1237040359742115902",
+        "team_one_name": "CLE",
+        "team_one_score": "68",
+        "team_two_id": "1237040690505060435",
+        "team_two_name": "PHX",
+        "team_two_score": "27",
+        "timestamp": "2026-05-28T03:47:36.508000+00:00"
+    },
+    {
+        "id": 705,
+        "team_one_id": "1237040671282696235",
+        "team_one_name": "LA",
+        "team_one_score": "33",
+        "team_two_id": "1237399310690422964",
+        "team_two_name": "PAS",
+        "team_two_score": "13",
+        "timestamp": "2026-05-28T01:35:58.405000+00:00"
+    },
+    {
+        "id": 769,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "68",
+        "team_two_id": "1329901076144590918",
+        "team_two_name": "LIS",
+        "team_two_score": "53",
+        "timestamp": "2026-06-06T03:36:24.597000+00:00"
+    },
+    {
+        "id": 770,
+        "team_one_id": "1237399640308060210",
+        "team_one_name": "TUS",
+        "team_one_score": "42",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "7",
+        "timestamp": "2026-06-06T02:06:49.639000+00:00"
+    },
+    {
+        "id": 771,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "42",
+        "team_two_id": "1237040668791144560",
+        "team_two_name": "LV",
+        "team_two_score": "29",
+        "timestamp": "2026-06-06T03:05:23.010000+00:00"
+    },
+    {
+        "id": 772,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "40",
+        "team_two_id": "1237394000856617063",
+        "team_two_name": "BTR",
+        "team_two_score": "17",
+        "timestamp": "2026-06-05T02:34:16.166000+00:00"
+    },
+    {
+        "id": 773,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "28",
+        "team_two_id": "1237040374992863263",
+        "team_two_name": "IND",
+        "team_two_score": "27",
+        "timestamp": "2026-06-06T03:23:42.118000+00:00"
+    },
+    {
+        "id": 774,
+        "team_one_id": "1237398929079799838",
+        "team_one_name": "FLD",
+        "team_one_score": "51",
+        "team_two_id": "1284393341844197467",
+        "team_two_name": "SCT",
+        "team_two_score": "34",
+        "timestamp": "2026-06-05T03:30:00.936000+00:00"
+    },
+    {
+        "id": 775,
+        "team_one_id": "1237040676265263185",
+        "team_one_name": "MIN",
+        "team_one_score": "56",
+        "team_two_id": "1329901066526920714",
+        "team_two_name": "HAR",
+        "team_two_score": "20",
+        "timestamp": "2026-06-06T02:52:50.834000+00:00"
+    },
+    {
+        "id": 776,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "60",
+        "team_two_id": "1237040686050574406",
+        "team_two_name": "NY",
+        "team_two_score": "40",
+        "timestamp": "2026-06-05T02:45:43.214000+00:00"
+    },
+    {
+        "id": 777,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "34",
+        "team_two_id": "1237399640308060210",
+        "team_two_name": "TUS",
+        "team_two_score": "26",
+        "timestamp": "2026-06-08T02:21:04.572000+00:00"
+    },
+    {
+        "id": 778,
+        "team_one_id": "1329901053776494592",
+        "team_one_name": "FAY",
+        "team_one_score": "45",
+        "team_two_id": "1237040668791144560",
+        "team_two_name": "LV",
+        "team_two_score": "23",
+        "timestamp": "2026-06-09T03:48:02.660000+00:00"
+    },
+    {
+        "id": 779,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "47",
+        "team_two_id": "1237398929079799838",
+        "team_two_name": "FLD",
+        "team_two_score": "40",
+        "timestamp": "2026-06-08T03:20:00.764000+00:00"
+    },
+    {
+        "id": 780,
+        "team_one_id": "1237040703385632899",
+        "team_one_name": "TB",
+        "team_one_score": "41",
+        "team_two_id": "1237040676265263185",
+        "team_two_name": "MIN",
+        "team_two_score": "40",
+        "timestamp": "2026-06-08T03:57:38.950000+00:00"
+    },
+    {
+        "id": 781,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "60",
+        "team_two_id": "1329901053776494592",
+        "team_two_name": "FAY",
+        "team_two_score": "44",
+        "timestamp": "2026-06-12T02:03:07.922000+00:00"
+    },
+    {
+        "id": 782,
+        "team_one_id": "1237040352578244618",
+        "team_one_name": "CLT",
+        "team_one_score": "47",
+        "team_two_id": "1237040703385632899",
+        "team_two_name": "TB",
+        "team_two_score": "34",
+        "timestamp": "2026-06-12T02:49:07.620000+00:00"
+    },
+    {
+        "id": 783,
+        "team_one_id": "1237040369766498384",
+        "team_one_name": "GB",
+        "team_one_score": "49",
+        "team_two_id": "1237040352578244618",
+        "team_two_name": "CLT",
+        "team_two_score": "42",
+        "timestamp": "2026-06-14T03:34:28.219000+00:00"
+    },
+    {
+        "id": 784,
+        "team_one_id": "1237040693327695882",
+        "team_one_name": "PIT",
+        "team_one_score": "45",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "32",
+        "timestamp": "2026-06-04T03:10:11.422000+00:00"
+    },
+    {
+        "id": 785,
+        "team_one_id": "1329901066526920714",
+        "team_one_name": "HAR",
+        "team_one_score": "48",
+        "team_two_id": "1237398932682702928",
+        "team_two_name": "GNS",
+        "team_two_score": "46",
+        "timestamp": "2026-06-04T02:52:38.661000+00:00"
+    },
+    {
+        "id": 786,
+        "team_one_id": "1237040344521244672",
+        "team_one_name": "BAL",
+        "team_one_score": "47",
+        "team_two_id": "1237040678123602032",
+        "team_two_name": "NSH",
+        "team_two_score": "46",
+        "timestamp": "2026-06-04T02:03:44.277000+00:00"
+    },
+    {
+        "id": 788,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "42",
+        "team_two_id": "1237040701301198938",
+        "team_two_name": "SEA",
+        "team_two_score": "6",
+        "timestamp": "2026-06-04T02:17:59.796000+00:00"
+    },
+    {
+        "id": 789,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "41",
+        "team_two_id": "1237040355044757624",
+        "team_two_name": "CHI",
+        "team_two_score": "39",
+        "timestamp": "2026-06-04T02:53:07.613000+00:00"
+    },
+    {
+        "id": 790,
+        "team_one_id": "1329901076144590918",
+        "team_one_name": "LIS",
+        "team_one_score": "27",
+        "team_two_id": "1237040372291604520",
+        "team_two_name": "HOU",
+        "team_two_score": "19",
+        "timestamp": "2026-06-04T02:16:41.163000+00:00"
+    },
+    {
+        "id": 791,
+        "team_one_id": "1237040686050574406",
+        "team_one_name": "NY",
+        "team_one_score": "41",
+        "team_two_id": "1237398915523940484",
+        "team_two_name": "COL",
+        "team_two_score": "26",
+        "timestamp": "2026-06-04T02:58:07.756000+00:00"
+    },
+    {
+        "id": 792,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "52",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "41",
+        "timestamp": "2026-06-02T00:57:38.427000+00:00"
+    },
+    {
+        "id": 792,
+        "team_one_id": "1284393339818479668",
+        "team_one_name": "RCH",
+        "team_one_score": "35",
+        "team_two_id": "1237040367384137769",
+        "team_two_name": "DET",
+        "team_two_score": "29",
+        "timestamp": "2026-06-03T02:51:58.799000+00:00"
+    },
+    {
+        "id": 793,
+        "team_one_id": "1237399294622040074",
+        "team_one_name": "MAD",
+        "team_one_score": "47",
+        "team_two_id": "1237398932682702928",
+        "team_two_name": "GNS",
+        "team_two_score": "27",
+        "timestamp": "2026-06-03T02:55:49.370000+00:00"
+    },
+    {
+        "id": 794,
+        "team_one_id": "1237040678123602032",
+        "team_one_name": "NSH",
+        "team_one_score": "24",
+        "team_two_id": "1329901093433511959",
+        "team_two_name": "SYD",
+        "team_two_score": "22",
+        "timestamp": "2026-06-03T03:12:18.643000+00:00"
+    },
+    {
+        "id": 795,
+        "team_one_id": "1237040683513155635",
+        "team_one_name": "NO",
+        "team_one_score": "28",
+        "team_two_id": "1284393334923726899",
+        "team_two_name": "LOU",
+        "team_two_score": "21",
+        "timestamp": "2026-06-02T01:49:00.627000+00:00"
+    },
+    {
+        "id": 796,
+        "team_one_id": "1237040374992863263",
+        "team_one_name": "IND",
+        "team_one_score": "26",
+        "team_two_id": "1284393334340718653",
+        "team_two_name": "LEX",
+        "team_two_score": "21",
+        "timestamp": "2026-06-03T02:45:55.357000+00:00"
+    },
+    {
+        "id": 797,
+        "team_one_id": "1284393341844197467",
+        "team_one_name": "SCT",
+        "team_one_score": "51",
+        "team_two_id": "1284393339076087848",
+        "team_two_name": "RAL",
+        "team_two_score": "45",
+        "timestamp": "2026-06-03T04:32:13.579000+00:00"
+    },
+    {
+        "id": 798,
+        "team_one_id": "1237040372291604520",
+        "team_one_name": "HOU",
+        "team_one_score": "41",
+        "team_two_id": "1237398947971207302",
+        "team_two_name": "LAN",
+        "team_two_score": "34",
+        "timestamp": "2026-06-02T01:51:21.768000+00:00"
+    },
+    {
+        "id": 799,
+        "team_one_id": "1237398942904356864",
+        "team_one_name": "JAC",
+        "team_one_score": "33",
+        "team_two_id": "1237398915523940484",
+        "team_two_name": "COL",
+        "team_two_score": "20",
+        "timestamp": "2026-06-03T02:07:27.898000+00:00"
+    }
+]

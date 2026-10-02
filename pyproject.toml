@@ -1,0 +1,62 @@
+[project]
+name = "circuit-bot"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+authors = [
+    { name = "vxWrath" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "discord>=2.3.2",
+    "msgspec>=0.22.0",
+]
+
+[project.scripts]
+circuit-bot = "circuit_bot:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.414",
+    "ruff>=0.16.9",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (undefined names, unused imports, etc.)
+    "I",   # isort (import ordering)
+    "UP",  # pyupgrade (modernise syntax: use list/dict/X|Y instead of typing.List/Dict/Optional)
+    "B",   # flake8-bugbear (likely bugs and design issues)
+    "RUF", # ruff-specific rules
+]
+ignore = [
+    "E501",  # line too long - handled by line-length setting
+    "E731",  # do not assign a lambda expression, use a def
+    "F403",  # 'from module import *' used; unable to detect undefined names (common in __init__.py files)
+    "UP037", # remove quotes from annotations
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["circuit_bot"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+include = ["src"]
+exclude = ["**/node_modules", "**/__pycache__", ".venv"]
