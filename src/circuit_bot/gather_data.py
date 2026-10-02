@@ -1,8 +1,9 @@
+import asyncio
+import datetime
+import re
+
 import aiohttp
 import msgspec
-import datetime
-import asyncio
-import re
 
 
 def get_environment_variables() -> dict[str, str]:
@@ -29,11 +30,11 @@ USER_TOKEN = get_env("USER_TOKEN")
 HEADERS    = {"Authorization": f"{USER_TOKEN}"}
 
 URL        = "https://discord.com/api/v10/channels/{channel_id}/messages?limit={limit}&after={after}"
-CHANNEL_ID = 0
+CHANNEL_ID = 1414086380266717226
 LIMIT      = 100
 
-BEFORE_DT = datetime.datetime(2026, 9, 21, tzinfo=datetime.timezone.utc)
-AFTER_DT  = datetime.datetime(2026, 7, 17, tzinfo=datetime.timezone.utc)
+BEFORE_DT = datetime.datetime(2026, 5, 6, tzinfo=datetime.timezone.utc)
+AFTER_DT  = datetime.datetime(2026, 3, 8, tzinfo=datetime.timezone.utc)
 
 class Message(msgspec.Struct):
     id: str
@@ -192,7 +193,7 @@ def convert_to_games():
 
     games.sort(key=lambda g: datetime.datetime.fromisoformat(g.timestamp))
 
-    with open("games/<>.json", "w") as f:
+    with open("games/mvp_season_9.json", "w") as f:
         json.dump(msgspec.to_builtins(games), f, indent=4)
 
 def main():
