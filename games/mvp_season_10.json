@@ -1,0 +1,2392 @@
+[
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "61",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "26",
+        "timestamp": "2026-05-17T03:16:46.942000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "51",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "45",
+        "timestamp": "2026-05-22T03:05:51.052000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "51",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "45",
+        "timestamp": "2026-05-22T03:07:39.502000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "14",
+        "team_two_id": "1289625866413805648",
+        "team_two_name": "panthers",
+        "team_two_score": "49",
+        "timestamp": "2026-05-22T03:16:21.760000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "50",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "40",
+        "timestamp": "2026-05-23T01:25:49.471000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "47",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "43",
+        "timestamp": "2026-05-23T02:10:17.294000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286888274971066379",
+        "team_one_name": "colts",
+        "team_one_score": "34",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "27",
+        "timestamp": "2026-05-23T03:48:14.039000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "70",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "52",
+        "timestamp": "2026-05-23T04:43:01.124000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "38",
+        "team_two_id": "1289627009617760328",
+        "team_two_name": "ravens",
+        "team_two_score": "33",
+        "timestamp": "2026-05-23T04:58:18.452000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "38",
+        "team_two_id": "1289627009617760328",
+        "team_two_name": "ravens",
+        "team_two_score": "33",
+        "timestamp": "2026-05-23T05:00:48.535000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "34",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "27",
+        "timestamp": "2026-05-23T15:25:53.700000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627544588521472",
+        "team_one_name": "bengals",
+        "team_one_score": "7",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "42",
+        "timestamp": "2026-05-24T03:35:02.187000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "42",
+        "team_two_id": "1289625866413805648",
+        "team_two_name": "panthers",
+        "team_two_score": "56",
+        "timestamp": "2026-05-24T03:54:19.531000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627026801819741",
+        "team_one_name": "buccaneers",
+        "team_one_score": "35",
+        "team_two_id": "1288253912662675466",
+        "team_two_name": "commanders",
+        "team_two_score": "42",
+        "timestamp": "2026-05-24T03:57:27.914000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "40",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "0",
+        "timestamp": "2026-05-25T00:33:00.538000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "50",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "29",
+        "timestamp": "2026-05-25T03:24:18.477000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628933523902598",
+        "team_one_name": "chargers",
+        "team_one_score": "30",
+        "team_two_id": "1289627009617760328",
+        "team_two_name": "ravens",
+        "team_two_score": "28",
+        "timestamp": "2026-05-25T03:54:54.297000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627026801819741",
+        "team_one_name": "buccaneers",
+        "team_one_score": "33",
+        "team_two_id": "1286887293185036319",
+        "team_two_name": "seahawks",
+        "team_two_score": "32",
+        "timestamp": "2026-05-25T03:58:47.072000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627026801819741",
+        "team_one_name": "buccaneers",
+        "team_one_score": "33",
+        "team_two_id": "1286887293185036319",
+        "team_two_name": "seahawks",
+        "team_two_score": "32",
+        "timestamp": "2026-05-25T04:22:17.586000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "21",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "14",
+        "timestamp": "2026-05-25T05:47:06.702000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286888274971066379",
+        "team_one_name": "colts",
+        "team_one_score": "17",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "56",
+        "timestamp": "2026-05-26T00:04:20.498000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "41",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "6",
+        "timestamp": "2026-05-26T00:29:37.908000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628127760482345",
+        "team_one_name": "raiders",
+        "team_one_score": "49",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "22",
+        "timestamp": "2026-05-26T01:59:52.939000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "73",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "54",
+        "timestamp": "2026-05-26T03:56:35.085000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "73",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "54",
+        "timestamp": "2026-05-26T03:57:58.628000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "26",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "38",
+        "timestamp": "2026-05-27T01:02:22.624000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "28",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "35",
+        "timestamp": "2026-05-27T03:04:39.325000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "38",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "22",
+        "timestamp": "2026-05-27T03:15:28.777000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288254203009171488",
+        "team_one_name": "lions",
+        "team_one_score": "40",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "32",
+        "timestamp": "2026-05-27T03:59:21.608000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "28",
+        "team_two_id": "1267922917941973064",
+        "team_two_name": "vikings",
+        "team_two_score": "38",
+        "timestamp": "2026-05-28T01:51:54.193000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "25",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "41",
+        "timestamp": "2026-05-28T01:56:35.453000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625689837801595",
+        "team_one_name": "jaguars",
+        "team_one_score": "7",
+        "team_two_id": "1289630100761083955",
+        "team_two_name": "patriots",
+        "team_two_score": "25",
+        "timestamp": "2026-05-28T02:46:28.365000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628127760482345",
+        "team_one_name": "raiders",
+        "team_one_score": "33",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "31",
+        "timestamp": "2026-05-29T20:10:42.530000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "38",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "6",
+        "timestamp": "2026-05-30T00:57:00.021000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "62",
+        "team_two_id": "1286887293185036319",
+        "team_two_name": "seahawks",
+        "team_two_score": "33",
+        "timestamp": "2026-05-30T01:56:39.230000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "14",
+        "team_two_id": "1288254203009171488",
+        "team_two_name": "lions",
+        "team_two_score": "0",
+        "timestamp": "2026-05-30T02:15:59.473000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "14",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "0",
+        "timestamp": "2026-05-30T02:29:49.433000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "43",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "7",
+        "timestamp": "2026-05-30T02:35:10.547000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628501372043264",
+        "team_one_name": "falcons",
+        "team_one_score": "14",
+        "team_two_id": "1289623999357259837",
+        "team_two_name": "49ers",
+        "team_two_score": "0",
+        "timestamp": "2026-05-30T02:53:55.424000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "14",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "0",
+        "timestamp": "2026-05-30T03:19:53.316000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "35",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "13",
+        "timestamp": "2026-05-30T04:53:54.868000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628933523902598",
+        "team_one_name": "chargers",
+        "team_one_score": "29",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "35",
+        "timestamp": "2026-05-31T00:04:53.752000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "14",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "0",
+        "timestamp": "2026-05-31T02:19:12.486000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "29",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "24",
+        "timestamp": "2026-05-31T03:05:38.177000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "24",
+        "team_two_id": "1286892651076915220",
+        "team_two_name": "eagles",
+        "team_two_score": "29",
+        "timestamp": "2026-05-31T03:17:08.244000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627544588521472",
+        "team_one_name": "bengals",
+        "team_one_score": "25",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "11",
+        "timestamp": "2026-05-31T03:17:10.633000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "35",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "0",
+        "timestamp": "2026-05-31T03:35:23.562000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "36",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "35",
+        "timestamp": "2026-06-01T01:56:10.032000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "48",
+        "team_two_id": "1289625866413805648",
+        "team_two_name": "panthers",
+        "team_two_score": "51",
+        "timestamp": "2026-06-01T03:14:37.379000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "61",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "37",
+        "timestamp": "2026-06-01T03:45:26.280000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628125659004958",
+        "team_one_name": "broncos",
+        "team_one_score": "51",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "49",
+        "timestamp": "2026-06-02T00:56:03.745000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "14",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "0",
+        "timestamp": "2026-06-02T01:10:19.245000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "7",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "28",
+        "timestamp": "2026-06-02T02:38:55.066000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288254203009171488",
+        "team_one_name": "lions",
+        "team_one_score": "18",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "39",
+        "timestamp": "2026-06-02T02:55:18.141000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "6",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "46",
+        "timestamp": "2026-06-03T01:42:56.120000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "38",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "28",
+        "timestamp": "2026-06-03T01:53:17.497000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "41",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "45",
+        "timestamp": "2026-06-03T02:07:38.406000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "29",
+        "team_two_id": "1286889120077054002",
+        "team_two_name": "steelers",
+        "team_two_score": "54",
+        "timestamp": "2026-06-03T02:57:16.347000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "56",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "35",
+        "timestamp": "2026-06-03T03:01:30.953000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627026801819741",
+        "team_one_name": "buccaneers",
+        "team_one_score": "35",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "24",
+        "timestamp": "2026-06-03T03:01:48.609000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "14",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "0",
+        "timestamp": "2026-06-03T03:02:42.397000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "56",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "35",
+        "timestamp": "2026-06-03T03:20:45.659000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "0",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "37",
+        "timestamp": "2026-06-03T03:30:08.754000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "58",
+        "team_two_id": "1288253912662675466",
+        "team_two_name": "commanders",
+        "team_two_score": "29",
+        "timestamp": "2026-06-03T03:47:38.725000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "52",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "13",
+        "timestamp": "2026-06-04T01:03:22.753000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "62",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "38",
+        "timestamp": "2026-06-04T01:24:11.423000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "62",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "38",
+        "timestamp": "2026-06-04T01:45:02.087000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "52",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "13",
+        "timestamp": "2026-06-04T01:54:09.835000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "38",
+        "team_two_id": "1289630100761083955",
+        "team_two_name": "patriots",
+        "team_two_score": "62",
+        "timestamp": "2026-06-04T02:19:01.351000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "14",
+        "team_two_id": "1288253912662675466",
+        "team_two_name": "commanders",
+        "team_two_score": "0",
+        "timestamp": "2026-06-04T02:31:42.736000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "55",
+        "team_two_id": "1289626171293564928",
+        "team_two_name": "packers",
+        "team_two_score": "41",
+        "timestamp": "2026-06-04T03:10:12.657000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "55",
+        "team_two_id": "1289626171293564928",
+        "team_two_name": "packers",
+        "team_two_score": "41",
+        "timestamp": "2026-06-04T03:11:46.140000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "14",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "0",
+        "timestamp": "2026-06-05T00:24:28.690000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288254203009171488",
+        "team_one_name": "lions",
+        "team_one_score": "28",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "39",
+        "timestamp": "2026-06-05T02:56:31.451000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "46",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "13",
+        "timestamp": "2026-06-05T02:59:21.356000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "29",
+        "team_two_id": "1286887293185036319",
+        "team_two_name": "seahawks",
+        "team_two_score": "43",
+        "timestamp": "2026-06-05T03:04:30.941000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628125659004958",
+        "team_one_name": "broncos",
+        "team_one_score": "46",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "54",
+        "timestamp": "2026-06-06T00:58:40.486000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "41",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "31",
+        "timestamp": "2026-06-06T02:04:20.975000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "41",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "31",
+        "timestamp": "2026-06-06T02:05:31.788000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "41",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "31",
+        "timestamp": "2026-06-06T02:34:17.896000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "25",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "20",
+        "timestamp": "2026-06-06T02:45:42.235000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "22",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "38",
+        "timestamp": "2026-06-06T03:02:46.393000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "14",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "0",
+        "timestamp": "2026-06-06T03:07:55.742000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "22",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "38",
+        "timestamp": "2026-06-06T03:44:04.366000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "2",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "40",
+        "timestamp": "2026-06-07T00:56:28.227000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "22",
+        "team_two_id": "1286892651076915220",
+        "team_two_name": "eagles",
+        "team_two_score": "42",
+        "timestamp": "2026-06-07T03:54:23.213000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625689837801595",
+        "team_one_name": "jaguars",
+        "team_one_score": "58",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "57",
+        "timestamp": "2026-06-07T04:05:40.845000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "54",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "41",
+        "timestamp": "2026-06-07T04:16:35.319000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "61",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "27",
+        "timestamp": "2026-06-07T04:52:30.337000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627544588521472",
+        "team_one_name": "bengals",
+        "team_one_score": "6",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "43",
+        "timestamp": "2026-06-07T07:35:38.850000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628501372043264",
+        "team_one_name": "falcons",
+        "team_one_score": "14",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "0",
+        "timestamp": "2026-06-08T00:16:51.118000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "32",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "52",
+        "timestamp": "2026-06-08T01:58:37.318000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "49",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "9",
+        "timestamp": "2026-06-08T02:00:50.982000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288254203009171488",
+        "team_one_name": "lions",
+        "team_one_score": "35",
+        "team_two_id": "1267922917941973064",
+        "team_two_name": "vikings",
+        "team_two_score": "31",
+        "timestamp": "2026-06-08T02:57:11.916000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "37",
+        "team_two_id": "1289626171293564928",
+        "team_two_name": "packers",
+        "team_two_score": "47",
+        "timestamp": "2026-06-08T03:02:55.718000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "40",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "23",
+        "timestamp": "2026-06-08T03:47:44.329000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "47",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "26",
+        "timestamp": "2026-06-08T04:06:39.238000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286891765734965259",
+        "team_one_name": "texans",
+        "team_one_score": "56",
+        "team_two_id": "1329636465637851176",
+        "team_two_name": "IndianapolisCubs",
+        "team_two_score": "45",
+        "timestamp": "2026-06-08T04:07:06.307000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "42",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "7",
+        "timestamp": "2026-06-09T02:20:39.008000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "42",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "7",
+        "timestamp": "2026-06-09T02:26:24.566000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627560610758739",
+        "team_one_name": "browns",
+        "team_one_score": "9",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "48",
+        "timestamp": "2026-06-09T02:29:57.531000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "43",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "6",
+        "timestamp": "2026-06-09T02:44:16.017000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "55",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "39",
+        "timestamp": "2026-06-09T02:57:45.962000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "51",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "34",
+        "timestamp": "2026-06-09T03:37:45.014000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "49",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "42",
+        "timestamp": "2026-06-09T03:39:00.369000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "49",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "35",
+        "timestamp": "2026-06-10T02:30:17.524000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "17",
+        "team_two_id": "1289623707173781656",
+        "team_two_name": "bills",
+        "team_two_score": "20",
+        "timestamp": "2026-06-10T02:42:58.262000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "46",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "10",
+        "timestamp": "2026-06-10T02:48:03.007000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "47",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "26",
+        "timestamp": "2026-06-10T03:02:55.255000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "21",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "14",
+        "timestamp": "2026-06-10T03:07:14.071000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "52",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "70",
+        "timestamp": "2026-06-10T03:09:03.832000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "39",
+        "team_two_id": "1289629192388087818",
+        "team_two_name": "cowboys",
+        "team_two_score": "7",
+        "timestamp": "2026-06-10T03:43:43.335000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "56",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "45",
+        "timestamp": "2026-06-11T02:58:55.805000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "21",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "30",
+        "timestamp": "2026-06-11T03:58:38.105000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "30",
+        "team_two_id": "1266379345895755911",
+        "team_two_name": "rams",
+        "team_two_score": "12",
+        "timestamp": "2026-06-11T04:04:51.505000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "49",
+        "team_two_id": "1289623707173781656",
+        "team_two_name": "bills",
+        "team_two_score": "14",
+        "timestamp": "2026-06-11T04:37:49.969000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "14",
+        "team_two_id": "1286892651076915220",
+        "team_two_name": "eagles",
+        "team_two_score": "37",
+        "timestamp": "2026-06-12T00:41:34.427000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "14",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "0",
+        "timestamp": "2026-06-12T01:20:25.280000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "32",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "40",
+        "timestamp": "2026-06-12T01:53:52.217000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "57",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "29",
+        "timestamp": "2026-06-12T01:58:38.173000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "47",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "22",
+        "timestamp": "2026-06-12T02:47:18.148000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624415755173959",
+        "team_one_name": "cardinals",
+        "team_one_score": "22",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "31",
+        "timestamp": "2026-06-12T03:08:27.082000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "47",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "61",
+        "timestamp": "2026-06-12T03:11:17.854000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "52",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "46",
+        "timestamp": "2026-06-12T03:18:56.854000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623707173781656",
+        "team_one_name": "bills",
+        "team_one_score": "8",
+        "team_two_id": "1289625866413805648",
+        "team_two_name": "panthers",
+        "team_two_score": "45",
+        "timestamp": "2026-06-12T03:39:53.917000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627544588521472",
+        "team_one_name": "bengals",
+        "team_one_score": "14",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "55",
+        "timestamp": "2026-06-13T00:39:32.251000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288254203009171488",
+        "team_one_name": "lions",
+        "team_one_score": "38",
+        "team_two_id": "1286887293185036319",
+        "team_two_name": "seahawks",
+        "team_two_score": "55",
+        "timestamp": "2026-06-13T00:53:15.698000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "13",
+        "team_two_id": "1286889120077054002",
+        "team_two_name": "steelers",
+        "team_two_score": "35",
+        "timestamp": "2026-06-13T03:49:13.725000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627544588521472",
+        "team_one_name": "bengals",
+        "team_one_score": "56",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "29",
+        "timestamp": "2026-06-14T00:12:25.760000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "50",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "38",
+        "timestamp": "2026-06-14T03:07:21.142000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625689837801595",
+        "team_one_name": "jaguars",
+        "team_one_score": "55",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "18",
+        "timestamp": "2026-06-14T04:27:19.110000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "34",
+        "team_two_id": "1289630100761083955",
+        "team_two_name": "patriots",
+        "team_two_score": "28",
+        "timestamp": "2026-06-15T00:20:00.027000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "34",
+        "team_two_id": "1289630100761083955",
+        "team_two_name": "patriots",
+        "team_two_score": "28",
+        "timestamp": "2026-06-15T00:22:28.653000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "34",
+        "team_two_id": "1289630100761083955",
+        "team_two_name": "patriots",
+        "team_two_score": "28",
+        "timestamp": "2026-06-15T00:24:20.904000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "27",
+        "team_two_id": "1267922917941973064",
+        "team_two_name": "vikings",
+        "team_two_score": "31",
+        "timestamp": "2026-06-15T00:54:33.903000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "0",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "0",
+        "timestamp": "2026-06-15T01:58:54.266000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "26",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "54",
+        "timestamp": "2026-06-15T03:49:27.792000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "36",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "34",
+        "timestamp": "2026-06-15T03:52:06.950000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "41",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "27",
+        "timestamp": "2026-06-17T00:56:58.408000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "31",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "34",
+        "timestamp": "2026-06-17T01:05:05.707000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628125659004958",
+        "team_one_name": "broncos",
+        "team_one_score": "34",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "51",
+        "timestamp": "2026-06-17T01:59:05.991000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "43",
+        "team_two_id": "1288254203009171488",
+        "team_two_name": "lions",
+        "team_two_score": "7",
+        "timestamp": "2026-06-17T02:39:07.713000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "54",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "46",
+        "timestamp": "2026-06-17T04:19:03.426000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "50",
+        "team_two_id": "1267922917941973064",
+        "team_two_name": "vikings",
+        "team_two_score": "49",
+        "timestamp": "2026-06-18T00:58:46.239000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627560610758739",
+        "team_one_name": "browns",
+        "team_one_score": "14",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "0",
+        "timestamp": "2026-06-18T02:20:09.575000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "70",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "42",
+        "timestamp": "2026-06-18T03:01:14.070000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628125659004958",
+        "team_one_name": "broncos",
+        "team_one_score": "48",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "13",
+        "timestamp": "2026-06-18T03:50:42.259000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "27",
+        "team_two_id": "1288253912662675466",
+        "team_two_name": "commanders",
+        "team_two_score": "6",
+        "timestamp": "2026-06-18T03:57:41.978000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628933523902598",
+        "team_one_name": "chargers",
+        "team_one_score": "52",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "32",
+        "timestamp": "2026-06-18T04:15:08.772000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "55",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "16",
+        "timestamp": "2026-06-18T05:09:09.735000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "37",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "7",
+        "timestamp": "2026-06-18T19:40:17.710000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "70",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "66",
+        "timestamp": "2026-06-19T01:00:15.370000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "14",
+        "team_two_id": "1289626171293564928",
+        "team_two_name": "packers",
+        "team_two_score": "0",
+        "timestamp": "2026-06-19T02:22:39.091000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628501372043264",
+        "team_one_name": "falcons",
+        "team_one_score": "26",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "33",
+        "timestamp": "2026-06-19T03:00:25.461000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "41",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "0",
+        "timestamp": "2026-06-19T03:42:00.446000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "36",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "28",
+        "timestamp": "2026-06-19T03:45:04.022000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289623999357259837",
+        "team_one_name": "49ers",
+        "team_one_score": "6",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "39",
+        "timestamp": "2026-06-19T03:51:47.578000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625689837801595",
+        "team_one_name": "jaguars",
+        "team_one_score": "48",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "34",
+        "timestamp": "2026-06-19T03:58:31.190000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266379345895755911",
+        "team_one_name": "rams",
+        "team_one_score": "14",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "0",
+        "timestamp": "2026-06-20T00:13:41.363000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "36",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "29",
+        "timestamp": "2026-06-20T01:56:42.055000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "29",
+        "team_two_id": "1288254203009171488",
+        "team_two_name": "lions",
+        "team_two_score": "7",
+        "timestamp": "2026-06-20T02:41:45.092000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887769989320829",
+        "team_one_name": "saints",
+        "team_one_score": "16",
+        "team_two_id": "1266379345895755911",
+        "team_two_name": "rams",
+        "team_two_score": "52",
+        "timestamp": "2026-06-20T03:59:20.434000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625689837801595",
+        "team_one_name": "jaguars",
+        "team_one_score": "52",
+        "team_two_id": "1289626171293564928",
+        "team_two_name": "packers",
+        "team_two_score": "70",
+        "timestamp": "2026-06-20T04:11:18.255000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "27",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "34",
+        "timestamp": "2026-06-21T03:02:04.283000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286888274971066379",
+        "team_one_name": "colts",
+        "team_one_score": "26",
+        "team_two_id": "1289623707173781656",
+        "team_two_name": "bills",
+        "team_two_score": "13",
+        "timestamp": "2026-06-21T12:43:18.959000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628125659004958",
+        "team_one_name": "broncos",
+        "team_one_score": "14",
+        "team_two_id": "1289623999357259837",
+        "team_two_name": "49ers",
+        "team_two_score": "0",
+        "timestamp": "2026-06-21T23:18:18.545000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "14",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "0",
+        "timestamp": "2026-06-22T02:15:40.403000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "58",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "42",
+        "timestamp": "2026-06-22T04:44:02.124000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "45",
+        "team_two_id": "1266379345895755911",
+        "team_two_name": "rams",
+        "team_two_score": "41",
+        "timestamp": "2026-06-22T05:00:44.954000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "57",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "50",
+        "timestamp": "2026-06-23T01:33:54.997000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "47",
+        "team_two_id": "1286889120077054002",
+        "team_two_name": "steelers",
+        "team_two_score": "63",
+        "timestamp": "2026-06-23T01:55:47.695000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286892651076915220",
+        "team_one_name": "eagles",
+        "team_one_score": "40",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "0",
+        "timestamp": "2026-06-23T04:00:58.984000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "44",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "33",
+        "timestamp": "2026-06-23T04:26:27.750000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "44",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "33",
+        "timestamp": "2026-06-23T04:40:54.819000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627560610758739",
+        "team_one_name": "browns",
+        "team_one_score": "140",
+        "team_two_id": "1289623707173781656",
+        "team_two_name": "bills",
+        "team_two_score": "0",
+        "timestamp": "2026-06-23T18:28:13.736000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286888274971066379",
+        "team_one_name": "colts",
+        "team_one_score": "14",
+        "team_two_id": "1288254203009171488",
+        "team_two_name": "lions",
+        "team_two_score": "0",
+        "timestamp": "2026-06-23T22:36:52.511000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "44",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "55",
+        "timestamp": "2026-06-24T01:58:49.066000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624415755173959",
+        "team_one_name": "cardinals",
+        "team_one_score": "6",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "42",
+        "timestamp": "2026-06-24T02:46:44.906000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "33",
+        "team_two_id": "1289625866413805648",
+        "team_two_name": "panthers",
+        "team_two_score": "48",
+        "timestamp": "2026-06-24T02:59:08.214000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288254203009171488",
+        "team_one_name": "lions",
+        "team_one_score": "14",
+        "team_two_id": "1289623999357259837",
+        "team_two_name": "49ers",
+        "team_two_score": "0",
+        "timestamp": "2026-06-24T03:15:25.533000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "28",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "21",
+        "timestamp": "2026-06-24T04:08:52.929000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "48",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "47",
+        "timestamp": "2026-06-25T02:03:33.096000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "27",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "47",
+        "timestamp": "2026-06-26T03:00:26.528000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628933523902598",
+        "team_one_name": "chargers",
+        "team_one_score": "26",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "31",
+        "timestamp": "2026-06-26T03:28:35.124000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "47",
+        "team_two_id": "1286892651076915220",
+        "team_two_name": "eagles",
+        "team_two_score": "24",
+        "timestamp": "2026-06-26T03:55:53.355000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "77",
+        "team_two_id": "1289626171293564928",
+        "team_two_name": "packers",
+        "team_two_score": "41",
+        "timestamp": "2026-06-26T03:58:24.362000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "48",
+        "team_two_id": "1266282727313903718",
+        "team_two_name": "dolphins",
+        "team_two_score": "47",
+        "timestamp": "2026-06-26T04:47:44.055000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "14",
+        "team_two_id": "1288254203009171488",
+        "team_two_name": "lions",
+        "team_two_score": "0",
+        "timestamp": "2026-06-26T18:18:17.441000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "48",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "47",
+        "timestamp": "2026-06-26T18:35:31.143000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "14",
+        "team_two_id": "1288254203009171488",
+        "team_two_name": "lions",
+        "team_two_score": "0",
+        "timestamp": "2026-06-26T19:10:46.866000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627026801819741",
+        "team_one_name": "buccaneers",
+        "team_one_score": "14",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "0",
+        "timestamp": "2026-06-26T22:56:56.241000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "14",
+        "team_two_id": "1286887769989320829",
+        "team_two_name": "saints",
+        "team_two_score": "0",
+        "timestamp": "2026-06-27T00:18:39.429000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1319781791728668723",
+        "team_one_name": "titans",
+        "team_one_score": "61",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "20",
+        "timestamp": "2026-06-27T01:43:30.671000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624415755173959",
+        "team_one_name": "cardinals",
+        "team_one_score": "14",
+        "team_two_id": "1289623999357259837",
+        "team_two_name": "49ers",
+        "team_two_score": "0",
+        "timestamp": "2026-06-27T02:20:26.916000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "31",
+        "team_two_id": "1289629192388087818",
+        "team_two_name": "cowboys",
+        "team_two_score": "22",
+        "timestamp": "2026-06-27T03:51:14.425000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "14",
+        "team_two_id": "1266379345895755911",
+        "team_two_name": "rams",
+        "team_two_score": "0",
+        "timestamp": "2026-06-27T05:07:48.872000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627026801819741",
+        "team_one_name": "buccaneers",
+        "team_one_score": "14",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "0",
+        "timestamp": "2026-06-27T21:22:27.502000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286891765734965259",
+        "team_one_name": "texans",
+        "team_one_score": "30",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "41",
+        "timestamp": "2026-06-28T00:52:24.054000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "35",
+        "team_two_id": "1286892651076915220",
+        "team_two_name": "eagles",
+        "team_two_score": "0",
+        "timestamp": "2026-06-28T01:33:18.169000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628933523902598",
+        "team_one_name": "chargers",
+        "team_one_score": "47",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "60",
+        "timestamp": "2026-06-28T03:13:12.464000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "12",
+        "team_two_id": "1289627009617760328",
+        "team_two_name": "ravens",
+        "team_two_score": "48",
+        "timestamp": "2026-06-28T03:46:37.532000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628125659004958",
+        "team_one_name": "broncos",
+        "team_one_score": "36",
+        "team_two_id": "1289628127760482345",
+        "team_two_name": "raiders",
+        "team_two_score": "6",
+        "timestamp": "2026-06-28T03:50:07.299000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289629192388087818",
+        "team_one_name": "cowboys",
+        "team_one_score": "47",
+        "team_two_id": "1288253912662675466",
+        "team_two_name": "commanders",
+        "team_two_score": "40",
+        "timestamp": "2026-06-28T04:02:18.532000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "23",
+        "team_two_id": "1289623707173781656",
+        "team_two_name": "bills",
+        "team_two_score": "9",
+        "timestamp": "2026-06-29T00:03:55.934000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289627009617760328",
+        "team_one_name": "ravens",
+        "team_one_score": "14",
+        "team_two_id": "1289627560610758739",
+        "team_two_name": "browns",
+        "team_two_score": "0",
+        "timestamp": "2026-06-29T00:19:51.655000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286888274971066379",
+        "team_one_name": "colts",
+        "team_one_score": "14",
+        "team_two_id": "1289625689837801595",
+        "team_two_name": "jaguars",
+        "team_two_score": "0",
+        "timestamp": "2026-06-29T00:24:47.828000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625866413805648",
+        "team_one_name": "panthers",
+        "team_one_score": "14",
+        "team_two_id": "1289628501372043264",
+        "team_two_name": "falcons",
+        "team_two_score": "0",
+        "timestamp": "2026-06-29T01:04:55.671000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "42",
+        "team_two_id": "1289623707173781656",
+        "team_two_name": "bills",
+        "team_two_score": "24",
+        "timestamp": "2026-06-29T02:02:40.711000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286889120077054002",
+        "team_one_name": "steelers",
+        "team_one_score": "14",
+        "team_two_id": "1289627544588521472",
+        "team_two_name": "bengals",
+        "team_two_score": "0",
+        "timestamp": "2026-06-29T02:51:39.458000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "19",
+        "team_two_id": "1267922917941973064",
+        "team_two_name": "vikings",
+        "team_two_score": "54",
+        "timestamp": "2026-06-29T03:10:02.556000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625689837801595",
+        "team_one_name": "jaguars",
+        "team_one_score": "14",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "0",
+        "timestamp": "2026-06-29T03:44:33.071000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "55",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "41",
+        "timestamp": "2026-06-29T03:55:05.423000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "58",
+        "team_two_id": "1289624415755173959",
+        "team_two_name": "cardinals",
+        "team_two_score": "20",
+        "timestamp": "2026-06-30T02:45:44.704000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "55",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "36",
+        "timestamp": "2026-06-30T03:54:59.444000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626485639872512",
+        "team_one_name": "bearsc",
+        "team_one_score": "60",
+        "team_two_id": "1288253912662675466",
+        "team_two_name": "commanders",
+        "team_two_score": "23",
+        "timestamp": "2026-06-30T04:38:42.250000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286891765734965259",
+        "team_one_name": "texans",
+        "team_one_score": "14",
+        "team_two_id": "1289628125659004958",
+        "team_two_name": "broncos",
+        "team_two_score": "0",
+        "timestamp": "2026-06-30T05:42:31.134000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "48",
+        "team_two_id": "1289626485639872512",
+        "team_two_name": "bearsc",
+        "team_two_score": "46",
+        "timestamp": "2026-07-01T03:58:29.391000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289625414460772477",
+        "team_one_name": "jets",
+        "team_one_score": "35",
+        "team_two_id": "1286891765734965259",
+        "team_two_name": "texans",
+        "team_two_score": "34",
+        "timestamp": "2026-07-01T04:54:37.226000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1329496697126125679",
+        "team_one_name": "ArizonaHeat",
+        "team_one_score": "41",
+        "team_two_id": "1329952610114863115",
+        "team_two_name": "LosAngelesComets",
+        "team_two_score": "43",
+        "timestamp": "2026-07-03T01:42:22.040000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289626171293564928",
+        "team_one_name": "packers",
+        "team_one_score": "59",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "45",
+        "timestamp": "2026-07-03T03:52:04.746000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "38",
+        "team_two_id": "1286889120077054002",
+        "team_two_name": "steelers",
+        "team_two_score": "36",
+        "timestamp": "2026-07-03T03:58:43.661000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624674463907952",
+        "team_one_name": "giants",
+        "team_one_score": "48",
+        "team_two_id": "1289625866413805648",
+        "team_two_name": "panthers",
+        "team_two_score": "41",
+        "timestamp": "2026-07-04T01:44:44.907000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624415755173959",
+        "team_one_name": "cardinals",
+        "team_one_score": "33",
+        "team_two_id": "1329953493070647386",
+        "team_two_name": "PittsburghStormers",
+        "team_two_score": "12",
+        "timestamp": "2026-07-04T03:03:20.023000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282341878333501",
+        "team_one_name": "chiefs",
+        "team_one_score": "47",
+        "team_two_id": "1319781791728668723",
+        "team_two_name": "titans",
+        "team_two_score": "45",
+        "timestamp": "2026-07-04T03:04:20.354000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628127760482345",
+        "team_one_name": "raiders",
+        "team_one_score": "14",
+        "team_two_id": "1329953610733322241",
+        "team_two_name": "SeattleCyclones",
+        "team_two_score": "0",
+        "timestamp": "2026-07-04T03:06:33.808000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "34",
+        "team_two_id": "1289625414460772477",
+        "team_two_name": "jets",
+        "team_two_score": "27",
+        "timestamp": "2026-07-06T01:36:09.982000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628933523902598",
+        "team_one_name": "chargers",
+        "team_one_score": "14",
+        "team_two_id": "1329497135728558153",
+        "team_two_name": "CarolinaPredators",
+        "team_two_score": "0",
+        "timestamp": "2026-07-06T02:20:02.255000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "28",
+        "team_two_id": "1289629192388087818",
+        "team_two_name": "cowboys",
+        "team_two_score": "25",
+        "timestamp": "2026-07-06T04:21:48.661000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1288253912662675466",
+        "team_one_name": "commanders",
+        "team_one_score": "43",
+        "team_two_id": "1329497285922525244",
+        "team_two_name": "ChicagoBucks",
+        "team_two_score": "8",
+        "timestamp": "2026-07-06T04:30:57.731000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1329496697126125679",
+        "team_one_name": "ArizonaHeat",
+        "team_one_score": "13",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "40",
+        "timestamp": "2026-07-08T00:56:03.055000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "45",
+        "team_two_id": "1289627026801819741",
+        "team_two_name": "buccaneers",
+        "team_two_score": "44",
+        "timestamp": "2026-07-08T03:52:50.440000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1267922917941973064",
+        "team_one_name": "vikings",
+        "team_one_score": "54",
+        "team_two_id": "1289624674463907952",
+        "team_two_name": "giants",
+        "team_two_score": "42",
+        "timestamp": "2026-07-08T04:08:00.844000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1266282727313903718",
+        "team_one_name": "dolphins",
+        "team_one_score": "57",
+        "team_two_id": "1289627009617760328",
+        "team_two_name": "ravens",
+        "team_two_score": "71",
+        "timestamp": "2026-07-08T04:14:24.813000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628127760482345",
+        "team_one_name": "raiders",
+        "team_one_score": "41",
+        "team_two_id": "1289628933523902598",
+        "team_two_name": "chargers",
+        "team_two_score": "33",
+        "timestamp": "2026-07-08T05:06:23.216000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "62",
+        "team_two_id": "1266282341878333501",
+        "team_two_name": "chiefs",
+        "team_two_score": "56",
+        "timestamp": "2026-07-09T01:47:11.674000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289628127760482345",
+        "team_one_name": "raiders",
+        "team_one_score": "35",
+        "team_two_id": "1329636556478218250",
+        "team_two_name": "JacksonsvilleDevils",
+        "team_two_score": "0",
+        "timestamp": "2026-07-10T03:49:25.497000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289630100761083955",
+        "team_one_name": "patriots",
+        "team_one_score": "32",
+        "team_two_id": "1289627009617760328",
+        "team_two_name": "ravens",
+        "team_two_score": "22",
+        "timestamp": "2026-07-11T01:57:46.375000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1289624415755173959",
+        "team_one_name": "cardinals",
+        "team_one_score": "45",
+        "team_two_id": "1286888274971066379",
+        "team_two_name": "colts",
+        "team_two_score": "9",
+        "timestamp": "2026-07-11T20:02:31.259000+00:00"
+    },
+    {
+        "id": null,
+        "team_one_id": "1286887293185036319",
+        "team_one_name": "seahawks",
+        "team_one_score": "40",
+        "team_two_id": "1267922917941973064",
+        "team_two_name": "vikings",
+        "team_two_score": "61",
+        "timestamp": "2026-07-12T04:25:55.523000+00:00"
+    }
+]
