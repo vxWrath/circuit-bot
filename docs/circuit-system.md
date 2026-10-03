@@ -99,15 +99,7 @@ A team that makes **no attempt to schedule its games** - meaning no game threads
 
 ## The Rating
 
-Every team carries a rating across circuits - the league's cumulative record of team strength. The rating system is custom-built and calibrated against historical Football Fusion game data. It does several things that simple standings cannot:
-
-- **Consistency outranks streaks.** A team proven strong across multiple circuits outranks a team that performed well for a single window. Reputation is earned circuit over circuit.
-- **Every game affects the rating.** With only eight games per circuit, there is no room to coast.
-- **Margin of victory matters, within limits.** Blowouts count for more than narrow wins, but the weight is capped so running up the score against weak opponents is not rewarded.
-- **Inactivity is penalized.** A missed game is any game short of the two-per-window requirement, whatever the reason. Missed games carry escalating penalties - a team missing four or five games in a circuit will see its rating fall sharply.
-- **New teams start at the bottom.** A team entering the league - new or returning - starts at the lowest rating in the league and works its way up. Multiple circuits are how a new team reaches the top. A team that wants to keep its rating through a break should request a hiatus rather than leave the league.
-
-The rating model is currently in development; it will be validated against historical game data before launch.
+The rating model is specified in [The Rating System](rating-system.md).
 
 ## The Tournament
 
