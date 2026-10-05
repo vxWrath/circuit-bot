@@ -1,13 +1,16 @@
 import asyncio
 import datetime
 import re
+from pathlib import Path
 
 import aiohttp
 import msgspec
 
+TOOLS_DIR = Path(__file__).resolve().parent
+
 
 def get_environment_variables() -> dict[str, str]:
-    with open(".env", "r") as f:
+    with open(".env") as f:
         lines = f.readlines()
 
     env_vars: dict[str, str] = {}
@@ -22,28 +25,29 @@ def get_environment_variables() -> dict[str, str]:
 
     return env_vars
 
+
 def get_env(key: str) -> str:
     env_vars = get_environment_variables()
     return env_vars[key]
 
-USER_TOKEN = get_env("USER_TOKEN")
-HEADERS    = {"Authorization": f"{USER_TOKEN}"}
 
-URL        = "https://discord.com/api/v10/channels/{channel_id}/messages?limit={limit}&after={after}"
+URL = "https://discord.com/api/v10/channels/{channel_id}/messages?limit={limit}&after={after}"
 CHANNEL_ID = 1414086380266717226
-LIMIT      = 100
+LIMIT = 100
 
-BEFORE_DT = datetime.datetime(2026, 5, 6, tzinfo=datetime.timezone.utc)
-AFTER_DT  = datetime.datetime(2026, 3, 8, tzinfo=datetime.timezone.utc)
+BEFORE_DT = datetime.datetime(2026, 5, 6, tzinfo=datetime.UTC)
+AFTER_DT = datetime.datetime(2026, 3, 8, tzinfo=datetime.UTC)
+
 
 class Message(msgspec.Struct):
     id: str
     timestamp: str
     embed_description: str
 
-async def fetch_messages() -> list[Message]:
+
+async def fetch_messages(headers: dict[str, str]) -> list[Message]:
     print("Fetching messages...")
-    
+
     # Calculate initial snowflake timestamp manually to avoid dependency quirks
     # Discord epoch (2015-01-01T00:00:00Z) in milliseconds = 1420070400000
     discord_epoch = 1420070400000
@@ -54,7 +58,7 @@ async def fetch_messages() -> list[Message]:
     async with aiohttp.ClientSession() as session:
         while True:
             url = URL.format(channel_id=CHANNEL_ID, limit=LIMIT, after=after_id)
-            async with session.get(url, headers=HEADERS) as response:
+            async with session.get(url, headers=headers) as response:
                 if response.status == 429:
                     data = await response.json()
                     retry_after = data.get("retry_after", 1)
@@ -77,7 +81,7 @@ async def fetch_messages() -> list[Message]:
             new_games = 0
             stop_fetching = False
 
-            # Iterate in reverse (from data[-1] to data[0]) to process 
+            # Iterate in reverse (from data[-1] to data[0]) to process
             # messages from oldest to newest chronologically
             for message in reversed(data):
                 timestamp = datetime.datetime.fromisoformat(message["timestamp"])
@@ -110,10 +114,13 @@ async def fetch_messages() -> list[Message]:
 
     return messages
 
+
 def store_messages(messages: list[Message]):
     import json
-    with open("messages.json", "w") as f:
+
+    with open(TOOLS_DIR / "messages.json", "w") as f:
         json.dump(msgspec.to_builtins(messages), f, indent=4)
+
 
 class Game(msgspec.Struct):
     id: str | None
@@ -125,19 +132,18 @@ class Game(msgspec.Struct):
     team_two_score: str
     timestamp: str
 
+
 PATTERN = re.compile(
     r"(?:<:(?P<team_one_name>\w+):\d+>|:(?P<team_one_name_alt>\w+):)?\s*"
     r"<@&(?P<team_one_id>\d+)>\s*"
     r"(?:<:(?P<team_one_name_after>\w+):\d+>|:(?P<team_one_name_alt_after>\w+):)?\s*"
-    
     r"\*{0,2}(?P<team_one_score>\d+)\*{0,2}\s*-\s*\*{0,2}(?P<team_two_score>\d+)\*{0,2}\s*"
-    
     r"(?:<:(?P<team_two_name>\w+):\d+>|:(?P<team_two_name_alt>\w+):)?\s*"
     r"<@&(?P<team_two_id>\d+)>\s*"
     r"(?:<:(?P<team_two_name_after>\w+):\d+>|:(?P<team_two_name_alt_after>\w+):)?",
-    
-    re.DOTALL
+    re.DOTALL,
 )
+
 
 def parse_message(text: str) -> dict[str, str | None] | None:
     match = PATTERN.search(text)
@@ -173,9 +179,11 @@ def parse_message(text: str) -> dict[str, str | None] | None:
 
     return result
 
+
 def convert_to_games():
     import json
-    with open("messages.json", "r") as f:
+
+    with open(TOOLS_DIR / "messages.json") as f:
         messages = json.load(f)
 
     games: list[Game] = []
@@ -193,13 +201,17 @@ def convert_to_games():
 
     games.sort(key=lambda g: datetime.datetime.fromisoformat(g.timestamp))
 
-    with open("games/mvp_season_9.json", "w") as f:
+    with open(TOOLS_DIR / "games" / "mvp_season_9.json", "w") as f:
         json.dump(msgspec.to_builtins(games), f, indent=4)
 
+
 def main():
-    messages = asyncio.run(fetch_messages())
+    headers = {"Authorization": f"{get_env('USER_TOKEN')}"}
+    messages = asyncio.run(fetch_messages(headers))
     store_messages(messages)
 
     convert_to_games()
 
-main()
+
+if __name__ == "__main__":
+    main()
