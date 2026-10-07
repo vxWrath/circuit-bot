@@ -27,7 +27,9 @@ class Params(msgspec.Struct):
     season_gap_decay: float = 0.15  # confidence decay at a season boundary (calibration only)
 
     # Placement
-    new_team_start_percentile: float = 2.5  # new teams start at this percentile of established ratings; kept low so a rejoin never lifts a team
+    new_team_start_percentile: float = (
+        2.5  # new teams start at this percentile of established ratings; kept low so a rejoin never lifts a team
+    )
     new_team_start_min_games: int = 4  # a team needs this many games to count toward the percentile pool
     new_team_start_fallback: float = -25.0  # start rating when no established pool exists yet
 
