@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-circuit-bot = "circuit_bot.__main__:main"
+circuit-bot = "circuit_bot:main"
 
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13.0"]
