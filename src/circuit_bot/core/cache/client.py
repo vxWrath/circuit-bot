@@ -1,14 +1,16 @@
 import random
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, get_origin, overload
+from typing import TYPE_CHECKING, Any, overload
 
 import msgspec
-from redis.asyncio import ConnectionPool, RedisError
+from redis.asyncio import ConnectionPool
 from redis.asyncio import Redis as AsyncRedis
+from redis.asyncio import RedisError
 
 from ..env import get_env
-from ..exception import CircuitException
 from ..logging import get_logger
+from .exceptions import CacheError, CacheNotConnected, CacheValidationError
+from .serializer import CacheCodec
 
 if TYPE_CHECKING:
     from ..bluerobot import CircuitBot
@@ -16,22 +18,6 @@ if TYPE_CHECKING:
 __all__ = ("CacheClient", "CacheError", "CacheNotConnected", "CacheValidationError")
 
 logger = get_logger("cache")
-
-
-class CacheError(CircuitException):
-    """Raised when a cache operation fails."""
-
-
-class CacheNotConnected(CacheError):
-    """Raised when a cache operation is attempted before connecting."""
-
-
-class CacheValidationError(CacheError):
-    """Raised when a value found in the cache can't be decoded into the requested type.
-
-    The bad entry is left in Redis, so the caller decides whether to refill or
-    delete it.
-    """
 
 
 class CacheClient:
@@ -60,14 +46,13 @@ class CacheClient:
     """
 
     DEFAULT_TTL = 300  # seconds, before jitter
-    TTL_JITTER = 0.1  # fraction of _DEFAULT_TTL applied in either direction
+    TTL_JITTER = 0.1  # fraction of DEFAULT_TTL applied in either direction
 
     def __init__(self, *, bot: "CircuitBot"):
         self.bot = bot
 
         self._redis: AsyncRedis | None = None
-        self._encoder = msgspec.json.Encoder()
-        self._decoders: dict[type[Any], msgspec.json.Decoder] = {}
+        self._codec = CacheCodec()
 
     async def connect(self) -> None:
         if self._redis is not None:
@@ -88,7 +73,7 @@ class CacheClient:
             await self._redis.ping()
 
             logger.info("Redis connected (pool allows %d connections)", pool.max_connections)
-        except (OSError, RedisError) as e:
+        except (OSError, RedisError, ValueError) as e:
             raise CacheNotConnected(f"Failed to connect to Redis: {e}") from e
 
     async def close(self) -> None:
@@ -132,45 +117,6 @@ class CacheClient:
 
         jitter = random.uniform(1 - cls.TTL_JITTER, 1 + cls.TTL_JITTER)
         return int(cls.DEFAULT_TTL * jitter)
-
-    @staticmethod
-    def get_type_name(as_type: type[Any]) -> str:
-        """Render *as_type* for error messages: ``User``, ``dict[str, str]``."""
-
-        return as_type.__name__ if isinstance(as_type, type) else str(as_type)
-
-    @staticmethod
-    def is_proper_cls(as_type: type[Any]) -> None:
-        """Reject an unsupported *cls* before touching Redis."""
-
-        if as_type is bytes or as_type is int or as_type in (str, float, bool):
-            return
-
-        origin = get_origin(as_type)
-        if (
-            as_type is dict
-            or as_type is list
-            or origin is dict
-            or origin is list
-            or (isinstance(as_type, type) and issubclass(as_type, msgspec.Struct))
-        ):
-            return
-
-        raise TypeError(f"Unsupported cls {as_type!r}")
-
-    @staticmethod
-    def _check_hash_cls(as_type: type[Any]) -> None:
-        """Reject an unsupported *cls* before touching Redis."""
-
-        if (
-            as_type is bytes
-            or as_type is dict
-            or get_origin(as_type) is dict
-            or (isinstance(as_type, type) and issubclass(as_type, msgspec.Struct))
-        ):
-            return
-
-        raise TypeError(f"Unsupported cls {as_type!r}")
 
     # -- single-key operations (path-based) ---------------------------------
 
@@ -222,33 +168,18 @@ class CacheClient:
         and :class:`CacheError` if Redis fails.
         """
 
-        self.is_proper_cls(cls)
+        self._codec.validate_cls(cls, scalars=(int, str, float, bool), containers=(dict, list))
         key = self.key_from_path(*path)
 
         try:
-            data = await self.redis.get(key, **redis_kwargs)
+            data: bytes | None = await self.redis.get(key, **redis_kwargs)  # type: ignore
         except RedisError as e:
             raise CacheError(f"Redis GET failed for key {key!r}") from e
 
-        if data is None or cls is bytes:
-            return data
+        if data is None:
+            return None
 
-        if cls is int:
-            try:
-                return int(data)
-            except ValueError as e:
-                raise CacheValidationError(f"Cached value at {key!r} isn't an int: {e}") from e
-
-        decoder = self._decoders.get(cls)
-
-        if decoder is None:
-            decoder = msgspec.json.Decoder(type=cls, strict=False)
-            self._decoders[cls] = decoder
-
-        try:
-            return decoder.decode(data)
-        except msgspec.DecodeError as e:
-            raise CacheValidationError(f"Cached value at {key!r} doesn't match {self.get_type_name(cls)}: {e}") from e
+        return self._codec.decode(data, cls, key=key)
 
     async def set(
         self,
@@ -268,15 +199,7 @@ class CacheClient:
             await cache.set("stats", "logins", value=count, ex=60)
         """
         key = self.key_from_path(*path)
-        data: bytes
-
-        if isinstance(value, bytes):
-            data = value
-        elif type(value) in (dict, list, str, int, float, bool) or isinstance(value, msgspec.Struct):
-            data = self._encoder.encode(value)
-        else:
-            raise TypeError(f"Unsupported value type {type(value)!r}")
-
+        data = self._codec.encode(value)
         ex = self.resolve_ttl(redis_kwargs)
 
         try:
@@ -333,39 +256,6 @@ class CacheClient:
 
     # -- hash operations (path-based) ---------------------------------------
 
-    @staticmethod
-    def decode_hash_mapping(as_type: type[Any], mapping: dict[str, bytes], key: str) -> Any:
-        """Turn a raw field mapping into *as_type*.
-
-        :meth:`hash_set` JSON-encodes every field on its own, so each value is
-        decoded individually.  *key* is only used in error messages.  A value
-        that doesn't decode or assemble raises :class:`CacheValidationError`,
-        while an empty mapping is a miss and returns ``None`` - nothing was
-        cached, so there is nothing to validate.
-        """
-
-        if not mapping:
-            return None
-
-        if as_type is bytes:
-            return mapping
-
-        decoded: dict[str, Any] = {}
-
-        for field, value in mapping.items():
-            try:
-                decoded[field] = msgspec.json.decode(value)
-            except msgspec.DecodeError as e:
-                raise CacheValidationError(f"Field {field!r} of hash {key!r} doesn't decode: {e}") from e
-
-        if as_type is dict:
-            return decoded
-
-        try:
-            return msgspec.convert(decoded, type=as_type, strict=False)
-        except msgspec.ValidationError as e:
-            raise CacheValidationError(f"Hash {key!r} doesn't match {CacheClient.get_type_name(as_type)}: {e}") from e
-
     @overload
     async def hash_get(
         self, *path: Any, cls: type[bytes], fields: Iterable[str]
@@ -402,13 +292,18 @@ class CacheClient:
             if missing:
                 ...  # refill the fields that weren't cached
 
-        Raises :class:`CacheError` if Redis fails.
+        Raises ``TypeError`` if *fields* is empty and :class:`CacheError` if
+        Redis fails.
         """
 
-        self._check_hash_cls(cls)
+        self._codec.validate_cls(cls, containers=(dict,))
+
+        ordered_fields = sorted(fields)
+
+        if not ordered_fields:
+            raise TypeError("hash_get() requires at least one field")
 
         key = self.key_from_path(*path)
-        ordered_fields = sorted(fields)
 
         try:
             hmget: list[bytes | None] = await self.redis.hmget(key, ordered_fields)  # type: ignore
@@ -429,7 +324,7 @@ class CacheClient:
             else:
                 mapping[field] = value
 
-        return (self.decode_hash_mapping(cls, mapping, key), missing)
+        return (self._codec.decode_hash(mapping, cls, key=key), missing)
 
     @overload
     async def hash_getall(self, *path: Any, cls: type[bytes]) -> dict[str, bytes] | None: ...
@@ -458,7 +353,7 @@ class CacheClient:
             user = await cache.hash_getall("user", 1234, cls=User)
         """
 
-        self._check_hash_cls(cls)
+        self._codec.validate_cls(cls, containers=(dict,))
 
         key = self.key_from_path(*path)
 
@@ -472,9 +367,7 @@ class CacheClient:
         if not hgetall:
             return None
 
-        mapping = {field.decode(): value for field, value in hgetall.items()}
-
-        return self.decode_hash_mapping(cls, mapping, key)
+        return self._codec.decode_hash(hgetall, cls, key=key)
 
     async def hash_set(
         self,
@@ -495,21 +388,15 @@ class CacheClient:
         """
 
         key = self.key_from_path(*path)
-        encoded: dict[str, bytes]
-
-        if isinstance(instance, msgspec.Struct):
-            data: dict[str, Any] = msgspec.to_builtins(instance)
-            encoded = {k: self._encoder.encode(v) for k, v in data.items()}
-        else:
-            encoded = {k: self._encoder.encode(v) for k, v in instance.items()}
-
-        if not encoded:
-            return 0
-
         ex = self.resolve_ttl(redis_kwargs)
 
         if ex is None and redis_kwargs:
             raise TypeError(f"Expiry options {sorted(redis_kwargs)} are meaningless with ex=None")
+
+        encoded = self._codec.encode_hash(instance)
+
+        if not encoded:
+            return 0
 
         try:
             async with self.redis.pipeline() as pipe:
@@ -527,9 +414,14 @@ class CacheClient:
     async def hash_delete(self, *path: Any, fields: Iterable[str]) -> int:
         """Delete one or more fields from a hash at *path*.
 
-        Returns the number of fields removed.  Raises :class:`CacheError` if
-        Redis fails.
+        Returns the number of fields removed.  Raises ``TypeError`` if
+        *fields* is empty and :class:`CacheError` if Redis fails.
         """
+
+        fields = tuple(fields)
+
+        if not fields:
+            raise TypeError("hash_delete() requires at least one field")
 
         key = self.key_from_path(*path)
 
