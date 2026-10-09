@@ -9,13 +9,13 @@ from redis.asyncio import RedisError
 
 from ..env import get_env
 from ..logging import get_logger
-from .exceptions import CacheError, CacheNotConnected, CacheValidationError
-from .serializer import CacheCodec
+from .codec import CacheCodec
+from .exceptions import CacheError, CacheNotConnected
 
 if TYPE_CHECKING:
     from ..bluerobot import CircuitBot
 
-__all__ = ("CacheClient", "CacheError", "CacheNotConnected", "CacheValidationError")
+__all__ = ("CacheClient",)
 
 logger = get_logger("cache")
 
