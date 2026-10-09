@@ -1,3 +1,4 @@
+import random
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, get_origin, overload
 
@@ -12,7 +13,7 @@ from ..logging import get_logger
 if TYPE_CHECKING:
     from ..bluerobot import CircuitBot
 
-__all__ = ("CacheClient",)
+__all__ = ("CacheClient", "CacheError", "CacheNotConnected", "CacheValidationError")
 
 logger = get_logger("cache")
 
@@ -25,7 +26,42 @@ class CacheNotConnected(CacheError):
     """Raised when a cache operation is attempted before connecting."""
 
 
+class CacheValidationError(CacheError):
+    """Raised when a value found in the cache can't be decoded into the requested type.
+
+    The bad entry is left in Redis, so the caller decides whether to refill or
+    delete it.
+    """
+
+
 class CacheClient:
+    """Async Redis cache, available on the bot as ``bot.cache``.
+
+    Keys are built from *path* segments rather than hand-formatted strings
+    (:meth:`key_from_path` defines the layout), so every call site shares one
+    key shape::
+
+        await cache.set("user", 1234, value=user, ex=60)
+        user = await cache.get("user", 1234, cls=User)  # → User | None
+
+    Entries written by :meth:`set` and :meth:`hash_set` expire after ~300
+    seconds by default, jittered by ±10% so a bulk write doesn't expire - and
+    refill from the source of truth - all at once.  Pass ``ex`` for a fixed
+    TTL, or ``ex=None`` to keep an entry until it's deleted.
+
+    Misses are not errors: nothing found in Redis comes back as ``None``,
+    ``False``, ``0``, or an empty list, and that is the only thing that means
+    "not cached".  A cached value that can't be decoded into the requested *cls*
+    raises :class:`CacheValidationError`, and a Redis failure raises
+    :class:`CacheError`, so the caller can always tell the three apart.
+    Calling before :meth:`connect` raises :class:`CacheNotConnected`, and an
+    unsupported *cls* or value type raises ``TypeError`` - the last two signal
+    a bug, not a cache miss.
+    """
+
+    DEFAULT_TTL = 300  # seconds, before jitter
+    TTL_JITTER = 0.1  # fraction of _DEFAULT_TTL applied in either direction
+
     def __init__(self, *, bot: "CircuitBot"):
         self.bot = bot
 
@@ -48,15 +84,10 @@ class CacheClient:
             )
             self._redis = AsyncRedis(connection_pool=pool)
 
-            # Verify connection
+            # Verify the connection before handing the client out
             await self._redis.ping()
 
-            # Log connection info
-            info = await self._redis.info()
-            active_connections = info["clients"]["connected_clients"]
-            logger.info("Redis pool created with %d connections (max %d)", active_connections, pool.max_connections)
-
-            return
+            logger.info("Redis connected (pool allows %d connections)", pool.max_connections)
         except (OSError, RedisError) as e:
             raise CacheNotConnected(f"Failed to connect to Redis: {e}") from e
 
@@ -75,15 +106,71 @@ class CacheClient:
 
     @staticmethod
     def key_from_path(*path: Any) -> str:
-        """Build a colon-delimited Redis key from path segments.
+        """Join *path* segments into a colon-delimited Redis key.
 
-        Each segment is converted via ``str()``, so integers, snowflakes,
-        and enum values all work without manual formatting::
+        Each segment is converted with ``str()``, so ints, strings, and enums
+        can be mixed without manual formatting::
 
-            Cache.key_from_path("sfa", "profile", "player", 789)
-            # → "sfa:profile:player:789"
+            cache.key_from_path("user", 1234, "profile")
+            # → "user:1234:profile"
         """
         return ":".join(str(p) for p in path)
+
+    # -- internals ----------------------------------------------------------
+
+    @classmethod
+    def resolve_ttl(cls, redis_kwargs: dict[str, Any]) -> int | None:
+        """Pop ``ex`` from *redis_kwargs*, falling back to a jittered default TTL.
+
+        An explicit ``ex`` is used as-is, and ``ex=None`` means the entry never
+        expires.  Only the default is jittered, so keys written in bulk don't
+        all expire - and refill from the source - at the same moment.
+        """
+
+        if "ex" in redis_kwargs:
+            return redis_kwargs.pop("ex")
+
+        jitter = random.uniform(1 - cls.TTL_JITTER, 1 + cls.TTL_JITTER)
+        return int(cls.DEFAULT_TTL * jitter)
+
+    @staticmethod
+    def get_type_name(as_type: type[Any]) -> str:
+        """Render *as_type* for error messages: ``User``, ``dict[str, str]``."""
+
+        return as_type.__name__ if isinstance(as_type, type) else str(as_type)
+
+    @staticmethod
+    def is_proper_cls(as_type: type[Any]) -> None:
+        """Reject an unsupported *cls* before touching Redis."""
+
+        if as_type is bytes or as_type is int or as_type in (str, float, bool):
+            return
+
+        origin = get_origin(as_type)
+        if (
+            as_type is dict
+            or as_type is list
+            or origin is dict
+            or origin is list
+            or (isinstance(as_type, type) and issubclass(as_type, msgspec.Struct))
+        ):
+            return
+
+        raise TypeError(f"Unsupported cls {as_type!r}")
+
+    @staticmethod
+    def _check_hash_cls(as_type: type[Any]) -> None:
+        """Reject an unsupported *cls* before touching Redis."""
+
+        if (
+            as_type is bytes
+            or as_type is dict
+            or get_origin(as_type) is dict
+            or (isinstance(as_type, type) and issubclass(as_type, msgspec.Struct))
+        ):
+            return
+
+        raise TypeError(f"Unsupported cls {as_type!r}")
 
     # -- single-key operations (path-based) ---------------------------------
 
@@ -92,6 +179,15 @@ class CacheClient:
 
     @overload
     async def get(self, *path: Any, cls: type[int]) -> int | None: ...
+
+    @overload
+    async def get(self, *path: Any, cls: type[str]) -> str | None: ...
+
+    @overload
+    async def get(self, *path: Any, cls: type[float]) -> float | None: ...
+
+    @overload
+    async def get(self, *path: Any, cls: type[bool]) -> bool | None: ...
 
     @overload
     async def get[T: msgspec.Struct](self, *path: Any, cls: type[T]) -> T | None: ...
@@ -103,126 +199,172 @@ class CacheClient:
     async def get[T](self, *path: Any, cls: type[list[T]]) -> list[T] | None: ...
 
     async def get(self, *path: Any, cls: type[Any], **redis_kwargs: Any) -> Any | None:
-        """Get and decode a value at *path*.  Returns ``None`` on miss, Redis error,
-        or a decode failure (stale/shape-changed cached value).
+        """Get the value at *path*, decoded according to *cls*.
 
-        *cls* controls decoding:
+        Returns ``None`` only on a miss.  A cached payload that no longer
+        decodes into *cls* raises :class:`CacheValidationError` instead, so a
+        miss and a stale entry are never confused.
 
-        - ``bytes`` → raw bytes, no decoding
-        - ``dict`` or ``list`` → decoded via ``msgspec.json.Decoder``
-        - ``list[T]`` / ``dict[str, T]`` → decoded via a cached ``msgspec.json.Decoder``
-        - ``msgspec.Struct`` subclass → decoded via a cached ``msgspec.json.Decoder``
+        *cls* selects how the stored bytes are turned back into a value:
+
+        - ``bytes`` → returned as-is
+        - ``int`` → parsed as an integer
+        - ``str``, ``float``, ``bool`` → JSON-decoded scalars
+        - ``dict``, ``list``, ``list[T]``, ``dict[str, T]`` → JSON-decoded
+        - ``msgspec.Struct`` subclass → JSON-decoded into that struct
+
+        Example::
+
+            user = await cache.get("user", 1234, cls=User)
+            logins = await cache.get("stats", "logins", cls=int)
+
+        Raises ``TypeError`` for an unsupported *cls*, before touching Redis,
+        and :class:`CacheError` if Redis fails.
         """
+
+        self.is_proper_cls(cls)
         key = self.key_from_path(*path)
 
         try:
             data = await self.redis.get(key, **redis_kwargs)
-        except RedisError:
-            logger.warning("Redis GET failed for key %r", key, exc_info=True)
-            return None
+        except RedisError as e:
+            raise CacheError(f"Redis GET failed for key {key!r}") from e
 
         if data is None or cls is bytes:
             return data
 
         if cls is int:
-            return int(data)
-
-        origin = get_origin(cls)
-        if (
-            cls is dict
-            or cls is list
-            or origin is dict
-            or origin is list
-            or (isinstance(cls, type) and issubclass(cls, msgspec.Struct))
-        ):
-            decoder = self._decoders.get(cls)
-            if decoder is None:
-                decoder = msgspec.json.Decoder(type=cls, strict=False)
-                self._decoders[cls] = decoder
-
             try:
-                return decoder.decode(data)
-            except msgspec.ValidationError:
-                # Stale or shape-changed cached values degrade to a miss and
-                # refill from the source.
-                logger.warning("Cache GET decode failed for key %r", key, exc_info=True)
-                return None
+                return int(data)
+            except ValueError as e:
+                raise CacheValidationError(f"Cached value at {key!r} isn't an int: {e}") from e
 
-        raise TypeError(f"Unsupported cls {cls!r}")
+        decoder = self._decoders.get(cls)
+
+        if decoder is None:
+            decoder = msgspec.json.Decoder(type=cls, strict=False)
+            self._decoders[cls] = decoder
+
+        try:
+            return decoder.decode(data)
+        except msgspec.DecodeError as e:
+            raise CacheValidationError(f"Cached value at {key!r} doesn't match {self.get_type_name(cls)}: {e}") from e
 
     async def set(
         self,
         *path: Any,
-        value: msgspec.Struct | dict[str, Any] | list[Any] | bytes,
+        value: msgspec.Struct | dict[str, Any] | list[Any] | str | int | float | bool | bytes,
         **redis_kwargs: Any,
-    ) -> bool:
-        """Set a value at *path* with ex in seconds.  Returns ``False`` on Redis error.
+    ) -> None:
+        """Store *value* at *path*, expiring after ~300 seconds by default.
 
-        *value* is auto-encoded: ``msgspec.Struct`` → ``msgspec.json``,
-        ``dict`` or ``list`` → ``msgspec.json.Encoder``, ``bytes`` → stored as-is.
+        *value* is encoded automatically: ``msgspec.Struct``, ``dict``,
+        ``list``, and JSON scalars are JSON-encoded, while ``bytes`` are stored
+        as-is.  Pass ``ex`` (in seconds) for a fixed TTL, or ``ex=None`` to
+        store the entry with no expiry.  Raises :class:`CacheError` if Redis
+        fails::
+
+            await cache.set("user", 1234, value=user)
+            await cache.set("stats", "logins", value=count, ex=60)
         """
         key = self.key_from_path(*path)
-        value_type = type(value)
+        data: bytes
 
-        if value_type is bytes:
+        if isinstance(value, bytes):
             data = value
-        elif value_type is dict or value_type is list or isinstance(value, msgspec.Struct):
+        elif type(value) in (dict, list, str, int, float, bool) or isinstance(value, msgspec.Struct):
             data = self._encoder.encode(value)
         else:
             raise TypeError(f"Unsupported value type {type(value)!r}")
 
+        ex = self.resolve_ttl(redis_kwargs)
+
         try:
-            return await self.redis.set(key, data, ex=redis_kwargs.pop("ex", 300), **redis_kwargs)  # type: ignore[arg-type]
-        except RedisError:
-            logger.warning("Redis SET failed for key %r", key, exc_info=True)
-            return False
+            await self.redis.set(key, data, ex=ex, **redis_kwargs)
+        except RedisError as e:
+            raise CacheError(f"Redis SET failed for key {key!r}") from e
 
     async def exists(self, *path: Any) -> bool:
-        """Return ``True`` if a key exists at *path*.  Returns ``False`` on Redis error."""
+        """Return ``True`` if a key exists at *path*, ``False`` otherwise.
+
+        Raises ``TypeError`` if *path* is empty - there would be no key to look
+        up - and :class:`CacheError` if Redis fails.
+        """
 
         if not path:
-            return False
+            raise TypeError("exists() requires at least one path segment")
 
         key = self.key_from_path(*path)
 
         try:
             count = await self.redis.exists(key)
-            return count > 0
-        except RedisError:
-            logger.warning("Redis EXISTS failed for key %r", key, exc_info=True)
-            return False
+        except RedisError as e:
+            raise CacheError(f"Redis EXISTS failed for key {key!r}") from e
+
+        return count > 0
 
     async def expire(self, *path: Any, ex: int, **redis_kwargs: Any) -> bool:
         """Set or update the expiry (in seconds) on an existing key.
 
         Returns ``True`` if the timeout was set, ``False`` if the key doesn't
-        exist or on Redis error.
+        exist.  Raises :class:`CacheError` if Redis fails.
         """
 
         key = self.key_from_path(*path)
 
         try:
             return await self.redis.expire(key, ex, **redis_kwargs)
-        except RedisError:
-            logger.warning("Redis EXPIRE failed for key %r", key, exc_info=True)
-            return False
+        except RedisError as e:
+            raise CacheError(f"Redis EXPIRE failed for key {key!r}") from e
 
-    async def incr(self, *path: Any, amount: int = 1) -> int | None:
-        """Atomically increment a counter at *path* by *amount*.
+    async def incr(self, *path: Any, amount: int = 1) -> int:
+        """Atomically increment a counter at *path* by *amount* and return the new value.
 
-        Returns the new value, or ``None`` on Redis error.  If the key doesn't
-        exist it is set to 0 before incrementing.
+        If the key doesn't exist it is set to 0 before incrementing.  Raises
+        :class:`CacheError` if Redis fails.
         """
 
         key = self.key_from_path(*path)
 
         try:
             return await self.redis.incrby(key, amount)
-        except RedisError:
-            logger.warning("Redis INCRBY failed for key %r", key, exc_info=True)
-            return None
+        except RedisError as e:
+            raise CacheError(f"Redis INCRBY failed for key {key!r}") from e
 
     # -- hash operations (path-based) ---------------------------------------
+
+    @staticmethod
+    def decode_hash_mapping(as_type: type[Any], mapping: dict[str, bytes], key: str) -> Any:
+        """Turn a raw field mapping into *as_type*.
+
+        :meth:`hash_set` JSON-encodes every field on its own, so each value is
+        decoded individually.  *key* is only used in error messages.  A value
+        that doesn't decode or assemble raises :class:`CacheValidationError`,
+        while an empty mapping is a miss and returns ``None`` - nothing was
+        cached, so there is nothing to validate.
+        """
+
+        if not mapping:
+            return None
+
+        if as_type is bytes:
+            return mapping
+
+        decoded: dict[str, Any] = {}
+
+        for field, value in mapping.items():
+            try:
+                decoded[field] = msgspec.json.decode(value)
+            except msgspec.DecodeError as e:
+                raise CacheValidationError(f"Field {field!r} of hash {key!r} doesn't decode: {e}") from e
+
+        if as_type is dict:
+            return decoded
+
+        try:
+            return msgspec.convert(decoded, type=as_type, strict=False)
+        except msgspec.ValidationError as e:
+            raise CacheValidationError(f"Hash {key!r} doesn't match {CacheClient.get_type_name(as_type)}: {e}") from e
 
     @overload
     async def hash_get(
@@ -230,117 +372,109 @@ class CacheClient:
     ) -> tuple[dict[str, bytes] | None, set[str]]: ...
 
     @overload
+    async def hash_get[D](
+        self, *path: Any, cls: type[dict[str, D]], fields: Iterable[str]
+    ) -> tuple[dict[str, D] | None, set[str]]: ...
+
+    @overload
     async def hash_get[T: msgspec.Struct](
         self, *path: Any, cls: type[T], fields: Iterable[str]
     ) -> tuple[T | None, set[str]]: ...
 
-    @overload
-    async def hash_get[D: dict[str, Any]](
-        self, *path: Any, cls: type[D], fields: Iterable[str]
-    ) -> tuple[D | None, set[str]]: ...
-
     async def hash_get(self, *path: Any, cls: type[Any], fields: Iterable[str]) -> tuple[Any | None, set[str]]:
-        """Get one or more fields from a hash at *path*.
+        """Get the requested *fields* from the hash at *path*.
 
-        *cls* controls how field values are decoded:
+        *cls* selects how field values are returned:
 
-        - ``dict[str, bytes]`` → raw bytes values, no decoding
-        - ``dict[str, Any]`` → each value decoded via ``msgspec.json.Decoder``
-        - ``list[Any]`` → each value decoded via ``msgspec.json.Decoder``
-        - ``msgspec.Struct`` → field mapping decoded into the struct type
+        - ``bytes`` → a ``dict`` of raw ``bytes`` values
+        - ``dict``, ``dict[str, T]`` → each value JSON-decoded into a ``dict``
+        - ``msgspec.Struct`` subclass → each value JSON-decoded into that struct
 
-        Returns ``(cls or None, missing fields)``
+        Returns ``(value, missing)``, where *missing* is the set of requested
+        fields that weren't in the hash, so callers can refill just those.
+        *value* is ``None`` when the hash holds none of the requested fields,
+        whatever *cls* is - that is a miss, not an error.  A cached field that
+        no longer decodes, or fields that can't be assembled into *cls* - e.g.
+        a required field wasn't cached or requested - raises
+        :class:`CacheValidationError` rather than joining *missing*::
+
+            user, missing = await cache.hash_get("user", 1234, cls=User, fields=("name", "level"))
+            if missing:
+                ...  # refill the fields that weren't cached
+
+        Raises :class:`CacheError` if Redis fails.
         """
 
-        key = self.key_from_path(*path)
+        self._check_hash_cls(cls)
 
+        key = self.key_from_path(*path)
         ordered_fields = sorted(fields)
+
         try:
             hmget: list[bytes | None] = await self.redis.hmget(key, ordered_fields)  # type: ignore
-        except RedisError:
-            logger.warning("Redis HMGET failed for key %r", key, exc_info=True)
-            return (None, set(fields))
+        except RedisError as e:
+            raise CacheError(f"Redis HMGET failed for key {key!r}") from e
 
-        try:
-            items = zip(ordered_fields, hmget, strict=True)
-        except ValueError:
-            logger.warning(
-                "Redis HMGET field count mismatch for key %r. Requested %d, got %d",
-                key,
-                len(ordered_fields),
-                len(hmget),
+        if len(hmget) != len(ordered_fields):
+            raise CacheError(
+                f"Redis HMGET on key {key!r} returned {len(hmget)} values for {len(ordered_fields)} fields"
             )
-            return (None, set(fields))
 
-        mapping: dict[str, Any] = {}
+        mapping: dict[str, bytes] = {}
         missing: set[str] = set()
 
-        for field, value in items:
-            field_name = field.decode() if isinstance(field, bytes) else field
-
+        for field, value in zip(ordered_fields, hmget, strict=True):
             if value is None:
-                missing.add(field_name)
-                continue
-
-            elif cls is bytes or cls is dict or cls is list or issubclass(cls, msgspec.Struct):
-                mapping[field_name] = value
-
+                missing.add(field)
             else:
-                raise TypeError(f"Unsupported cls {cls!r}")
+                mapping[field] = value
 
-        if cls is bytes or cls is dict:
-            return (mapping, missing)
-
-        return (msgspec.convert(mapping, type=cls, strict=False), missing)
+        return (self.decode_hash_mapping(cls, mapping, key), missing)
 
     @overload
     async def hash_getall(self, *path: Any, cls: type[bytes]) -> dict[str, bytes] | None: ...
 
     @overload
-    async def hash_getall[T: msgspec.Struct](self, *path: Any, cls: type[T]) -> T | None: ...
+    async def hash_getall[D](self, *path: Any, cls: type[dict[str, D]]) -> dict[str, D] | None: ...
 
     @overload
-    async def hash_getall[D: dict[str, Any]](self, *path: Any, cls: type[D]) -> D | None: ...
+    async def hash_getall[T: msgspec.Struct](self, *path: Any, cls: type[T]) -> T | None: ...
 
     async def hash_getall(self, *path: Any, cls: type[Any]) -> Any | None:
-        """Get all fields from a hash at *path*.
+        """Get every field of the hash at *path*.
 
-        *cls* controls how field values are decoded:
+        *cls* selects how field values are returned:
 
-        - ``dict[str, bytes]`` → raw bytes values, no decoding
-        - ``dict[str, Any]`` → each value decoded via ``msgspec.json.Decoder``
-        - ``list[Any]`` → each value decoded via ``msgspec.json.Decoder``
-        - ``msgspec.Struct`` → field mapping decoded into the struct type
+        - ``bytes`` → a ``dict`` of raw ``bytes`` values
+        - ``dict``, ``dict[str, T]`` → each value JSON-decoded into a ``dict``
+        - ``msgspec.Struct`` subclass → each value JSON-decoded into that struct
 
-        Returns ``None`` if the key doesn't exist or on Redis error.
+        Returns ``None`` if the hash doesn't exist - Redis deletes a hash once
+        its last field is removed.  A field that no longer decodes, or a hash
+        that can't be assembled into *cls*, raises
+        :class:`CacheValidationError`.  Raises :class:`CacheError` if Redis
+        fails::
+
+            user = await cache.hash_getall("user", 1234, cls=User)
         """
+
+        self._check_hash_cls(cls)
 
         key = self.key_from_path(*path)
 
         try:
             hgetall: dict[bytes, bytes] = await self.redis.hgetall(key)  # type: ignore
-        except RedisError:
-            logger.warning("Redis HGETALL failed for key %r", key, exc_info=True)
-            return None
+        except RedisError as e:
+            raise CacheError(f"Redis HGETALL failed for key {key!r}") from e
 
         # Redis auto-deletes a hash when its last field is removed,
         # so an empty hgetall always means the key doesn't exist.
         if not hgetall:
             return None
 
-        mapping: dict[str, Any] = {}
+        mapping = {field.decode(): value for field, value in hgetall.items()}
 
-        for field, value in hgetall.items():
-            if cls is bytes or cls is dict or cls is list or issubclass(cls, msgspec.Struct):
-                mapping[field.decode()] = value
-
-            else:
-                raise TypeError(f"Unsupported cls {cls!r}")
-
-        if cls is bytes or cls is dict:
-            return mapping
-
-        return msgspec.convert(mapping, type=cls, strict=False)
+        return self.decode_hash_mapping(cls, mapping, key)
 
     async def hash_set(
         self,
@@ -348,9 +482,16 @@ class CacheClient:
         instance: msgspec.Struct | dict[str, Any],
         **redis_kwargs: Any,
     ) -> int:
-        """Set all fields of a hash from a ``dict`` or ``msgspec.Struct``.
+        """Write all fields of *instance* to the hash at *path*.
 
-        Returns the number of fields added, or 0 on Redis error.
+        *instance* is a ``msgspec.Struct`` or ``dict`` whose fields are
+        JSON-encoded.  The hash expires after ~300 seconds by default; pass
+        ``ex`` for a fixed TTL or ``ex=None`` to keep it until it's deleted.
+        Returns the number of new fields added, and raises :class:`CacheError`
+        if Redis fails::
+
+            await cache.hash_set("user", 1234, instance=user)
+            await cache.hash_set("user", 1234, instance={"level": 12}, ex=60)
         """
 
         key = self.key_from_path(*path)
@@ -365,42 +506,50 @@ class CacheClient:
         if not encoded:
             return 0
 
+        ex = self.resolve_ttl(redis_kwargs)
+
+        if ex is None and redis_kwargs:
+            raise TypeError(f"Expiry options {sorted(redis_kwargs)} are meaningless with ex=None")
+
         try:
             async with self.redis.pipeline() as pipe:
                 await pipe.hset(key, mapping=encoded)  # type: ignore
-                await pipe.expire(key, time=redis_kwargs.pop("ex", 300), **redis_kwargs)
+
+                if ex is not None:
+                    await pipe.expire(key, time=ex, **redis_kwargs)
 
                 commands = await pipe.execute()
                 return commands[0]
 
-        except RedisError:
-            logger.warning("Redis HSET failed for key %r", key, exc_info=True)
-            return 0
+        except RedisError as e:
+            raise CacheError(f"Redis HSET failed for key {key!r}") from e
 
     async def hash_delete(self, *path: Any, fields: Iterable[str]) -> int:
         """Delete one or more fields from a hash at *path*.
 
-        Returns the number of fields removed, or 0 on Redis error.
+        Returns the number of fields removed.  Raises :class:`CacheError` if
+        Redis fails.
         """
 
         key = self.key_from_path(*path)
 
         try:
             return await self.redis.hdel(key, *fields)
-        except RedisError:
-            logger.warning("Redis HDEL failed for key %r", key, exc_info=True)
-            return 0
+        except RedisError as e:
+            raise CacheError(f"Redis HDEL failed for key {key!r}") from e
 
     # -- multi-key operations (raw key strings) -----------------------------
 
     async def delete(self, *keys: str) -> int:
-        """Delete one or more keys.  Returns count deleted, or 0 on Redis error.
+        """Delete one or more complete keys.  Returns the count deleted.
 
-        Keys are pre-built strings.  Use :meth:`key_from_path` to construct them::
+        Unlike the path-based methods, *keys* are full key strings - build
+        them with :meth:`key_from_path` when deleting keys of different
+        shapes in one call.  Raises :class:`CacheError` if Redis fails::
 
             await cache.delete(
-                cache.key_from_path("sfa", "row", "players", "789"),
-                cache.key_from_path("sfa", "profile", "player", "789"),
+                cache.key_from_path("user", 1234, "profile"),
+                cache.key_from_path("user", 1234, "scores"),
             )
         """
 
@@ -409,23 +558,26 @@ class CacheClient:
 
         try:
             return await self.redis.delete(*keys)
-        except RedisError:
-            logger.warning("Redis DELETE failed for keys %r", keys, exc_info=True)
-            return 0
+        except RedisError as e:
+            raise CacheError(f"Redis DELETE failed for keys {keys!r}") from e
 
     async def keys(self, pattern: str) -> list[str]:
-        """Return keys matching *pattern* via ``SCAN``.  Returns empty list on Redis error.
+        """Return every key matching *pattern* via ``SCAN``.
 
-        ``SCAN`` iterates the keyspace in small batches so it won't block
-        the server.  Still prefer well-scoped patterns like
-        ``sfa:profile:player:*`` - never ``*`` in production.
+        ``SCAN`` walks the keyspace in small batches so it won't block the
+        server.  Keep patterns as narrow as possible - never ``*`` in
+        production.  An empty list means nothing matched; raises
+        :class:`CacheError` if Redis fails::
+
+            for key in await cache.keys("user:1234:*"):
+                ...
         """
 
         try:
             result: list[str] = []
             cursor = 0
             while True:
-                scan: tuple[int, list[bytes]] = await self.redis.scan(cursor, match=pattern)  # type: ignore
+                scan: tuple[int, list[bytes]] = await self.redis.scan(cursor, match=pattern, count=25)  # type: ignore
                 cursor, batch = scan
 
                 result.extend(k.decode() for k in batch)
@@ -434,12 +586,18 @@ class CacheClient:
                     break
 
             return result
-        except RedisError:
-            logger.warning("Redis SCAN failed for pattern %r", pattern, exc_info=True)
-            return []
+        except RedisError as e:
+            raise CacheError(f"Redis SCAN failed for pattern {pattern!r}") from e
 
     async def delete_pattern(self, pattern: str) -> int:
-        """Delete all keys matching *pattern*.  Returns count deleted."""
+        """Delete every key matching *pattern*.  Returns the count deleted.
+
+        Shorthand for :meth:`keys` followed by :meth:`delete`, so the same
+        warning about overly broad patterns applies.  Raises
+        :class:`CacheError` if Redis fails::
+
+            removed = await cache.delete_pattern("user:1234:*")
+        """
 
         keys = await self.keys(pattern)
         if not keys:
