@@ -14,7 +14,7 @@ __all__ = ("CircuitTree",)
 class CircuitTree(CommandTree):
     async def interaction_check(self, interaction: discord.Interaction["CircuitBot"]) -> bool:
         interaction.__class__ = Interaction
-        
+
         # attach stuff to interaction here
-        
+
         return True

@@ -3,9 +3,8 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, overload
 
 import msgspec
-from redis.asyncio import ConnectionPool
+from redis.asyncio import ConnectionPool, RedisError
 from redis.asyncio import Redis as AsyncRedis
-from redis.asyncio import RedisError
 
 from ..env import get_env
 from ..logging import get_logger

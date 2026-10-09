@@ -8,6 +8,7 @@ from discord.ext.commands import Bot
 from ..bloxlink import BloxlinkClient
 from ..cache import CacheClient
 from ..database import DatabasePool
+from ..roblox import RobloxClient
 from .tree import CircuitTree
 
 __all__ = ("CircuitBot",)
@@ -26,12 +27,14 @@ class CircuitBot(Bot):
 
     def __init__(self):
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(enable_cleanup_closed=True)
+            connector=aiohttp.TCPConnector(enable_cleanup_closed=True),
+            timeout=aiohttp.ClientTimeout(total=10),
         )
 
         self.database: DatabasePool = DatabasePool(bot=self)
         self.cache: CacheClient = CacheClient(bot=self)
         self.bloxlink: BloxlinkClient = BloxlinkClient(bot=self)
+        self.roblox: RobloxClient = RobloxClient(bot=self)
 
     def initialize(self) -> Self:
         super().__init__(
