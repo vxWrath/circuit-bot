@@ -1,3 +1,4 @@
+import datetime
 from collections.abc import Callable, Coroutine
 from typing import TYPE_CHECKING, Any
 
@@ -7,7 +8,7 @@ from ..cache.exceptions import CacheError
 from ..env import get_env
 from ..logging import get_logger
 from ..missing import MISSING
-from .exceptions import BloxlinkAPIError, BloxlinkError
+from .exceptions import BloxlinkAPIError, BloxlinkError, BloxlinkRateLimitError
 
 if TYPE_CHECKING:
     from ..bluerobot import CircuitBot
@@ -27,6 +28,12 @@ class BloxlinkClient:
     :class:`BloxlinkError` instead, so the two are never confused.  Cache
     failures are logged and skipped - the API is always the source of truth.
 
+    Bloxlink allows :attr:`DAILY_LIMIT` requests per day per key, so every
+    request first spends one from a Redis counter keyed by the UTC date, and
+    once the day's budget is gone requests are refused with
+    :class:`BloxlinkRateLimitError` rather than sent - see
+    :meth:`validate_request`.
+
     Every request is authenticated with the ``BLOXLINK_API_KEY`` environment
     variable, so a key from https://blox.link/developers must be set.
     """
@@ -41,13 +48,17 @@ class BloxlinkClient:
     async def request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any] | None:
         """Send an authenticated HTTP request and parse the JSON response.
 
-        Returns ``None`` when the API answers 404 (nothing linked), raises
+        Spends one request from today's quota first, so a spent quota raises
+        :class:`BloxlinkRateLimitError` before anything goes out.  Returns
+        ``None`` when the API answers 404 (nothing linked), raises
         :class:`BloxlinkError` when the request itself fails, and
         :class:`BloxlinkAPIError` when the response has an unexpected status or
         isn't usable JSON.
         """
 
         logger.debug("Bloxlink API request: %s %s", method, url)
+
+        await self.validate_request()
 
         headers = {"Authorization": self.api_key}
         headers.update(kwargs.pop("headers", {}))
@@ -82,6 +93,52 @@ class BloxlinkClient:
 
         except (aiohttp.ClientError, TimeoutError) as e:
             raise BloxlinkError(f"Bloxlink API request failed for {method} {url}") from e
+
+    async def validate_request(self) -> None:
+        """Spend one request from today's quota, raising once it's used up.
+
+        The counter is a single Redis entry keyed by the UTC date
+        (``bloxlink:requests:2026-10-12``), so it starts over on its own at
+        midnight UTC and no reset job is needed.  The increment comes first, so
+        concurrent requests each get their own number and only the first
+        :attr:`DAILY_LIMIT` of them are ever sent; attempts refused by the
+        guard are counted too, which makes the counter a tally of demand rather
+        than of requests that reached Bloxlink.
+
+        Raises :class:`BloxlinkRateLimitError` once the limit is exceeded.
+        """
+
+        now = datetime.datetime.now(tz=datetime.UTC)
+        key = self.bot.cache.key_from_path("bloxlink", "requests", now.strftime("%Y-%m-%d"))
+
+        try:
+            used = await self.bot.cache.incr(key)
+        except CacheError as e:
+            logger.warning("Bloxlink quota check failed for %r, sending the request anyway: %s", key, e)
+            return
+
+        if used == 1:
+            try:
+                # INCR creates the counter without a TTL, and it only says
+                # anything about the day it counts, so drop it shortly after
+                # that day is over instead of leaving it in Redis for good.
+
+                midnight = now + datetime.timedelta(days=1)
+                midnight = midnight.replace(hour=0, minute=0, second=0, microsecond=0)
+                expiry = int((midnight - now).total_seconds())
+
+                await self.bot.cache.expire(key, ex=expiry + 1800)  # 30 minutes grace before expiry
+            except CacheError as e:
+                # A missed expiry only leaves a stale counter behind, so it's
+                # not worth refusing the request over.
+                logger.warning("Bloxlink quota expiry failed for %r, leaving it in Redis: %s", key, e)
+
+        if used > 2000:
+            raise BloxlinkRateLimitError(
+                f"Bloxlink API quota exhausted: 2000 requests used for {now.strftime('%Y-%m-%d')} UTC"
+            )
+
+        logger.debug("Bloxlink API quota: %d/%d used for %s UTC", used, 2000, now.strftime("%Y-%m-%d"))
 
     async def lookup[T: Any](
         self,
