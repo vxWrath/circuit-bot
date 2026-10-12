@@ -1,6 +1,6 @@
 from ..exception import CircuitException
 
-__all__ = ("BloxlinkAPIError", "BloxlinkError", "BloxlinkRateLimitError")
+__all__ = ("BloxlinkAPIError", "BloxlinkError", "BloxlinkRateLimitError", "BloxlinkUnavailableError")
 
 
 class BloxlinkError(CircuitException):
@@ -11,9 +11,26 @@ class BloxlinkAPIError(BloxlinkError):
     """Raised when the Bloxlink API returns an unexpected or malformed response."""
 
 
-class BloxlinkRateLimitError(BloxlinkError):
-    """Raised when a request is refused because the daily quota is spent.
+class BloxlinkUnavailableError(BloxlinkAPIError):
+    """Raised when Bloxlink answers with a server error (5xx).
 
-    Raised by the client itself, before anything reaches Bloxlink, but a
-    subclass of :class:`BloxlinkError` so a caller handling that covers it too.
+    The API answered, so this isn't a request that never got through: Bloxlink
+    is reachable but its backend is failing, which is Bloxlink's problem and
+    usually passes on its own.
     """
+
+
+class BloxlinkRateLimitError(BloxlinkError):
+    """Raised when a request is refused or rate limited.
+
+    Covers both a 429 from Bloxlink and the client's own daily quota guard,
+    which refuses requests locally rather than spending an API key's goodwill.
+    ``retry_after`` is how many seconds to wait before trying again when that
+    is actually known: seconds until the counter resets for the daily quota,
+    and the delay Bloxlink asked for on a 429 - though Bloxlink doesn't
+    document sending one, so expect ``None`` there.
+    """
+
+    def __init__(self, message: str, *, retry_after: float | None = None) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after
