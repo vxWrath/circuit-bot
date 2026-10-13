@@ -46,7 +46,7 @@ async def run():
     setup_discord_logger()
 
     await bot.cache.connect()
-    # await bot.database.connect()
+    await bot.database.connect()
 
     logger.info("Bot started")
 
@@ -61,15 +61,19 @@ async def run():
             raise
 
     await bot.close()
-    await bot.session.close()
-    await bot.cache.close()
-    # await bot.database.close()
 
+    # Cancel whatever is still running before closing the resources it uses: a
+    # task holding a database connection stalls Pool.close() until it lets go,
+    # and one cancelled mid-request would fail against a closed session.
     tasks = [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]
     for task in tasks:
         task.cancel()
 
     await asyncio.gather(*tasks, return_exceptions=True)
+
+    await bot.session.close()
+    await bot.cache.close()
+    await bot.database.close()
 
     logger.info("Bot shutdown complete")
 
