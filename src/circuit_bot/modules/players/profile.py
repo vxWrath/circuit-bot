@@ -1,7 +1,7 @@
 from collections.abc import Callable, Coroutine
 from typing import TYPE_CHECKING, Any, cast
 
-from ...core.database import Row
+from ...core.database import RecordNotFoundError, Row
 from ...core.profile import Profile
 from ...core.roblox import RobloxUser
 from .models import PlayerRow
@@ -54,24 +54,27 @@ class PlayerProfile(Profile["PlayerService"]):
         """The player's Roblox headshot, or ``None`` when none is available."""
         return await self.ensure_part("headshot_url", self.service.headshot_url, snowflake=self.snowflake)
 
-    async def link_roblox(self, roblox_id: int) -> PlayerRow | None:
-        """Link a Roblox account to this player, or ``None`` if there's no such player.
+    async def link_roblox(self, roblox_id: int) -> PlayerRow:
+        """Link a Roblox account to this player, or raise ``RecordNotFoundError``.
 
-        The write is keyed by the row :meth:`player` kept, or fetched here if
-        this is the first part anyone wanted, and the row it returns is kept.
-        Every other part is dropped.
+        The raise covers both no such player and the row going between the read
+        and the write.  The write is keyed by the row :meth:`player` kept, or
+        fetched here if this is the first part anyone wanted, and the row it
+        returns is kept.  Every other part is dropped.
         """
 
         player = await self.player()
 
         if player is None:
-            return None
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
 
-        # None here is the row having gone between the read and the write.
+        # The row went between the read and the write, so the parts read for it
+        # are stale.
         linked = await self.service.link_roblox(player, roblox_id=roblox_id)
 
         if linked is None:
-            return None
+            self.invalidate_parts()
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
 
         self.invalidate_parts()
         self.set_part(PlayerRow, linked)
