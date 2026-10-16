@@ -20,6 +20,21 @@ IS_ROOT_CONFIGURED: bool = False
 installed_handler: logging.Handler | None = None
 
 
+def console_renderer() -> structlog.dev.ConsoleRenderer:
+    """The dev renderer, with the logger name moved in front of the event.
+
+    structlog's own column order trails it, where it drifts with the width of
+    the message.
+    """
+
+    renderer = structlog.dev.ConsoleRenderer()
+    by_key = {column.key: column for column in renderer.columns}
+    # "" is the formatter every field without a column of its own falls through to.
+    renderer.columns = [by_key[""], by_key["timestamp"], by_key["level"], by_key["logger"], by_key["event"]]
+
+    return renderer
+
+
 def configure_root_logger(*, force: bool = False) -> None:
     """Configure structlog and the root logger for the bot process.
 
@@ -36,6 +51,8 @@ def configure_root_logger(*, force: bool = False) -> None:
     shared_processors: list[structlog.types.Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
+        # The name of the logger the call came through, ours or a library's.
+        structlog.stdlib.add_logger_name,
         structlog.processors.TimeStamper(fmt="iso"),
         # Fields a stdlib logger was handed in ``extra`` - the only way one carries them.
         structlog.stdlib.ExtraAdder(),
@@ -44,7 +61,7 @@ def configure_root_logger(*, force: bool = False) -> None:
     ]
 
     if is_dev():
-        renderer = structlog.dev.ConsoleRenderer()
+        renderer = console_renderer()
     else:
         renderer = structlog.processors.JSONRenderer()
 
