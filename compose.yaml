@@ -1,0 +1,130 @@
+# Development stack: the bot, its database, and its cache.
+#
+#   cp .env.example .env   once, then fill it in
+#   docker compose up --build            everything
+#   docker compose up -d postgres redis  infra only, bot on the host
+#
+# .env is the single source for every credential: DISCORD_TOKEN and
+# BLOXLINK_API_KEY for the bot, POSTGRES_* for the database service, REDIS_* for
+# the cache.  The bot turns those parts into connection settings itself, at
+# runtime (src/circuit_bot/config.py), so this file has no URLs to keep in step -
+# it only has to say where the two services are, because inside the compose
+# network they answer to their own names and a container's localhost is the
+# container.  Everything else reaches the bot through env_file:, untouched.
+
+name: circuit-bot
+
+services:
+  bot:
+    build:
+      context: .
+      target: dev
+    env_file: .env
+    environment:
+      # environment: wins over env_file:, so these four override the same keys
+      # from .env.  The credentials and names do not need overriding and are left
+      # to arrive through env_file: as they are.
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+
+      # Pinned to the ports the two images listen on.  In .env POSTGRES_PORT is
+      # the port a bot *on the host* dials, which is whichever port compose
+      # publishes below - a different question from which port the service itself
+      # is on, and the one that stops being right inside the network.
+      POSTGRES_PORT: "5432"
+      REDIS_PORT: "6379"
+
+      # What picks the log renderer: console in dev, JSON in prod.  Need not be
+      # in .env - leaving it unset is the same as setting it to dev.
+      STAGE: ${STAGE:-dev}
+    volumes:
+      # The dev image installs the project editable, pointed at /app/src, so
+      # the working tree here is the code that runs.  discord.py has no
+      # reloader: `docker compose restart bot` after a change.
+      - ./src:/app/src
+    depends_on:
+      # The bot connects to Redis and then Postgres on the way up, and either
+      # one failing there takes the process down - so wait for both to answer,
+      # not merely to have started.
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    init: true
+    restart: unless-stopped
+    # On SIGTERM the bot cancels its running tasks and closes both pools on the
+    # way out.  Docker's 10s default is not always enough for that.
+    stop_grace_period: 30s
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      # :? rather than a fallback: a credential default in a file that may end
+      # up on a server is a credential nobody rotates.  Missing means stop.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env - see .env.example}
+      POSTGRES_DB: ${POSTGRES_DB:-circuit}
+    volumes:
+      # Postgres 18 moved PGDATA under a version directory and declares its
+      # volume at /var/lib/postgresql - mounting the old .../data path here
+      # would leave the data outside the volume, and drop it on every recreate.
+      #
+      # POSTGRES_PASSWORD only takes effect while this directory is empty.
+      # Change it in .env once the volume exists and postgres keeps the old
+      # password, failing every connection; .env.example has the reset steps.
+      - postgres-data:/var/lib/postgresql
+    ports:
+      # Published so host tooling - psql, a GUI - reaches the database the bot is
+      # using, and so a bot running on the host has something to dial.  This is
+      # the one place POSTGRES_PORT is read as the host-side port.
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      # $$ defers to the shell inside the container, which has these two from
+      # the environment block above.  -h 127.0.0.1 forces the check over TCP:
+      # initdb runs a temporary server on the unix socket alone, and the
+      # socket-only default would call that one ready.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:8-alpine
+    # The cache is TTL'd - entries expire after ~300s by default - but ex=None
+    # is a real option, so the store outlives a restart rather than starting
+    # every entry's clock over on one.
+    #
+    # The official image takes no password from the environment, so requirepass
+    # goes on the command line, where `docker inspect` will show it.  That is
+    # the trade for not mounting a config file; it is a local cache either way.
+    command:
+      - redis-server
+      - --requirepass
+      - "${REDIS_PASSWORD:?set REDIS_PASSWORD in .env - see .env.example}"
+      - --save
+      - "60"
+      - "1"
+      - --loglevel
+      - warning
+    environment:
+      # redis-cli reads REDISCLI_AUTH on its own, so the healthcheck below
+      # authenticates without repeating the password on a command line.  The
+      # server ignores the variable.
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env - see .env.example}
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
