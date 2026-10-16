@@ -90,6 +90,8 @@ class CacheClient:
         await self._redis.aclose()
         self._redis = None
 
+        logger.info("Redis connection closed")
+
     @property
     def redis(self) -> AsyncRedis:
         if not self._redis:

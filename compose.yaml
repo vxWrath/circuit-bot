@@ -33,8 +33,6 @@ services:
         condition: service_healthy
     init: true
     restart: no
-    # Shutdown cancels tasks and closes both pools; 10s is tight for that.
-    stop_grace_period: 30s
 
   postgres:
     image: postgres:18-alpine
