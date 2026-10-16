@@ -1,26 +1,16 @@
-import asyncio
-from collections.abc import Callable, Coroutine
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-import aiohttp
 import msgspec
 
-from ..cache.exceptions import CacheError
-from ..logging import get_logger
-from ..missing import MISSING
-from ..ratelimit import OnRatelimit, RetryPolicy, retry_delay
+from ..api import APIClient, Errors
+from ..ratelimit import OnRatelimit
 from .exceptions import RobloxAPIError, RobloxError, RobloxRateLimitError, RobloxUnavailableError
-from .models import RobloxUser
-
-if TYPE_CHECKING:
-    from ..bluerobot import CircuitBot
+from .models import RobloxUser, RobloxUserIngest
 
 __all__ = ("RobloxClient", "RobloxUser")
 
-logger = get_logger("roblox")
 
-
-class RobloxClient:
+class RobloxClient(APIClient):
     """Client for the Roblox web API, available on the bot as ``bot.roblox``.
 
     Every result is cached through ``bot.cache`` for a few minutes, including
@@ -33,142 +23,31 @@ class RobloxClient:
     than guessing at a ceiling the client reads what the API says about the
     wait: a 429 is retried in place while it's short, and raises
     :class:`RobloxRateLimitError` - carrying ``retry_after`` - when it isn't.
+    Sending the request at all is :class:`~circuit_bot.core.api.APIClient`'s;
+    what's here is what is Roblox's.
     """
 
+    NAME = "Roblox"
+    ERRORS = Errors(
+        error=RobloxError,
+        api=RobloxAPIError,
+        unavailable=RobloxUnavailableError,
+        ratelimit=RobloxRateLimitError,
+    )
+
     BASE_URL = "https://{api}.roblox.com/v{version}"
-    RETRY_POLICY = RetryPolicy()
 
-    def __init__(self, *, bot: "CircuitBot"):
-        self.bot = bot
-        self.session = bot.session
+    def error_detail(self, payload: Any) -> str | None:
+        """Roblox reports what went wrong as ``{"errors": [{"message": ...}]}``."""
 
-    async def request(
-        self,
-        method: str,
-        url: str,
-        *,
-        on_ratelimit: OnRatelimit | None = None,
-        **kwargs: Any,
-    ) -> dict[str, Any] | None:
-        """Send an HTTP request and parse the JSON response.
+        errors = payload.get("errors") if isinstance(payload, dict) else None
 
-        A 429 is waited out and retried in place while the wait is short enough
-        to sit on, up to :attr:`RETRY_POLICY` attempts; *on_ratelimit* is told
-        the delay first, so a caller can keep the user posted.  A longer wait
-        raises :class:`RobloxRateLimitError` instead, carrying ``retry_after``
-        when Roblox said how long to wait, leaving the caller to come back
-        later.
+        if not errors:
+            return None
 
-        Returns ``None`` when the API answers 404, raises :class:`RobloxError`
-        when the request itself fails, :class:`RobloxUnavailableError` when
-        Roblox answers 5xx - reachable, but its backend isn't - and
-        :class:`RobloxAPIError` for any other unexpected status or unusable
-        JSON.
-        """
+        first = errors[0]
 
-        logger.debug("Roblox API request: %s %s", method, url)
-
-        attempt = 0
-
-        while True:
-            attempt += 1
-
-            try:
-                async with self.session.request(method, url, **kwargs) as resp:
-                    if resp.status == 429:
-                        delay, requested = retry_delay(resp.headers, attempt, self.RETRY_POLICY)
-
-                        if attempt >= self.RETRY_POLICY.attempts or delay > self.RETRY_POLICY.max_wait:
-                            # Only a header Roblox actually sent is a promise to
-                            # the caller - our own backoff is a guess.
-                            asked = f" (asked for {requested:.1f}s)" if requested is not None else ""
-                            raise RobloxRateLimitError(
-                                f"Roblox API rate limited {method} {url}{asked}",
-                                retry_after=requested,
-                            )
-
-                        # Hand the connection back before sleeping on it.
-                        resp.release()
-
-                        logger.warning(
-                            "Roblox API rate limited %s %s, retrying in %.1fs (attempt %d/%d)",
-                            method,
-                            url,
-                            delay,
-                            attempt,
-                            self.RETRY_POLICY.attempts,
-                        )
-
-                        if on_ratelimit is not None:
-                            await on_ratelimit(delay)
-
-                        await asyncio.sleep(delay)
-                        continue
-
-                    if resp.status == 404:
-                        return None
-
-                    if resp.status >= 500:
-                        raise RobloxUnavailableError(f"Roblox API returned {resp.status} for {method} {url}")
-
-                    if resp.status != 200:
-                        raise RobloxAPIError(f"Roblox API returned {resp.status} for {method} {url}")
-
-                    if not resp.content_type.startswith("application/json"):
-                        raise RobloxAPIError(f"Roblox API returned non-JSON ({resp.content_type}) for {method} {url}")
-
-                    try:
-                        return await resp.json()
-                    except ValueError as e:
-                        raise RobloxAPIError(f"Roblox API returned invalid JSON for {method} {url}") from e
-
-            except (aiohttp.ClientError, TimeoutError) as e:
-                raise RobloxError(f"Roblox API request failed for {method} {url}") from e
-
-    async def lookup[T: Any](
-        self,
-        *path: Any,
-        cls: type[T],
-        fetch: Callable[..., Coroutine[None, None, T | None]],
-        args: tuple[Any, ...] = MISSING,
-        on_ratelimit: OnRatelimit | None = None,
-    ) -> T | None:
-        """Serve *path* from the cache, falling back to *fetch*.
-
-        A ``None`` result is cached under ``(*path, "missing")`` so repeated
-        lookups of nonexistent users don't hit the API either.  Cache failures
-        are logged and skipped - *fetch* is always the source of truth.
-        *on_ratelimit* is handed to *fetch*, which passes it along to the
-        request it makes, so only a lookup that actually reaches the API can
-        report a wait.
-        """
-
-        missing_path = (*path, "missing")
-
-        try:
-            cached = await self.bot.cache.get(*path, cls=cls)
-            if cached is not None:
-                return cached
-
-            if await self.bot.cache.exists(*missing_path):
-                return None
-        except CacheError as e:
-            key = self.bot.cache.key_from_path(*path)
-            logger.warning("Cache read failed for %r, fetching from the API instead: %s", key, e)
-
-        args = args if args is not MISSING else ()
-        value = await fetch(*args, on_ratelimit=on_ratelimit)
-
-        try:
-            if value is None:
-                await self.bot.cache.set(*missing_path, value=True)
-            else:
-                await self.bot.cache.set(*path, value=value)
-        except CacheError as e:
-            key = self.bot.cache.key_from_path(*path)
-            logger.warning("Cache write failed for %r: %s", key, e)
-
-        return value
+        return (first.get("message") if isinstance(first, dict) else None) or None
 
     async def fetch_user(self, user_id: int, *, on_ratelimit: OnRatelimit | None = None) -> RobloxUser | None:
         """Fetch *user_id*'s profile from the users API."""
@@ -191,21 +70,12 @@ class RobloxClient:
         if not users:
             return None
 
-        raw = users[0]
-        username = raw.get("name")
-        display_name = raw.get("displayName")
+        try:
+            ingested = msgspec.convert(users[0], type=RobloxUserIngest)
+        except msgspec.DecodeError as e:
+            raise RobloxAPIError(f"Roblox API returned invalid user data for {url} (user id {user_id})") from e
 
-        if not username or not display_name:
-            raise RobloxAPIError(f"Roblox API returned incomplete user data for {url} (user id {user_id})")
-
-        return msgspec.convert(
-            {
-                "id": raw.get("id", user_id),
-                "username": username,
-                "display_name": display_name,
-            },
-            type=RobloxUser,
-        )
+        return msgspec.convert(ingested, RobloxUser, from_attributes=True)
 
     async def fetch_headshot(self, user_id: int, *, on_ratelimit: OnRatelimit | None = None) -> str | None:
         """Fetch *user_id*'s headshot URL from the thumbnails API."""

@@ -6,7 +6,7 @@ import msgspec
 from redis.asyncio import ConnectionPool, RedisError
 from redis.asyncio import Redis as AsyncRedis
 
-from ..env import get_env
+from ...config import get_redis_settings
 from ..logging import get_logger
 from .codec import CacheCodec
 from .exceptions import CacheError, CacheNotConnected
@@ -36,16 +36,27 @@ class CacheClient:
 
     Misses are not errors: nothing found in Redis comes back as ``None``,
     ``False``, ``0``, or an empty list, and that is the only thing that means
-    "not cached".  A cached value that can't be decoded into the requested *cls*
+    "not cached" - apart from :meth:`get_or_absent`, whose ``absent`` flag is
+    how a caller tells "not cached" from a :meth:`set_absent` marker saying the
+    source had nothing.  A cached value that can't be decoded into the requested *cls*
     raises :class:`CacheValidationError`, and a Redis failure raises
     :class:`CacheError`, so the caller can always tell the three apart.
     Calling before :meth:`connect` raises :class:`CacheNotConnected`, and an
-    unsupported *cls* or value type raises ``TypeError`` - the last two signal
-    a bug, not a cache miss.
+    unsupported *cls*, value type, or empty path raises ``TypeError`` - the
+    last two signal a bug, not a cache miss.
     """
 
     DEFAULT_TTL = 300  # seconds, before jitter
     TTL_JITTER = 0.1  # fraction of DEFAULT_TTL applied in either direction
+
+    # The options Redis EXPIRE takes, which are the only ones a hash write can
+    # pass on: everything else a caller had in mind belongs to another command.
+    EXPIRE_OPTIONS = frozenset({"nx", "xx", "gt", "lt"})
+
+    # What set_absent() stores, and what get_or_absent() reads back as "the
+    # source was asked and had nothing".  A NUL can't begin JSON, so it can't
+    # collide with anything the codec wrote - and set() refuses it outright.
+    ABSENT = b"\x00"
 
     def __init__(self, *, bot: "CircuitBot"):
         self.bot = bot
@@ -54,12 +65,27 @@ class CacheClient:
         self._codec = CacheCodec()
 
     async def connect(self) -> None:
+        """Create the client, opening a connection to Redis.
+
+        Reads the connection settings from the ``REDIS_*`` environment variables
+        and is a no-op if the client already exists, so it is safe to call more
+        than once.  Raises :class:`CacheNotConnected` if Redis can't be reached, or
+        if a setting is missing or malformed.
+        """
+
         if self._redis is not None:
             return
 
         try:
-            pool = ConnectionPool.from_url(
-                get_env("REDIS_URL"),
+            # Inside the block deliberately: get_env raises OSError for a missing
+            # variable, and that is one of the failures this translates.
+            settings = get_redis_settings()
+
+            pool = ConnectionPool(
+                host=settings.host,
+                port=settings.port,
+                password=settings.password,
+                db=settings.db,
                 max_connections=10,
                 socket_connect_timeout=5.0,
                 socket_keepalive=True,
@@ -71,7 +97,13 @@ class CacheClient:
             # Verify the connection before handing the client out
             await self._redis.ping()
 
-            logger.info("Redis connected (pool allows %d connections)", pool.max_connections)
+            logger.info(
+                "Redis connected to %s:%d/%d (pool allows %d connections)",
+                settings.host,
+                settings.port,
+                settings.db,
+                pool.max_connections,
+            )
         except (OSError, RedisError, ValueError) as e:
             raise CacheNotConnected(f"Failed to connect to Redis: {e}") from e
 
@@ -97,7 +129,16 @@ class CacheClient:
 
             cache.key_from_path("user", 1234, "profile")
             # → "user:1234:profile"
+
+        At least one segment is required, since an empty path would name the
+        key ``""`` - no call means that, so it's a bug rather than a lookup.
+        Every path-based method builds its key here, which is what makes this
+        the one place the check has to be.
         """
+
+        if not path:
+            raise TypeError("a key needs at least one path segment")
+
         return ":".join(str(p) for p in path)
 
     # -- internals ----------------------------------------------------------
@@ -199,6 +240,10 @@ class CacheClient:
         """
         key = self.key_from_path(*path)
         data = self._codec.encode(value)
+
+        if data == self.ABSENT:
+            raise TypeError(f"{self.ABSENT!r} is this cache's own marker for an absent entry - see set_absent()")
+
         ex = self.resolve_ttl(redis_kwargs)
 
         try:
@@ -206,15 +251,89 @@ class CacheClient:
         except RedisError as e:
             raise CacheError(f"Redis SET failed for key {key!r}") from e
 
+    async def set_absent(self, *path: Any, **redis_kwargs: Any) -> None:
+        """Remember at *path* that the source was asked and had nothing.
+
+        Negative caching is worth the same key a value would take: the marker
+        is one byte (see :attr:`ABSENT`), written where the value would have
+        gone, so asking again costs the one round trip
+        :meth:`get_or_absent` spends rather than a second lookup of its own.
+        It expires like any other entry - ~300 seconds by default, ``ex`` for a
+        fixed TTL, ``ex=None`` until it's deleted.  Raises :class:`CacheError`
+        if Redis fails.
+        """
+
+        key = self.key_from_path(*path)
+        ex = self.resolve_ttl(redis_kwargs)
+
+        try:
+            await self.redis.set(key, self.ABSENT, ex=ex, **redis_kwargs)
+        except RedisError as e:
+            raise CacheError(f"Redis SET failed for key {key!r}") from e
+
+    @overload
+    async def get_or_absent(self, *path: Any, cls: type[bytes]) -> tuple[bytes | None, bool]: ...
+
+    @overload
+    async def get_or_absent(self, *path: Any, cls: type[int]) -> tuple[int | None, bool]: ...
+
+    @overload
+    async def get_or_absent(self, *path: Any, cls: type[str]) -> tuple[str | None, bool]: ...
+
+    @overload
+    async def get_or_absent(self, *path: Any, cls: type[float]) -> tuple[float | None, bool]: ...
+
+    @overload
+    async def get_or_absent(self, *path: Any, cls: type[bool]) -> tuple[bool | None, bool]: ...
+
+    @overload
+    async def get_or_absent[T: msgspec.Struct](self, *path: Any, cls: type[T]) -> tuple[T | None, bool]: ...
+
+    @overload
+    async def get_or_absent[T](self, *path: Any, cls: type[dict[str, T]]) -> tuple[dict[str, T] | None, bool]: ...
+
+    @overload
+    async def get_or_absent[T](self, *path: Any, cls: type[list[T]]) -> tuple[list[T] | None, bool]: ...
+
+    async def get_or_absent(self, *path: Any, cls: type[Any], **redis_kwargs: Any) -> tuple[Any | None, bool]:
+        """Get the value at *path*, or find out that the source had nothing.
+
+        Returns ``(value, absent)``, which keeps three answers apart in one
+        read: ``(value, False)`` is a hit, ``(None, True)`` is an entry
+        :meth:`set_absent` wrote - the source was asked and had nothing - and
+        ``(None, False)`` is a miss, where nothing is known yet and the source
+        still has to be asked.  A plain ``None`` can't tell the middle from the
+        last, which is why the answer is stored rather than inferred.
+
+        *cls* selects how the stored bytes are read, exactly as it does for
+        :meth:`get` - and ``None`` is never a cached value, so it's free to
+        mean "nothing" here.
+
+        Raises ``TypeError`` for an unsupported *cls*, before touching Redis,
+        and :class:`CacheError` if Redis fails.
+        """
+
+        self._codec.validate_cls(cls, scalars=(int, str, float, bool), containers=(dict, list))
+        key = self.key_from_path(*path)
+
+        try:
+            data: bytes | None = await self.redis.get(key, **redis_kwargs)  # type: ignore
+        except RedisError as e:
+            raise CacheError(f"Redis GET failed for key {key!r}") from e
+
+        if data is None:
+            return None, False
+
+        if data == self.ABSENT:
+            return None, True
+
+        return self._codec.decode(data, cls, key=key), False
+
     async def exists(self, *path: Any) -> bool:
         """Return ``True`` if a key exists at *path*, ``False`` otherwise.
 
-        Raises ``TypeError`` if *path* is empty - there would be no key to look
-        up - and :class:`CacheError` if Redis fails.
+        Raises :class:`CacheError` if Redis fails.
         """
-
-        if not path:
-            raise TypeError("exists() requires at least one path segment")
 
         key = self.key_from_path(*path)
 
@@ -379,6 +498,10 @@ class CacheClient:
         *instance* is a ``msgspec.Struct`` or ``dict`` whose fields are
         JSON-encoded.  The hash expires after ~300 seconds by default; pass
         ``ex`` for a fixed TTL or ``ex=None`` to keep it until it's deleted.
+        The flags ``EXPIRE`` takes - ``nx``, ``xx``, ``gt``, ``lt`` - are
+        passed on with it, and any other expiry option is a ``TypeError``
+        rather than a surprise from Redis several frames down.
+
         Returns the number of new fields added, and raises :class:`CacheError`
         if Redis fails::
 
@@ -391,6 +514,13 @@ class CacheClient:
 
         if ex is None and redis_kwargs:
             raise TypeError(f"Expiry options {sorted(redis_kwargs)} are meaningless with ex=None")
+
+        # The leftovers ride along to EXPIRE, so they have to be options EXPIRE
+        # takes: ``px`` or ``exat`` would otherwise only be refused by Redis.
+        unknown = sorted(set(redis_kwargs) - self.EXPIRE_OPTIONS)
+
+        if unknown:
+            raise TypeError(f"hash_set() takes ex, and {sorted(self.EXPIRE_OPTIONS)} alongside it - not {unknown}")
 
         encoded = self._codec.encode_hash(instance)
 

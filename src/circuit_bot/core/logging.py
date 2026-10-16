@@ -2,11 +2,12 @@
 
 import asyncio
 import logging
-import os
 import sys
 from typing import Any
 
 import structlog
+
+from .env import is_dev
 
 __all__ = (
     "configure_root_logger",
@@ -16,15 +17,22 @@ __all__ = (
 )
 
 IS_ROOT_CONFIGURED: bool = False
+installed_handler: logging.Handler | None = None
 
 
 def configure_root_logger(*, force: bool = False) -> None:
-    """Configure structlog for the bot process.
+    """Configure structlog and the root logger for the bot process.
 
-    *dev* mode (the default) uses coloured console output.  Set *dev* to
-    ``False`` for JSON output suitable for log aggregation.
+    Output is coloured on the console in dev - ``STAGE`` unset or ``dev``,
+    which :func:`~circuit_bot.core.env.is_dev` reads - and JSON everywhere
+    else, so a deployed bot logs something a collector can read.
+
+    Called on demand by :func:`get_logger`, which does it once.  *force* rebuilds
+    the pipeline a second time and swaps the root handler for a fresh one: it
+    holds onto the handler it installed for exactly that, since adding another
+    would print every record once per handler.
     """
-    global IS_ROOT_CONFIGURED
+    global IS_ROOT_CONFIGURED, installed_handler
 
     if IS_ROOT_CONFIGURED and not force:
         return
@@ -33,9 +41,15 @@ def configure_root_logger(*, force: bool = False) -> None:
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
+        # Fields a stdlib logger was handed in ``extra``, which is the only way
+        # one carries them.  A no-op for a structlog logger's own records.
+        structlog.stdlib.ExtraAdder(),
+        # An exception becomes text here.  Left as the tuple the record holds,
+        # the JSON renderer writes it out as a repr and the frames are lost.
+        structlog.processors.format_exc_info,
     ]
 
-    if _is_dev_mode():
+    if is_dev():
         renderer = structlog.dev.ConsoleRenderer()
     else:
         renderer = structlog.processors.JSONRenderer()
@@ -63,9 +77,14 @@ def configure_root_logger(*, force: bool = False) -> None:
     handler.setFormatter(formatter)
 
     root = logging.getLogger()
+
+    if installed_handler is not None:
+        root.removeHandler(installed_handler)
+
     root.addHandler(handler)
     root.setLevel(logging.INFO)
 
+    installed_handler = handler
     IS_ROOT_CONFIGURED = True
 
 
@@ -135,6 +154,17 @@ def install_asyncio_exception_handler() -> None:
 
 
 def get_logger(name: str, *, level: int | None = logging.INFO) -> logging.Logger:
+    """The logger for *name*, configuring the root logger the first time.
+
+    What comes back is a stdlib logger - structlog's pipeline is installed on
+    the root, where it renders both its own records and these - so a field of
+    its own travels in ``extra``, the one way a stdlib logger carries one::
+
+        logger.info("cache miss for %r", key, extra={"key": key})
+
+    *level* sets the logger's own level, and ``None`` leaves it to the root.
+    """
+
     if not IS_ROOT_CONFIGURED:
         configure_root_logger()
 
@@ -148,9 +178,3 @@ def get_logger(name: str, *, level: int | None = logging.INFO) -> logging.Logger
 
     logger.propagate = True
     return logger
-
-
-# this function exists to avoid circular imports
-def _is_dev_mode() -> bool:
-    val = os.environ.get("STAGE", "dev")
-    return val.casefold() == "dev"

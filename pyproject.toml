@@ -14,6 +14,7 @@ dependencies = [
     "orjson>=3.13.0",
     "redis>=8.1.0",
     "structlog>=26.1.0",
+    "uvloop>=0.23.0 ; sys_platform != 'win32'",
 ]
 
 [project.scripts]
@@ -63,5 +64,6 @@ venvPath = "."
 venv = ".venv"
 pythonVersion = "3.14"
 typeCheckingMode = "basic"
+reportDeprecated = "error"
 include = ["src"]
 exclude = ["**/node_modules", "**/__pycache__", ".venv"]

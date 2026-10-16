@@ -3,9 +3,8 @@
 import datetime
 import random
 from collections.abc import Awaitable, Callable, Mapping
+from dataclasses import dataclass
 from email.utils import parsedate_to_datetime
-
-import msgspec
 
 __all__ = ("OnRatelimit", "RetryPolicy", "backoff_delay", "retry_after", "retry_delay")
 
@@ -13,7 +12,8 @@ __all__ = ("OnRatelimit", "RetryPolicy", "backoff_delay", "retry_after", "retry_
 type OnRatelimit = Callable[[float], Awaitable[None]]
 
 
-class RetryPolicy(msgspec.Struct, frozen=True):
+@dataclass(frozen=True)
+class RetryPolicy:
     """How long a client is willing to sit on a rate limit.
 
     *attempts* counts the first try, so the default of three allows two waits.

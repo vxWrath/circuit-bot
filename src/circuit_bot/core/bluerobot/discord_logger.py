@@ -15,8 +15,8 @@ def setup_discord_logger() -> None:
 
     discord_logger = logging.getLogger("discord")
 
-    # Let records bubble up to the root logger so they pass through the
-    # ContextFilter and use the same formatted output as everything else.
+    # Let records bubble up to the root logger, where structlog's handler
+    # formats them the same way it formats the bot's own.
     discord_logger.propagate = True
 
     # Keep INFO so we get gateway connect/disconnect, shard events, etc.
