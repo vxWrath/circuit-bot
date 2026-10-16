@@ -14,17 +14,13 @@ class RobloxAPIError(RobloxError, APIResponseError):
 class RobloxUnavailableError(RobloxAPIError, APIUnavailableError):
     """Raised when Roblox answers with a server error (5xx).
 
-    The API answered, so this isn't a request that never got through: Roblox is
-    reachable but its backend is failing, which is Roblox's problem and usually
-    passes on its own.
+    The API answered, so this is not a request that never got through.
     """
 
 
 class RobloxRateLimitError(RobloxError, APIRateLimitError):
     """Raised when a request is rate limited and not worth waiting out in-line.
 
-    ``retry_after`` is how many seconds to wait before trying again when that
-    is actually known - the delay Roblox asked for, which is where it will
-    almost always come from.  It's ``None`` when nothing said, so a caller
-    shouldn't read it as a value the client invented.
+    ``retry_after`` is the delay Roblox asked for in seconds, or ``None`` when
+    nothing said - never a value the client invented.
     """

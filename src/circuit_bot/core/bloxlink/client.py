@@ -16,27 +16,11 @@ __all__ = ("BloxlinkClient",)
 class BloxlinkClient(APIClient):
     """Client for the Bloxlink API, available on the bot as ``bot.bloxlink``.
 
-    Resolves the accounts Bloxlink has linked, scoped to a Discord guild.
-    Every result is cached through ``bot.cache`` for a few minutes, including
-    "not linked", so repeated lookups don't hit the API at all.  A lookup
-    returns ``None`` only when no account is linked; an API failure raises
-    :class:`BloxlinkError` instead, so the two are never confused.  Cache
-    failures are logged and skipped - the API is always the source of truth.
-
-    Bloxlink allows :attr:`DAILY_LIMIT` requests per day per key, so every
-    request first spends one from a Redis counter keyed by the UTC date, and
-    once the day's budget is gone requests are refused with
-    :class:`BloxlinkRateLimitError` rather than sent - see
-    :meth:`before_request`.  Requests are throttled minute to minute as well,
-    so a 429 is waited out and retried while the wait is short enough, and
-    raises :class:`BloxlinkRateLimitError` - the same error, carrying
-    ``retry_after`` - when it isn't.
-
-    Every request is authenticated with the ``BLOXLINK_API_KEY`` environment
-    variable, so a key from https://blox.link/developers must be set.
-
-    Sending the request at all is :class:`~circuit_bot.core.api.APIClient`'s;
-    what's here is what is Bloxlink's - the key, the quota, and the endpoints.
+    Resolves and caches the accounts Bloxlink has linked, scoped to a Discord
+    guild.  ``None`` means nothing is linked; an API failure raises
+    :class:`BloxlinkError`.  Each request spends one of :attr:`DAILY_LIMIT` per
+    UTC day, refused with :class:`BloxlinkRateLimitError` once the budget is
+    gone.  Requires ``BLOXLINK_API_KEY``.
     """
 
     NAME = "Bloxlink"
@@ -72,19 +56,10 @@ class BloxlinkClient(APIClient):
     async def before_request(self) -> None:
         """Spend one request from today's quota, raising once it's used up.
 
-        The counter is a single Redis entry keyed by the UTC date
-        (``bloxlink:requests:2026-10-12``), so it starts over on its own at
-        midnight UTC and no reset job is needed.  The increment comes first, so
-        concurrent requests each get their own number and only the first
-        :attr:`DAILY_LIMIT` of them are ever sent; attempts refused by the
-        guard are counted too, which makes the counter a tally of demand rather
-        than of requests that reached Bloxlink.
-
         Runs once per attempt, so a request that is rate limited and retried
-        spends a second unit on the retry - which is what Bloxlink counts.
-
-        Raises :class:`BloxlinkRateLimitError` once the limit is exceeded, with
-        ``retry_after`` set to the seconds left until the counter resets.
+        spends a second unit.  Raises :class:`BloxlinkRateLimitError` with
+        ``retry_after`` set to the seconds left until the UTC-date counter
+        resets; a cache failure lets the request through uncounted.
         """
 
         now = datetime.datetime.now(tz=datetime.UTC)
@@ -188,12 +163,10 @@ class BloxlinkClient(APIClient):
     ) -> int | None:
         """Resolve *discord_user_id* to the Roblox account linked in *guild_id*.
 
-        Returns ``None`` if no Roblox account is linked and raises
+        Returns ``None`` if no account is linked and raises
         :class:`BloxlinkError` if the API can't be reached.  A cached link is
         served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting::
-
-            roblox_id = await bot.bloxlink.resolve_roblox_id(guild_id, discord_user_id, on_ratelimit=show_wait)
+        lookup that ends up waiting.
         """
 
         return await self.lookup(
@@ -216,12 +189,10 @@ class BloxlinkClient(APIClient):
     ) -> list[int] | None:
         """Resolve *roblox_id* to the Discord accounts linked in *guild_id*.
 
-        Returns ``None`` if no Discord account is linked and raises
+        Returns ``None`` if no account is linked and raises
         :class:`BloxlinkError` if the API can't be reached.  A cached link is
         served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting::
-
-            discord_ids = await bot.bloxlink.resolve_discord_ids(guild_id, roblox_id, on_ratelimit=show_wait)
+        lookup that ends up waiting.
         """
 
         return await self.lookup(

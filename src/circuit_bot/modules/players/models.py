@@ -6,9 +6,8 @@ __all__ = ("NewPlayer", "PlayerRef", "PlayerRow", "PlayerTable")
 class PlayerTable(Row):
     """The ``players`` table: one row per player, keyed by their Discord snowflake.
 
-    Nothing here is generated - the bot knows the snowflake - so there's no
-    ``generated`` list.  Columns are provisional; reconcile them with the real
-    schema before anything writes.
+    Columns are provisional; reconcile them with the real schema before
+    anything writes.
     """
 
     class Meta:
@@ -28,8 +27,7 @@ class PlayerRow(PlayerTable):
 class NewPlayer(PlayerTable, kw_only=True):
     """A player, as an insert sends one.
 
-    ``kw_only`` covers the fields inherited from the table as well as the ones
-    declared here, so a defaulted field can sit beside a required one.
+    Built with keywords, the inherited fields included.
     """
 
     snowflake: int

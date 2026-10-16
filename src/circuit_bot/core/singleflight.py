@@ -10,42 +10,12 @@ __all__ = ("SingleFlight",)
 class SingleFlight:
     """Run one coroutine for every caller asking the same thing at once.
 
-    A cache answers "did we learn this earlier?" and has nothing to say while
-    the first request for something is still out - so every caller that arrives
-    in that window does the work again.  This is what covers that window: the
-    first caller starts the call, later ones wait on the one already running,
-    and all of them get its answer.
-
-    The two mechanisms are neighbours and are meant to be used together, each
-    covering the window the other can't: this one while an answer is being
-    fetched, the cache once it exists.  Nothing is kept here after the call
-    finishes - what happens to the answer next is the caller's to decide, which
-    is what keeps this a coordinator rather than a second cache.
-
-    A key is whatever makes two requests the same question - an API resource, a
-    part of a profile - and each object that needs this holds its own, so one
-    object's keys can't collide with another's.  Waits are per key, so two
-    different questions never block each other.
-
-    Four things it has to get right, and does:
-
-    - **A caller's cancellation is not the call's.**  The call runs as a task
-      of its own and callers wait *on* it rather than awaiting it directly, so
-      an interaction timing out stops that caller waiting instead of cancelling
-      the fetch everybody else is waiting on.
-    - **A failure is not remembered.**  An exception reaches every waiter at
-      once, and the entry goes with it, so the next caller starts a fresh call
-      instead of being handed a stale failure.
-    - **An exception nobody waited for is still read.**  When every waiter has
-      gone, something has to ask the task for it, or asyncio reports it as
-      never retrieved.
-    - **An entry lives exactly as long as the call does**, whatever way the
-      call ends.
-
-    What the call itself sees is the first caller's: *func* is handed the
-    arguments that caller gave, not a mixture of everyone's, so a per-caller
-    argument - a callback reporting a wait - belongs to whoever started the
-    call and not to those who joined it.
+    Later callers wait on the call already running and get its result or its
+    exception; a failure is not remembered, and nothing is kept once the call
+    finishes.  Callers wait *on* the call's own task, so cancelling one never
+    cancels what the others are waiting on, and *func* sees the first caller's
+    arguments.  Keys must be hashable and equal for two requests that mean the
+    same thing.
     """
 
     def __init__(self) -> None:
@@ -55,13 +25,9 @@ class SingleFlight:
         """Call ``func(*args, **kwargs)`` once per *key*, sharing what it returns.
 
         Every caller that arrives while the call is in flight gets the same
-        result - or the same exception, if that is how it ended.  The call is
-        taken as a function and its arguments rather than as a coroutine
-        object, because one of those can only be awaited once and this may be
-        starting it on behalf of whoever arrived first.
-
-        *key* is compared and never stored beyond the call, so it has to be
-        hashable and equal for two requests that mean the same thing.
+        result, or the same exception.  *key* is compared and never stored
+        beyond the call, so it has to be hashable and equal for two requests
+        that mean the same thing.
         """
 
         task = self._in_flight.get(key)
@@ -87,9 +53,7 @@ class SingleFlight:
         """Drop *key*'s entry now that *task* is done, and read its exception.
 
         The callback :meth:`run` leaves on the task it started.  Reading the
-        exception is what stops asyncio warning about one nobody waited for:
-        every waiter may have been cancelled before it finished, and then this
-        is the only thing that looks.
+        exception is what stops asyncio warning about one nobody waited for.
         """
 
         self._in_flight.pop(key, None)

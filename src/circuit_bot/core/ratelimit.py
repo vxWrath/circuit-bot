@@ -17,10 +17,9 @@ class RetryPolicy:
     """How long a client is willing to sit on a rate limit.
 
     *attempts* counts the first try, so the default of three allows two waits.
-    A server asking for longer than *max_wait* seconds isn't waited on at all -
-    the client raises instead, leaving the caller to decide whether to come
-    back later.  When no header says how long to wait, *base_wait* is the first
-    backoff step, doubling per attempt up to *max_backoff*.
+    A server asking for longer than *max_wait* isn't waited on at all - the
+    client raises.  With no header to read, *base_wait* is the first backoff
+    step, doubling per attempt up to *max_backoff*.
     """
 
     attempts: int = 3
@@ -32,9 +31,8 @@ class RetryPolicy:
 def retry_after(headers: Mapping[str, str]) -> float | None:
     """Read how many seconds *headers* ask us to wait, or ``None`` if they don't.
 
-    ``retry-after`` wins, in either form RFC 9110 allows - a delay in seconds
-    or an HTTP date - and ``x-ratelimit-reset`` is the fallback, which both
-    APIs send as seconds until the window resets.  An unreadable header is
+    ``retry-after`` wins, in either form RFC 9110 allows - seconds or an HTTP
+    date - with ``x-ratelimit-reset`` as the fallback.  An unreadable header is
     skipped rather than guessed at, leaving the caller to back off instead.
     """
 
@@ -68,8 +66,7 @@ def backoff_delay(attempt: int, policy: RetryPolicy) -> float:
     """Return how long to wait before retrying, with *attempt* counting from one.
 
     The step doubles per attempt up to *policy.max_backoff*, and half of it is
-    jittered away, so a retry waits at least half the step but never lines up
-    with everything else that was throttled at the same moment.
+    jittered away, so a retry waits between half and the whole step.
     """
 
     step = min(policy.max_backoff, policy.base_wait * 2 ** (attempt - 1))
@@ -81,10 +78,9 @@ def backoff_delay(attempt: int, policy: RetryPolicy) -> float:
 def retry_delay(headers: Mapping[str, str], attempt: int, policy: RetryPolicy) -> tuple[float, float | None]:
     """Return how long to wait before retrying, and what the server asked for.
 
-    The delay is what *headers* asked for when they said anything usable, and
-    :func:`backoff_delay` otherwise.  The second element is that server-asked
-    value, or ``None`` when there wasn't one - callers that pass it on to their
-    own callers need the two kept apart, since a backoff guess is no promise.
+    The delay is what *headers* asked for when usable, :func:`backoff_delay`
+    otherwise; the second element is that server-asked value or ``None``, kept
+    apart because a backoff guess is no promise.
     """
 
     requested = retry_after(headers)

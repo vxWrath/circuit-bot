@@ -15,23 +15,11 @@ __all__ = ("PlayerService",)
 class PlayerService(Service):
     """Player reads and writes over the database and the cached clients.
 
-    The one place that composes a player out of several sources: the row in
-    Postgres, the Roblox account, and (once the stats gateway lands) the sheet
-    rows joined on ``roblox_id``.  Commands hold one of these and ask it
-    questions; they never reach past it into a repository - or into a client,
-    which is what keeps the composition in one place and the profile below a
-    view over this rather than a second one.
-
-    A method that spans several statements opens the transaction itself and
-    builds its repositories on it, so a caller can't half-commit it::
-
-        async with self.bot.database.transaction() as conn:
-            await conn.get_repository(GameRow).insert(result)
-            await conn.get_repository(AppearanceRow).bulk_insert(rows)
-
-    A method that has to join a caller's transaction takes the scope and builds
-    from it the same way - the repositories it makes are the whole of the
-    routing, and no call it writes carries a connection.
+    The one place that composes a player out of the row in Postgres and the
+    Roblox account: commands ask it rather than reaching past it into a
+    repository or a client.  A method spanning several statements opens the
+    transaction itself and builds its repositories on it, so a caller can't
+    half-commit it.
     """
 
     def __init__(self, *, bot: "CircuitBot") -> None:
@@ -61,8 +49,7 @@ class PlayerService(Service):
         """Attach a Roblox account to *player*, or ``None`` if the row is gone.
 
         *player* is the row the write is keyed by, so a caller that already read
-        the player to decide passes that read rather than a snowflake it would
-        have to look up again.
+        the player passes that read rather than looking the player up again.
         """
 
         return await self.players.update(player, roblox_id=roblox_id)
@@ -70,9 +57,8 @@ class PlayerService(Service):
     async def roblox_id(self, *, snowflake: int) -> int | None:
         """The Roblox account linked to *snowflake*, or ``None``.
 
-        The id on its own, for a caller that wants to name the account rather
-        than show it - a profile link, a join - and so doesn't pay for the
-        lookup :meth:`roblox_user` makes.
+        The id alone, without the lookup :meth:`roblox_user` makes, for a
+        caller that only needs to name the account.
         """
 
         player = await self.players.get_by_pk(snowflake)
@@ -86,8 +72,7 @@ class PlayerService(Service):
         """The Roblox account linked to *snowflake*, or ``None`` when there's none.
 
         No account linked and no such player are one answer, since a caller can
-        render neither any differently.  The client caches what it fetches, so
-        asking twice costs one lookup.
+        render neither any differently.
         """
 
         roblox_id = await self.roblox_id(snowflake=snowflake)

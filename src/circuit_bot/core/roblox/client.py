@@ -13,18 +13,10 @@ __all__ = ("RobloxClient", "RobloxUser")
 class RobloxClient(APIClient):
     """Client for the Roblox web API, available on the bot as ``bot.roblox``.
 
-    Every result is cached through ``bot.cache`` for a few minutes, including
-    "user doesn't exist", so repeated lookups don't hit the API at all.  A
-    lookup returns ``None`` only for a nonexistent user; an API failure raises
-    :class:`RobloxError` instead, so the two are never confused.  Cache
-    failures are logged and skipped - the API is always the source of truth.
-
-    Roblox throttles per IP rather than against a published budget, so rather
-    than guessing at a ceiling the client reads what the API says about the
-    wait: a 429 is retried in place while it's short, and raises
-    :class:`RobloxRateLimitError` - carrying ``retry_after`` - when it isn't.
-    Sending the request at all is :class:`~circuit_bot.core.api.APIClient`'s;
-    what's here is what is Roblox's.
+    Caches every result, including "user doesn't exist": ``None`` means the user
+    doesn't exist, where an API failure raises :class:`RobloxError`.  A 429 is
+    retried in place while the wait the API reports is short, and raises
+    :class:`RobloxRateLimitError` when it isn't.
     """
 
     NAME = "Roblox"
@@ -114,9 +106,7 @@ class RobloxClient(APIClient):
         Returns ``None`` if the user doesn't exist and raises
         :class:`RobloxError` if the API can't be reached.  A cached profile is
         served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting::
-
-            user = await bot.roblox.get_user(1234, on_ratelimit=show_wait)
+        lookup that ends up waiting.
         """
 
         return await self.lookup(
@@ -135,9 +125,7 @@ class RobloxClient(APIClient):
         Returns ``None`` if the user doesn't exist and raises
         :class:`RobloxError` if the API can't be reached.  A cached headshot is
         served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting::
-
-            headshot = await bot.roblox.get_headshot(1234, on_ratelimit=show_wait)
+        lookup that ends up waiting.
         """
 
         return await self.lookup(

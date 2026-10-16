@@ -14,19 +14,14 @@ class BloxlinkAPIError(BloxlinkError, APIResponseError):
 class BloxlinkUnavailableError(BloxlinkAPIError, APIUnavailableError):
     """Raised when Bloxlink answers with a server error (5xx).
 
-    The API answered, so this isn't a request that never got through: Bloxlink
-    is reachable but its backend is failing, which is Bloxlink's problem and
-    usually passes on its own.
+    The API answered, so this is not a request that never got through.
     """
 
 
 class BloxlinkRateLimitError(BloxlinkError, APIRateLimitError):
     """Raised when a request is refused or rate limited.
 
-    Covers both a 429 from Bloxlink and the client's own daily quota guard,
-    which refuses requests locally rather than spending an API key's goodwill.
-    ``retry_after`` is how many seconds to wait before trying again when that
-    is actually known: seconds until the counter resets for the daily quota,
-    and the delay Bloxlink asked for on a 429 - though Bloxlink doesn't
-    document sending one, so expect ``None`` there.
+    Covers both a 429 from Bloxlink and the client's own daily quota guard.
+    ``retry_after`` is the seconds to wait when that is known - until the quota
+    counter resets, or the delay Bloxlink asked for - and ``None`` otherwise.
     """

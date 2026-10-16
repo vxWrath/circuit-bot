@@ -9,28 +9,9 @@ __all__ = ("Profile",)
 class Profile[S]:
     """A view over several sources that fills itself in on demand.
 
-    Unlike a model, a profile is not a snapshot: it starts empty, fetches each
-    part the first time it's asked for, and keeps it.  A command pays only for
-    what it renders, and because the clients underneath cache their own reads,
-    asking for a part twice costs nothing.
-
-    An empty part is kept too - ``None`` is an answer, and re-asking would
-    repeat the lookup that already found nothing.  A loader that *raises* keeps
-    nothing, so the next call tries again, and two coroutines asking for the
-    same part at once are answered by one call rather than one each - the
-    command that renders four parts at once pays for four lookups, not for
-    every ask.
-
-    A profile mirrors its service: every service method that takes the
-    identifier the profile was opened with gets a counterpart here that drops
-    it.  Reads fill parts; writes go through the service and then refresh the
-    profile, so a caller never reads a part the write has invalidated::
-
-        player = await profile.link_roblox(roblox_id)
-        assert (await profile.player()).roblox_id == roblox_id
-
-    Parts stay within one module's subject - anything belonging to another
-    module goes through that module's service.
+    Each part is fetched once on first ask and kept, ``None`` included; a loader
+    that *raises* keeps nothing, asks arriving while one is in flight share it,
+    and a write refreshes the profile so no caller reads a part it invalidated.
     """
 
     def __init__(self, *, service: S) -> None:

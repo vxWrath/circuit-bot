@@ -23,14 +23,10 @@ installed_handler: logging.Handler | None = None
 def configure_root_logger(*, force: bool = False) -> None:
     """Configure structlog and the root logger for the bot process.
 
-    Output is coloured on the console in dev - ``STAGE`` unset or ``dev``,
-    which :func:`~circuit_bot.core.env.is_dev` reads - and JSON everywhere
-    else, so a deployed bot logs something a collector can read.
-
-    Called on demand by :func:`get_logger`, which does it once.  *force* rebuilds
-    the pipeline a second time and swaps the root handler for a fresh one: it
-    holds onto the handler it installed for exactly that, since adding another
-    would print every record once per handler.
+    Coloured in dev (:func:`~circuit_bot.core.env.is_dev`), JSON everywhere
+    else.  Called on demand by :func:`get_logger`, which does it once; *force*
+    rebuilds the pipeline, swapping the installed handler rather than adding a
+    second one.
     """
     global IS_ROOT_CONFIGURED, installed_handler
 
@@ -156,13 +152,9 @@ def install_asyncio_exception_handler() -> None:
 def get_logger(name: str, *, level: int | None = logging.INFO) -> logging.Logger:
     """The logger for *name*, configuring the root logger the first time.
 
-    What comes back is a stdlib logger - structlog's pipeline is installed on
-    the root, where it renders both its own records and these - so a field of
-    its own travels in ``extra``, the one way a stdlib logger carries one::
-
-        logger.info("cache miss for %r", key, extra={"key": key})
-
-    *level* sets the logger's own level, and ``None`` leaves it to the root.
+    What comes back is a stdlib logger, rendered by structlog's pipeline on the
+    root, so a field of its own travels in ``extra``.  *level* sets the
+    logger's own level, and ``None`` leaves it to the root.
     """
 
     if not IS_ROOT_CONFIGURED:

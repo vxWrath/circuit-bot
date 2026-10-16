@@ -1,16 +1,4 @@
-"""Where the bot's connection settings come from.
-
-The parts are the configuration.  A ``DATABASE_URL`` sitting in the environment
-beside the ``POSTGRES_*`` variables it was built from is a second copy of the same
-credentials, and the two drift - so nothing is read as a URL, and the drivers are
-handed the pieces instead.
-
-Both services are described as discrete parameters rather than a DSN because that
-is what the drivers accept, and because a generated password containing ``@``,
-``:`` or ``/`` needs no escaping when no string is ever joined together.  The same
-settings serve a bot on the host and a bot in a container: only the host changes,
-and compose is what changes it.
-"""
+"""Where the bot's connection settings come from - discrete parts, not a URL."""
 
 from typing import NamedTuple
 
@@ -48,14 +36,8 @@ class RedisSettings(NamedTuple):
 def get_postgres_settings() -> PostgresSettings:
     """Read the ``POSTGRES_*`` environment variables.
 
-    Host and port fall back to where a local server listens; the credentials and
-    the database name do not, so a missing password stops the bot at startup
-    rather than connecting as whatever the driver would have picked.
-
-    A missing variable raises ``OSError`` and a port that isn't a number raises
-    ``ValueError`` - both surfacing as the ``DatabaseNotConnected``
-    :meth:`~circuit_bot.core.database.DatabasePool.connect` raises, since it reads
-    these from inside the block that translates them.
+    Host and port default to a local server; the credentials and database name do
+    not.  A missing variable raises ``OSError``, a non-numeric port ``ValueError``.
     """
 
     return PostgresSettings(
@@ -70,7 +52,7 @@ def get_postgres_settings() -> PostgresSettings:
 def get_redis_settings() -> RedisSettings:
     """Read the ``REDIS_*`` environment variables.
 
-    As above: host, port and database index have defaults, the password does not.
+    Host, port and database index default; the password does not.
     """
 
     return RedisSettings(

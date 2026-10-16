@@ -71,10 +71,9 @@ async def run() -> None:
 def main() -> None:
     """Sync entry point for the ``circuit-bot`` console script.
 
-    The loop is uvloop's, or there is no run at all: that is the loop signal
-    handling is wired up against, and uvloop doesn't support Windows - so a bot
-    started somewhere it can't be imported stops here, loudly, rather than
-    running with no way to shut it down.
+    The loop is uvloop's or there is no run at all: signal handling is wired up
+    against it, and uvloop doesn't support Windows - so a bot started there
+    stops here, loudly, rather than running with no way to shut it down.
     """
 
     try:

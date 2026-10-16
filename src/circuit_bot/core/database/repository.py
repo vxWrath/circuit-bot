@@ -26,30 +26,11 @@ POSTGRES_TYPES = (datetime.datetime, datetime.date, datetime.time, decimal.Decim
 class Repository[R: Row]:
     """CRUD for one shape over one table.
 
-    A repository is bound to a row shape: reads come back as that shape, and
-    writes send exactly the fields it declares, minus the ones the database
-    fills in (the ``generated`` list in the ``Meta`` its table base declared).
-    Asking for another shape over the same table gives another repository, which
-    is the point of ``Row`` subclasses::
-
-        players = database.get_repository(PlayerRow)       # reads the full row
-        new_players = database.get_repository(NewPlayer)   # writes just what's new
-
-        player = await players.get_by_pk_or_raise(snowflake)
-        created = await new_players.insert(NewPlayer(snowflake=snowflake, name="kyle"))
-
-    Where a repository's statements land is settled once, by what it was built
-    on.  Built on the pool, each statement checks a connection out for itself;
-    built on a connection (:meth:`DatabaseConnection.get_repository`), they all
-    run on that one, inside whatever transaction it has open::
-
-        async with database.transaction() as conn:
-            await conn.get_repository(PlayerRow).update(player, name="kyle")
-            await conn.get_repository(RosterRow).insert(RosterRow(snowflake=snowflake))
-
-    Nothing here takes a connection, which is the point: there is no
-    per-statement knob to forget, so a write can't quietly commit outside the
-    transaction its neighbours are in.
+    Reads come back as that shape and writes send the fields it declares minus
+    ``generated``.  Where its statements land is settled by what it was built on:
+    on the pool each statement checks a connection out for itself, on a
+    connection (:meth:`DatabaseConnection.get_repository`) they all run there,
+    inside whatever transaction is open.
     """
 
     def __init__(self, database: "Database", *, row_cls: type[R]) -> None:
@@ -94,8 +75,8 @@ class Repository[R: Row]:
     def where_clause(self, filters: dict[str, Any]) -> str:
         """Render the equality ``WHERE`` clause over the columns in *filters*.
 
-        The values are passed separately, in the same order, so the clause only
-        ever holds column names - which is why the check happens here.
+        Values go separately and in the same order, so the clause only ever holds
+        column names.
         """
 
         self.check_columns(filters)
@@ -104,9 +85,8 @@ class Repository[R: Row]:
     def column_values(self, obj: R, columns: Sequence[str]) -> list[Any]:
         """The values *columns* take on *obj*, in the order they were given.
 
-        The repository's shape decides which columns a write sends; *obj* only
-        has to carry them.  One that doesn't is a bug in the caller, so it fails
-        here, named, rather than as a missing key inside the statement.
+        *obj* must carry every column; one that doesn't raises
+        :class:`RepositoryError` naming it, rather than failing inside the statement.
         """
 
         values = msgspec.to_builtins(obj, builtin_types=POSTGRES_TYPES)
@@ -178,13 +158,10 @@ class Repository[R: Row]:
     # -- writes ----------------------------------------------------------
 
     async def insert(self, obj: R) -> R:
-        """Insert *obj*, leaving out the columns the database fills in.
+        """Insert *obj*, leaving out the ``generated`` columns the database fills in.
 
-        The columns written are the ones the shape declares, minus
-        ``generated``, so a shape can carry a generated column to read it
-        back without ever writing it.  Returns the row ``RETURNING`` produced,
-        which is the only thing ``INSERT ... RETURNING`` can do - so a missing
-        row is an error rather than a ``None`` the caller has to handle.
+        Returns the row ``RETURNING`` produced - a missing one is an error, never
+        a ``None`` the caller has to handle.
         """
 
         columns = [field for field in self._fields if field not in self._generated]
@@ -206,16 +183,10 @@ class Repository[R: Row]:
     async def update(self, obj: R, **changes: Any) -> R | None:
         """Partial update - only touches the fields you pass, and only reads back those.
 
-        The row to change is *obj*'s, looked up by the primary key its table's
-        ``Meta`` declares, and the model that comes back is *obj* with the
-        columns the statement wrote replaced by whatever the database made of
-        them - ``RETURNING`` names just those columns, so a value a default or a
-        trigger changed comes back as the database left it::
-
-            player = await players.update(player, name="kyle")
-
-        ``None`` means no row matched, which is a row that was deleted rather
-        than an error the caller can't act on.
+        The row is *obj*'s, looked up by the primary key its table's ``Meta``
+        declares, and the model returned is *obj* with the written columns replaced
+        by whatever the database made of them.  ``None`` means no row matched: a row
+        that was deleted, not an error the caller can't act on.
         """
 
         if not changes:

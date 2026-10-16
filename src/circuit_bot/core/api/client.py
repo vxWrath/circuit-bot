@@ -21,10 +21,8 @@ __all__ = ("APIClient", "Errors")
 class Errors(NamedTuple):
     """The errors a client raises, declared together so none is forgotten.
 
-    One per way a request can end badly: the request never got through, the API
-    answered with something unusable, the API answered with a server error, and
-    the request was refused for asking too often.  Each is the service's own
-    subclass, so a caller can catch the one it means.
+    One per way a request can end badly, and each is the service's own subclass,
+    so a caller can catch the one it means.
     """
 
     error: type[APIError]
@@ -36,30 +34,14 @@ class Errors(NamedTuple):
 class APIClient:
     """Base for the clients that talk to a third-party HTTP API.
 
-    Roblox and Bloxlink are the same shape of thing: a session, a retry policy,
-    a status code that means "nothing there", a cache in front.  What differs
-    is their auth, their endpoints and the errors they raise, so this holds the
-    first group once and a subclass declares the second::
+    A subclass must declare :attr:`NAME` and :attr:`ERRORS`, and is refused at
+    definition time otherwise.  The hooks below default to doing nothing, so a
+    client overrides only the ones it has an answer for.
 
-        class RobloxClient(APIClient):
-            NAME = "Roblox"
-            ERRORS = Errors(error=RobloxError, api=RobloxAPIError, ...)
-
-            async def fetch_user(self, user_id: int) -> RobloxUser | None: ...
-
-    A subclass that forgets either is refused when it's defined, rather than
-    answering ``None`` from somewhere under a request.  Beyond those two, the
-    hooks below are what it overrides when it has something to add to a
-    request - each has a default that does nothing, so a client implements the
-    ones it has an answer for and no others, and none of them is required
-    enough to be abstract.  Its own surface - the ``get_user`` or
-    ``resolve_roblox_id`` a command calls - stays on itself, where the prose
-    that names it lives.
-
-    The two shared methods are :meth:`request`, which sends one HTTP request and
-    turns the ways it can fail into the client's own errors, and :meth:`lookup`,
-    which puts the cache in front of a fetch.  Neither is reached through the
-    bot: what a caller gets from ``bot.roblox`` is the subclass's own methods.
+    :meth:`request` sends one HTTP request and raises the client's own errors;
+    :meth:`lookup` puts the cache in front of a fetch.  Neither is reached
+    through the bot - what a caller gets from ``bot.roblox`` is the subclass's
+    own methods.
     """
 
     NAME: ClassVar[str]
@@ -94,12 +76,10 @@ class APIClient:
     # -- hooks ---------------------------------------------------------------
 
     def request_headers(self) -> dict[str, str]:
-        """Headers every request to this API carries.
+        """Headers every request to this API carries - override to authenticate.
 
-        A client that has to authenticate overrides this.  Called once per
-        :meth:`request` rather than once per attempt, so a retry sends what the
-        first try sent, and whatever a caller passes in its own ``headers`` is
-        merged over the top.
+        Built once per :meth:`request`, not per attempt, so a retry resends what
+        the first try sent; a caller's own ``headers`` merge over the top.
         """
 
         return {}
@@ -108,15 +88,14 @@ class APIClient:
         """Run once per attempt, just before the request goes out.
 
         Where a client spends something to make a request - a unit of quota, a
-        token refresh - it happens here, so only a request that is actually
-        about to be sent pays for it.
+        token refresh - it happens here, so only an attempt actually being made
+        pays for it.
         """
 
     def error_detail(self, payload: Any) -> str | None:
         """The reason an error body gives, in the spelling this API uses.
 
-        ``None`` when the body says nothing, which is this default: an API that
-        reports its errors some other way overrides it.
+        ``None`` by default, for an API that reports its errors some other way.
         """
 
         return None
@@ -146,18 +125,15 @@ class APIClient:
         """Send an HTTP request to this API and parse the JSON response.
 
         A 429 is waited out and retried in place while the wait is short enough
-        to sit on, up to :attr:`RETRY_POLICY` attempts; *on_ratelimit* is told
-        the delay first, so a caller can keep the user posted.  A longer wait
-        raises this client's rate limit error instead, carrying ``retry_after``
-        only when the API said how long to wait, leaving the caller to come
-        back later.
+        to sit on, up to :attr:`RETRY_POLICY` attempts, with *on_ratelimit* told
+        the delay first; a longer wait raises the client's rate limit error
+        instead, carrying ``retry_after`` only when the API said how long.
 
         Returns ``None`` when the API answers 404 - nothing there is an answer,
-        not a failure - and otherwise raises the errors the client declared in
+        not a failure - and otherwise raises what the client declared in
         :attr:`ERRORS`: its own error when the request never got through, its
-        response error for any other unexpected status or unusable JSON, and
-        its unavailable error when the API answers 5xx, which is the API being
-        reachable while its backend isn't.
+        response error for any other unexpected status or unusable JSON, and its
+        unavailable error when the API answers 5xx.
         """
 
         self._logger.debug("%s API request: %s %s", self.NAME, method, url)
@@ -241,23 +217,14 @@ class APIClient:
     ) -> T | None:
         """Serve *path* from the cache, falling back to *fetch*.
 
-        A ``None`` result is remembered too, as a marker written under the same
-        key a value would take - so a lookup of something that isn't there, an
-        account nobody linked or a user who doesn't exist, doesn't reach the API
-        a second time either, and reading that back costs the one round trip a
-        cached value costs.
+        A ``None`` from *fetch* is remembered too, as an absent marker under the
+        same key a value would take.  Cache failures are logged and skipped -
+        *fetch* is always the source of truth - and *on_ratelimit* is handed to
+        *fetch*, which passes it on to the request it makes.
 
-        Cache failures are logged and skipped: *fetch* is always the source of
-        truth.  *on_ratelimit* is handed to *fetch*, which passes it along to
-        the request it makes, so only a lookup that ends up waiting at the API
-        can report a wait.
-
-        Two callers asking for the same thing at the same moment share the one
-        call to *fetch* - the cache covers what happens between answers, this
-        covers the window before the first one exists.  What it shares is also
-        the first caller's arguments, so *on_ratelimit* belongs to whoever
-        started the fetch: a lookup that joins one already in flight isn't told
-        about a wait it didn't start.
+        Callers asking for the same thing at the same moment share one call to
+        *fetch*, and with it the first caller's arguments: a lookup that joins
+        one already in flight isn't told about a wait it didn't start.
         """
 
         key = self.bot.cache.key_from_path(*path)

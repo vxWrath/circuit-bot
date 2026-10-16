@@ -14,6 +14,5 @@ class CacheNotConnected(CacheError):
 class CacheValidationError(CacheError):
     """Raised when a value found in the cache can't be decoded into the requested type.
 
-    The bad entry is left in Redis, so the caller decides whether to refill or
-    delete it.
+    The bad entry is left in Redis, for the caller to refill or delete.
     """

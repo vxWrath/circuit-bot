@@ -6,12 +6,7 @@ __all__ = ("RobloxUser", "RobloxUserIngest")
 
 
 class RobloxUserIngest(APIModel):
-    """A Roblox user profile, as the users API spells it.
-
-    The API spells two of these differently - ``username`` arrives as ``name``
-    and ``display_name`` as ``displayName`` - so the wire spelling is carried
-    here, on the field, and a response decodes straight into this shape.
-    """
+    """A Roblox user profile, as the users API spells it."""
 
     id: int
     username: str = msgspec.field(name="name")
@@ -21,8 +16,7 @@ class RobloxUserIngest(APIModel):
 class RobloxUser(Model):
     """A Roblox user profile, as the rest of the bot spells it.
 
-    Built from :class:`RobloxUserIngest`, so what gets cached, compared and
-    written back out is this spelling rather than the API's.
+    Built from :class:`RobloxUserIngest`.
     """
 
     id: int

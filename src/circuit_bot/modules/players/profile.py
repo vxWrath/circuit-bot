@@ -16,19 +16,9 @@ class PlayerProfile(Profile["PlayerService"]):
     """One player, filled in on demand.
 
     Open it through :meth:`PlayerService.profile` and ask for the parts you
-    render - each is fetched once and kept, so a command that only shows a name
-    never touches the Roblox API or the stats sheet::
-
-        profile = players.profile(member.id)
-
-        player = await profile.player()
-        headshot = await profile.headshot_url()
-
-    Whatever the service does to a specific player has a counterpart here with
-    the snowflake already filled in - :meth:`link_roblox`, mirroring
-    :meth:`PlayerService.link_roblox`.  A part is whatever the service says it
-    is, so a profile never reaches for a client itself: the composition stays
-    where it was written.
+    render - each is fetched once and kept.  Methods that take a snowflake on
+    the service have a counterpart here with it filled in, and a profile never
+    reaches for a client itself.
     """
 
     def __init__(self, service: "PlayerService", snowflake: int) -> None:
@@ -67,12 +57,9 @@ class PlayerProfile(Profile["PlayerService"]):
     async def link_roblox(self, roblox_id: int) -> PlayerRow | None:
         """Link a Roblox account to this player, or ``None`` if there's no such player.
 
-        The write is keyed by the row already asked for - kept by
-        :meth:`player`, or fetched here if this is the first part anyone wanted
-        - so linking costs one statement of its own.  Everything else the
-        profile held is dropped, because a new account changes the Roblox parts
-        too - then the row the write returned is kept as-is, so the next read
-        doesn't have to fetch it back.
+        The write is keyed by the row :meth:`player` kept, or fetched here if
+        this is the first part anyone wanted, and the row it returns is kept.
+        Every other part is dropped.
         """
 
         player = await self.player()

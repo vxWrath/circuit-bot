@@ -1,5 +1,4 @@
-# The build context: uv sync needs pyproject.toml, uv.lock, README.md and
-# src/.  Everything else is either dead weight or actively unwanted.
+# uv sync needs pyproject.toml, uv.lock, README.md and src/.
 
 .git
 .gitignore
@@ -10,8 +9,7 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 
-# Secrets arrive as environment variables at run time.  A .env baked into a
-# layer stays in the image history even after the file is deleted.
+# Secrets arrive as environment variables; a baked-in .env stays in the layers.
 .env
 .env.*
 
@@ -19,7 +17,6 @@ docs/
 tools/
 out/
 
-# README.md is the exception: pyproject.toml names it as the project readme, so
-# the build backend reads it.
+# README.md is excepted - pyproject.toml names it as the project readme.
 *.md
 !README.md
