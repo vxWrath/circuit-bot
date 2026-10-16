@@ -8,7 +8,7 @@ import aiohttp
 
 from ..cache.exceptions import CacheError
 from ..logging import get_logger
-from ..ratelimit import OnRatelimit, RetryPolicy, retry_delay
+from ..ratelimit import RetryPolicy, retry_delay
 from ..singleflight import SingleFlight
 from .exceptions import APIError, APIRateLimitError, APIResponseError, APIUnavailableError
 
@@ -39,9 +39,8 @@ class APIClient:
     client overrides only the ones it has an answer for.
 
     :meth:`request` sends one HTTP request and raises the client's own errors;
-    :meth:`lookup` puts the cache in front of a fetch.  Neither is reached
-    through the bot - what a caller gets from ``bot.roblox`` is the subclass's
-    own methods.
+    :meth:`lookup` puts the cache in front of a fetch.  Both are internal: what
+    ``bot.roblox`` exposes is the subclass's own methods.
     """
 
     NAME: ClassVar[str]
@@ -114,26 +113,18 @@ class APIClient:
 
         return f"{message}: {detail}" if detail else message
 
-    async def request(
-        self,
-        method: str,
-        url: str,
-        *,
-        on_ratelimit: OnRatelimit | None = None,
-        **kwargs: Any,
-    ) -> dict[str, Any] | None:
+    async def request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any] | None:
         """Send an HTTP request to this API and parse the JSON response.
 
-        A 429 is waited out and retried in place while the wait is short enough
-        to sit on, up to :attr:`RETRY_POLICY` attempts, with *on_ratelimit* told
-        the delay first; a longer wait raises the client's rate limit error
-        instead, carrying ``retry_after`` only when the API said how long.
+        A 429 is waited out and retried in place while the wait is short enough to
+        sit on, up to :attr:`RETRY_POLICY` attempts; a longer wait raises the
+        client's rate limit error, carrying ``retry_after`` when the API said how
+        long.
 
-        Returns ``None`` when the API answers 404 - nothing there is an answer,
-        not a failure - and otherwise raises what the client declared in
-        :attr:`ERRORS`: its own error when the request never got through, its
-        response error for any other unexpected status or unusable JSON, and its
-        unavailable error when the API answers 5xx.
+        Returns ``None`` when the API answers 404.  Any other failure raises what
+        the client declared in :attr:`ERRORS`: its own error when the request
+        never got through, its response error for an unexpected status or
+        unusable JSON, and its unavailable error for a 5xx.
         """
 
         self._logger.debug("%s API request: %s %s", self.NAME, method, url)
@@ -176,9 +167,6 @@ class APIClient:
                             self.RETRY_POLICY.attempts,
                         )
 
-                        if on_ratelimit is not None:
-                            await on_ratelimit(delay)
-
                         await asyncio.sleep(delay)
                         continue
 
@@ -213,18 +201,15 @@ class APIClient:
         cls: type[T],
         fetch: Callable[..., Coroutine[None, None, T | None]],
         args: tuple[Any, ...] = (),
-        on_ratelimit: OnRatelimit | None = None,
     ) -> T | None:
         """Serve *path* from the cache, falling back to *fetch*.
 
         A ``None`` from *fetch* is remembered too, as an absent marker under the
-        same key a value would take.  Cache failures are logged and skipped -
-        *fetch* is always the source of truth - and *on_ratelimit* is handed to
-        *fetch*, which passes it on to the request it makes.
+        same key a value would take.  A cache failure is logged and skipped;
+        *fetch* stays the source of truth.
 
         Callers asking for the same thing at the same moment share one call to
-        *fetch*, and with it the first caller's arguments: a lookup that joins
-        one already in flight isn't told about a wait it didn't start.
+        *fetch*, and with it the first caller's arguments.
         """
 
         key = self.bot.cache.key_from_path(*path)
@@ -243,7 +228,7 @@ class APIClient:
         async def fetch_and_remember() -> T | None:
             """Fetch, then keep what came back - the unit concurrent callers share."""
 
-            fetched = await fetch(*args, on_ratelimit=on_ratelimit)
+            fetched = await fetch(*args)
 
             try:
                 if fetched is None:

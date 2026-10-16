@@ -16,8 +16,8 @@ class PlayerService(Service):
     """Player reads and writes over the database and the cached clients.
 
     The one place that composes a player out of the row in Postgres and the
-    Roblox account: commands ask it rather than reaching past it into a
-    repository or a client.  A method spanning several statements opens the
+    Roblox account, so commands have a single surface to ask.  A method spanning
+    several statements opens the
     transaction itself and builds its repositories on it, so a caller can't
     half-commit it.
     """
@@ -49,7 +49,7 @@ class PlayerService(Service):
         """Attach a Roblox account to *player*, or ``None`` if the row is gone.
 
         *player* is the row the write is keyed by, so a caller that already read
-        the player passes that read rather than looking the player up again.
+        the player passes that read.
         """
 
         return await self.players.update(player, roblox_id=roblox_id)

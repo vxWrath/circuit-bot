@@ -8,10 +8,7 @@ logger = get_logger("discord")
 
 
 def setup_discord_logger() -> None:
-    """Configure discord.py loggers to propagate to the root logging system.
-
-    ``configure_root_logger()`` must be called before this function.
-    """
+    """Configure discord.py loggers to propagate to the root logging system."""
 
     discord_logger = logging.getLogger("discord")
 

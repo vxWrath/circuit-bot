@@ -15,11 +15,7 @@ if TYPE_CHECKING:
 
 __all__ = ("RecordNotFoundError", "Repository", "RepositoryError")
 
-# What asyncpg wants handed to it as it is.  A row's values go straight into a
-# statement, so a ``datetime`` has to stay a ``datetime`` and a ``Decimal`` a
-# ``Decimal``.  ``msgspec.to_builtins`` is what recurses into a model - which is
-# what lets a nested one be stored at all - and these are the types it must
-# leave alone on the way down, rather than rendering them the way JSON would.
+# The types msgspec must hand asyncpg as they are, not as JSON would render them.
 POSTGRES_TYPES = (datetime.datetime, datetime.date, datetime.time, decimal.Decimal, uuid.UUID, bytes)
 
 
@@ -27,10 +23,10 @@ class Repository[R: Row]:
     """CRUD for one shape over one table.
 
     Reads come back as that shape and writes send the fields it declares minus
-    ``generated``.  Where its statements land is settled by what it was built on:
-    on the pool each statement checks a connection out for itself, on a
-    connection (:meth:`DatabaseConnection.get_repository`) they all run there,
-    inside whatever transaction is open.
+    ``generated``.  What the repository was built on decides where its statements
+    run: build it on the pool and each statement checks out a connection of its
+    own, or on a connection (:meth:`DatabaseConnection.get_repository`) and they
+    all run there, inside whatever transaction is open.
     """
 
     def __init__(self, database: "Database", *, row_cls: type[R]) -> None:
@@ -85,8 +81,8 @@ class Repository[R: Row]:
     def column_values(self, obj: R, columns: Sequence[str]) -> list[Any]:
         """The values *columns* take on *obj*, in the order they were given.
 
-        *obj* must carry every column; one that doesn't raises
-        :class:`RepositoryError` naming it, rather than failing inside the statement.
+        *obj* must carry every column.  One that doesn't raises
+        :class:`RepositoryError` naming the missing field.
         """
 
         values = msgspec.to_builtins(obj, builtin_types=POSTGRES_TYPES)
@@ -137,7 +133,7 @@ class Repository[R: Row]:
         return self.from_records(records)
 
     async def find_by(self, **filters: Any) -> list[R]:
-        """Simple equality-filter lookup, e.g. repo.find_by(user_id=5, active=True)."""
+        """Look up rows matching every equality filter, e.g. ``find_by(user_id=5, active=True)``."""
         if not filters:
             raise RepositoryError("find_by() called with no filters")
 
@@ -160,8 +156,8 @@ class Repository[R: Row]:
     async def insert(self, obj: R) -> R:
         """Insert *obj*, leaving out the ``generated`` columns the database fills in.
 
-        Returns the row ``RETURNING`` produced - a missing one is an error, never
-        a ``None`` the caller has to handle.
+        Returns the row ``RETURNING`` produced.  If the database returns nothing,
+        this raises :class:`RepositoryError`.
         """
 
         columns = [field for field in self._fields if field not in self._generated]
@@ -185,8 +181,7 @@ class Repository[R: Row]:
 
         The row is *obj*'s, looked up by the primary key its table's ``Meta``
         declares, and the model returned is *obj* with the written columns replaced
-        by whatever the database made of them.  ``None`` means no row matched: a row
-        that was deleted, not an error the caller can't act on.
+        by whatever the database made of them.  ``None`` means no row matched.
         """
 
         if not changes:

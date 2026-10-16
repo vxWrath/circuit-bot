@@ -2,14 +2,11 @@
 
 import datetime
 import random
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass
 from email.utils import parsedate_to_datetime
 
-__all__ = ("OnRatelimit", "RetryPolicy", "backoff_delay", "retry_after", "retry_delay")
-
-# Told how long a request is about to wait, just before it waits.
-type OnRatelimit = Callable[[float], Awaitable[None]]
+__all__ = ("RetryPolicy", "backoff_delay", "retry_after", "retry_delay")
 
 
 @dataclass(frozen=True)
@@ -33,7 +30,7 @@ def retry_after(headers: Mapping[str, str]) -> float | None:
 
     ``retry-after`` wins, in either form RFC 9110 allows - seconds or an HTTP
     date - with ``x-ratelimit-reset`` as the fallback.  An unreadable header is
-    skipped rather than guessed at, leaving the caller to back off instead.
+    skipped, leaving the caller to back off.
     """
 
     raw = headers.get("retry-after")

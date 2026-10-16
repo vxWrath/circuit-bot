@@ -31,8 +31,8 @@ class Profile[S]:
     ) -> T:
         """Call ``func(*args, **kwargs)`` once per *key* and keep what it returns.
 
-        A call that raises keeps nothing, so the next ask tries again; asks that
-        arrive while one is in flight wait on it rather than starting their own.
+        A call that raises keeps nothing, so the next ask tries again.  Asks
+        arriving while one is in flight wait on it.
         """
 
         if key in self._parts:

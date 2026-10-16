@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any
 from ..api import APIClient, Errors
 from ..cache.exceptions import CacheError
 from ..env import get_env
-from ..ratelimit import OnRatelimit
 from .exceptions import BloxlinkAPIError, BloxlinkError, BloxlinkRateLimitError, BloxlinkUnavailableError
 
 if TYPE_CHECKING:
@@ -95,18 +94,12 @@ class BloxlinkClient(APIClient):
             "Bloxlink API quota: %d/%d used for %s UTC", used, self.DAILY_LIMIT, now.strftime("%Y-%m-%d")
         )
 
-    async def fetch_roblox_id(
-        self,
-        guild_id: int,
-        discord_user_id: int,
-        *,
-        on_ratelimit: OnRatelimit | None = None,
-    ) -> int | None:
+    async def fetch_roblox_id(self, guild_id: int, discord_user_id: int) -> int | None:
         """Fetch the Roblox account linked to *discord_user_id* in *guild_id*."""
 
         url = f"{self.BASE_URL}/public/guilds/{guild_id}/discord-to-roblox/{discord_user_id}"
 
-        data = await self.request("GET", url, on_ratelimit=on_ratelimit)
+        data = await self.request("GET", url)
 
         if data is None:
             return None
@@ -123,18 +116,12 @@ class BloxlinkClient(APIClient):
         except (TypeError, ValueError) as e:
             raise BloxlinkAPIError(f"Bloxlink API returned an invalid Roblox ID {raw!r} for {url}") from e
 
-    async def fetch_discord_ids(
-        self,
-        guild_id: int,
-        roblox_id: int,
-        *,
-        on_ratelimit: OnRatelimit | None = None,
-    ) -> list[int] | None:
+    async def fetch_discord_ids(self, guild_id: int, roblox_id: int) -> list[int] | None:
         """Fetch the Discord accounts linked to *roblox_id* in *guild_id*."""
 
         url = f"{self.BASE_URL}/public/guilds/{guild_id}/roblox-to-discord/{roblox_id}"
 
-        data = await self.request("GET", url, on_ratelimit=on_ratelimit)
+        data = await self.request("GET", url)
 
         if data is None:
             return None
@@ -154,19 +141,11 @@ class BloxlinkClient(APIClient):
 
         return ids or None
 
-    async def resolve_roblox_id(
-        self,
-        guild_id: int,
-        discord_user_id: int,
-        *,
-        on_ratelimit: OnRatelimit | None = None,
-    ) -> int | None:
+    async def resolve_roblox_id(self, guild_id: int, discord_user_id: int) -> int | None:
         """Resolve *discord_user_id* to the Roblox account linked in *guild_id*.
 
         Returns ``None`` if no account is linked and raises
-        :class:`BloxlinkError` if the API can't be reached.  A cached link is
-        served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting.
+        :class:`BloxlinkError` if the API can't be reached.
         """
 
         return await self.lookup(
@@ -177,22 +156,13 @@ class BloxlinkClient(APIClient):
             cls=int,
             fetch=self.fetch_roblox_id,
             args=(guild_id, discord_user_id),
-            on_ratelimit=on_ratelimit,
         )
 
-    async def resolve_discord_ids(
-        self,
-        guild_id: int,
-        roblox_id: int,
-        *,
-        on_ratelimit: OnRatelimit | None = None,
-    ) -> list[int] | None:
+    async def resolve_discord_ids(self, guild_id: int, roblox_id: int) -> list[int] | None:
         """Resolve *roblox_id* to the Discord accounts linked in *guild_id*.
 
         Returns ``None`` if no account is linked and raises
-        :class:`BloxlinkError` if the API can't be reached.  A cached link is
-        served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting.
+        :class:`BloxlinkError` if the API can't be reached.
         """
 
         return await self.lookup(
@@ -203,5 +173,4 @@ class BloxlinkClient(APIClient):
             cls=list[int],
             fetch=self.fetch_discord_ids,
             args=(guild_id, roblox_id),
-            on_ratelimit=on_ratelimit,
         )

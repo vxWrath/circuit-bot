@@ -4,8 +4,8 @@ from ..model import Model
 
 __all__ = ("Row", "to_table_name")
 
-# Splits PascalCase into words while keeping acronyms whole, so RobloxIDRow
-# becomes "Roblox_ID" and HTTPLogRow "HTTP_Log" rather than one word per capital.
+# Splits PascalCase into words, keeping acronyms whole: RobloxIDRow becomes
+# "Roblox_ID" and HTTPLogRow "HTTP_Log".
 PASCAL_TO_SNAKE = re.compile(r"(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[A-Z])")
 
 

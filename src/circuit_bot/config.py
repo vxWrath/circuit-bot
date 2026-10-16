@@ -1,4 +1,4 @@
-"""Where the bot's connection settings come from - discrete parts, not a URL."""
+"""Where the bot's connection settings come from, one field per part."""
 
 from typing import NamedTuple
 

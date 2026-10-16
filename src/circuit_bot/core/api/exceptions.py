@@ -14,8 +14,7 @@ class APIResponseError(APIError):
 class APIUnavailableError(APIResponseError):
     """Raised when an API answers with a server error (5xx).
 
-    The API answered, so this isn't a request that never got through - the
-    service is reachable but its backend is failing.
+    The API answered, so the service is reachable and its own backend is failing.
     """
 
 

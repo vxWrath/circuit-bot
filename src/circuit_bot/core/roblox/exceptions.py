@@ -14,7 +14,7 @@ class RobloxAPIError(RobloxError, APIResponseError):
 class RobloxUnavailableError(RobloxAPIError, APIUnavailableError):
     """Raised when Roblox answers with a server error (5xx).
 
-    The API answered, so this is not a request that never got through.
+    The API answered, so the service is reachable and its own backend is failing.
     """
 
 

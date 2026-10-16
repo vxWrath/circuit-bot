@@ -10,9 +10,9 @@ __all__ = ("CacheCodec",)
 class CacheCodec:
     """Turn cache values into bytes and back again.
 
-    Reading is strict: a cached value is held to the shape it was cached as, so
-    an entry written by an earlier version of a model is refused rather than
-    coerced.  Any :class:`msgspec.Struct` will do - inheriting
+    Reading is strict: a cached value must match the shape it was cached as, so
+    an entry written by an earlier version of a model is refused.  Any
+    :class:`msgspec.Struct` will do - inheriting
     :class:`~circuit_bot.core.model.Model` is a convention of the bot's, not a
     requirement.
     """
@@ -118,9 +118,7 @@ class CacheCodec:
         subset of them.
         """
 
-        fields: dict[str, Any] = (
-            msgspec.to_builtins(instance) if isinstance(instance, msgspec.Struct) else instance
-        )
+        fields: dict[str, Any] = msgspec.to_builtins(instance) if isinstance(instance, msgspec.Struct) else instance
 
         return {field: self._encoder.encode(value) for field, value in fields.items()}
 
@@ -128,8 +126,8 @@ class CacheCodec:
         """Decode a raw hash field mapping into *cls*, or ``None`` when it is empty.
 
         Field names come back as ``str`` whatever Redis handed over, and each
-        field decodes on its own so one bad value is named rather than failing
-        the whole hash.  *key* names the hash in errors; a field that doesn't
+        field decodes on its own, so a bad value is named in the error.  *key*
+        names the hash in errors; a field that doesn't
         decode, or fields that don't fit *cls*, raise
         :class:`CacheValidationError`.
         """
@@ -139,8 +137,7 @@ class CacheCodec:
 
         try:
             fields = {
-                (field.decode() if isinstance(field, bytes) else field): value
-                for field, value in mapping.items()
+                (field.decode() if isinstance(field, bytes) else field): value for field, value in mapping.items()
             }
         except UnicodeDecodeError as e:
             raise CacheValidationError(f"Hash {key!r} has a field name that isn't UTF-8: {e}") from e

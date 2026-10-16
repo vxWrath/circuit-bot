@@ -24,10 +24,9 @@ class SingleFlight:
     async def run[T](self, key: Any, func: Callable[..., Coroutine[Any, Any, T]], *args: Any, **kwargs: Any) -> T:
         """Call ``func(*args, **kwargs)`` once per *key*, sharing what it returns.
 
-        Every caller that arrives while the call is in flight gets the same
-        result, or the same exception.  *key* is compared and never stored
-        beyond the call, so it has to be hashable and equal for two requests
-        that mean the same thing.
+        Every caller arriving while the call is in flight gets the same result, or
+        the same exception.  *key* must be hashable and equal for two requests that
+        mean the same thing.
         """
 
         task = self._in_flight.get(key)
@@ -37,12 +36,10 @@ class SingleFlight:
             self._in_flight[key] = task
             task.add_done_callback(lambda done: self.forget(key, done))
 
-        # Waiting *on* the call rather than awaiting it: a coroutine that awaits
-        # a task is cancelled through it, and one caller walking away must not
-        # cancel what the others are waiting on.  ``asyncio.wait`` never
-        # cancels what it waits for, where ``asyncio.shield`` would report the
-        # abandoned call's failure to the loop - noise for a failure the
-        # waiting callers are about to be handed anyway.
+        # Wait *on* the call, not by awaiting it: awaiting a task cancels through
+        # it, so one caller walking away would cancel what the others are waiting
+        # for.  ``asyncio.shield`` reports the abandoned call's failure to the
+        # loop instead, which the waiting callers are about to be handed anyway.
         await asyncio.wait({task})
 
         # The entry is keyed by something the type checker can't tie back to T,

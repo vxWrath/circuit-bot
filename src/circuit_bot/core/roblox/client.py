@@ -3,7 +3,6 @@ from typing import Any
 import msgspec
 
 from ..api import APIClient, Errors
-from ..ratelimit import OnRatelimit
 from .exceptions import RobloxAPIError, RobloxError, RobloxRateLimitError, RobloxUnavailableError
 from .models import RobloxUser, RobloxUserIngest
 
@@ -41,18 +40,13 @@ class RobloxClient(APIClient):
 
         return (first.get("message") if isinstance(first, dict) else None) or None
 
-    async def fetch_user(self, user_id: int, *, on_ratelimit: OnRatelimit | None = None) -> RobloxUser | None:
+    async def fetch_user(self, user_id: int) -> RobloxUser | None:
         """Fetch *user_id*'s profile from the users API."""
 
         url = self.BASE_URL.format(api="users", version="1")
         url += "/users"
 
-        data = await self.request(
-            "POST",
-            url,
-            json={"userIds": [user_id], "excludeBannedUsers": True},
-            on_ratelimit=on_ratelimit,
-        )
+        data = await self.request("POST", url, json={"userIds": [user_id], "excludeBannedUsers": True})
 
         if data is None:
             return None
@@ -69,7 +63,7 @@ class RobloxClient(APIClient):
 
         return msgspec.convert(ingested, RobloxUser, from_attributes=True)
 
-    async def fetch_headshot(self, user_id: int, *, on_ratelimit: OnRatelimit | None = None) -> str | None:
+    async def fetch_headshot(self, user_id: int) -> str | None:
         """Fetch *user_id*'s headshot URL from the thumbnails API."""
 
         url = self.BASE_URL.format(api="thumbnails", version="1")
@@ -83,7 +77,7 @@ class RobloxClient(APIClient):
             "isCircular": "false",
         }
 
-        data = await self.request("GET", url, params=params, on_ratelimit=on_ratelimit)
+        data = await self.request("GET", url, params=params)
 
         if data is None:
             return None
@@ -100,13 +94,11 @@ class RobloxClient(APIClient):
 
         return image_url
 
-    async def get_user(self, user_id: int, *, on_ratelimit: OnRatelimit | None = None) -> RobloxUser | None:
+    async def get_user(self, user_id: int) -> RobloxUser | None:
         """Get a user's profile.
 
         Returns ``None`` if the user doesn't exist and raises
-        :class:`RobloxError` if the API can't be reached.  A cached profile is
-        served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting.
+        :class:`RobloxError` if the API can't be reached.
         """
 
         return await self.lookup(
@@ -116,16 +108,13 @@ class RobloxClient(APIClient):
             cls=RobloxUser,
             fetch=self.fetch_user,
             args=(user_id,),
-            on_ratelimit=on_ratelimit,
         )
 
-    async def get_headshot(self, user_id: int, *, on_ratelimit: OnRatelimit | None = None) -> str | None:
+    async def get_headshot(self, user_id: int) -> str | None:
         """Get a user's headshot URL.
 
         Returns ``None`` if the user doesn't exist and raises
-        :class:`RobloxError` if the API can't be reached.  A cached headshot is
-        served without touching the API, so *on_ratelimit* only fires on a
-        lookup that ends up waiting.
+        :class:`RobloxError` if the API can't be reached.
         """
 
         return await self.lookup(
@@ -135,5 +124,4 @@ class RobloxClient(APIClient):
             cls=str,
             fetch=self.fetch_headshot,
             args=(user_id,),
-            on_ratelimit=on_ratelimit,
         )

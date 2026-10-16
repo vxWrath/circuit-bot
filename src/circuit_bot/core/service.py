@@ -22,11 +22,6 @@ class Service:
         self.bot = bot
 
     def get_repository[R: Row](self, shape: type[R]) -> Repository[R]:
-        """The repository for *shape*, built on the pool.
-
-        Shorthand for :meth:`DatabasePool.get_repository`; a method that needs
-        its statements on one connection builds them from its transaction
-        instead.
-        """
+        """The repository for *shape*, built on the pool."""
 
         return self.bot.database.get_repository(shape)

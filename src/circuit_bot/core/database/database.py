@@ -23,9 +23,9 @@ IsolationLevel = Literal[
 class Database(ABC):
     """A scope statements run in: the pool, or a connection checked out of it.
 
-    Which scope a :class:`Repository` was built on is the only thing deciding
-    where its statements land.  The scope members are abstract, so a subclass
-    that drops one fails at construction rather than silently answering ``None``.
+    What a :class:`Repository` was built on decides where its statements land.
+    The scope members are abstract, so a subclass that drops one fails at
+    construction.
     """
 
     @abstractmethod
@@ -60,8 +60,7 @@ class Database(ABC):
     async def fetchrow(self, query: str, *args: Any, timeout: float | None = None) -> asyncpg.Record | None:
         """Run *query* and return its first row, or ``None`` if it produced none.
 
-        Further rows are discarded, so pair it with ``LIMIT 1`` or an ``ORDER BY``
-        when the result set can hold more than one.
+        Further rows are discarded.
         """
 
         async with self.acquire() as conn:
@@ -80,8 +79,7 @@ class Database(ABC):
         """Run *query* and return its status string, such as ``"UPDATE 3"``.
 
         *query* may hold several semicolon-separated statements, and the status is
-        then the last one's.  :meth:`executemany` runs one statement over many
-        argument sets; :meth:`copy_records_to_table` loads rows in bulk.
+        then the last one's.
         """
 
         async with self.acquire() as conn:

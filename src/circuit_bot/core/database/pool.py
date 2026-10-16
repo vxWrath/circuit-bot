@@ -45,7 +45,7 @@ def jsonb_decode(data: bytes) -> Any:
 async def postgres_init(connection: asyncpg.Connection) -> None:
     """Register the ``orjson`` codec for ``jsonb`` on a new connection.
 
-    The pool's ``init`` callback, so it runs once per connection rather than per checkout.
+    The pool's ``init`` callback, so it runs once per connection.
     """
 
     await connection.set_type_codec(
@@ -61,10 +61,8 @@ class DatabasePool(Database):
     """Async PostgreSQL pool, available on the bot as ``bot.database``.
 
     Statements check a connection out of the pool for the call; :meth:`acquire`
-    and :meth:`transaction` pin one for a block, and a repository built here
-    checks one out per statement too - build it on a connection
-    (:meth:`DatabaseConnection.get_repository`) to keep its statements together.
-    Anything called before :meth:`connect` raises :class:`DatabaseNotConnected`.
+    and :meth:`transaction` pin one for a block.  Anything called before
+    :meth:`connect` raises :class:`DatabaseNotConnected`.
     """
 
     def __init__(self, *, bot: "CircuitBot"):
@@ -76,9 +74,8 @@ class DatabasePool(Database):
     async def connect(self) -> None:
         """Create the pool, opening its minimum connections to Postgres.
 
-        No-op if the pool already exists, so it is safe to call more than once.
-        Raises :class:`DatabaseNotConnected` if the database can't be reached or a
-        setting is missing or malformed.
+        Safe to call more than once.  Raises :class:`DatabaseNotConnected` if the
+        database can't be reached or a setting is missing or malformed.
         """
 
         if self._pool is not None:
@@ -94,11 +91,11 @@ class DatabasePool(Database):
                 user=settings.user,
                 password=settings.password,
                 database=settings.database,
-                min_size=2,  # connections kept open at all times
-                max_size=10,  # connections the pool grows to under load
-                max_inactive_connection_lifetime=300.0,  # seconds before an idle connection is recycled
-                command_timeout=30.0,  # seconds, the default timeout for statements on a connection
-                timeout=10.0,  # seconds to wait for each connection to open
+                min_size=2,
+                max_size=10,
+                max_inactive_connection_lifetime=300.0,
+                command_timeout=30.0,
+                timeout=10.0,
                 init=postgres_init,
             )
         except (OSError, asyncpg.PostgresError, ValueError) as e:
@@ -115,9 +112,8 @@ class DatabasePool(Database):
     async def close(self) -> None:
         """Close the pool, waiting for checked-out connections to come back.
 
-        No-op if the pool was never created or is already closed, so it is safe to
-        call twice.  A caller that never releases its connection stalls shutdown
-        here rather than losing it silently.
+        Safe to call twice.  A caller that never releases its connection stalls
+        shutdown here.
         """
 
         if self._pool is None:
@@ -139,10 +135,10 @@ class DatabasePool(Database):
     async def acquire(self, *, timeout: float | None = None) -> AsyncGenerator[DatabaseConnection]:
         """Check a connection out of the pool for the duration of the block.
 
-        It goes back when the block exits, including on an exception.  One
-        connection is not one view: with no transaction open each statement still
-        takes its own snapshot, so use :meth:`transaction` with
-        ``isolation="repeatable_read"`` when several reads have to agree.
+        It goes back when the block exits, including on an exception.  With no
+        transaction open each statement still takes its own snapshot; call
+        :meth:`transaction` with ``isolation="repeatable_read"`` when several reads
+        have to agree.
         """
 
         async with self.pool.acquire(timeout=timeout) as connection:
@@ -173,9 +169,7 @@ class DatabasePool(Database):
     def get_repository[R: Row](self, row: type[R]) -> Repository[R]:
         """Return the repository for *row*, built on first ask and kept per shape.
 
-        Two shapes over one table get a repository each.  Its statements check a
-        connection out for the statement alone - a connection's own repository
-        (:meth:`DatabaseConnection.get_repository`) is the one that stays put.
+        Two shapes over one table get a repository each.
         """
 
         repository = self._repositories.get(row)

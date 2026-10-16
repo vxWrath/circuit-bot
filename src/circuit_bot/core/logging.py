@@ -25,8 +25,8 @@ def configure_root_logger(*, force: bool = False) -> None:
 
     Coloured in dev (:func:`~circuit_bot.core.env.is_dev`), JSON everywhere
     else.  Called on demand by :func:`get_logger`, which does it once; *force*
-    rebuilds the pipeline, swapping the installed handler rather than adding a
-    second one.
+    rebuilds the pipeline, swapping the installed handler so only one is ever
+    attached.
     """
     global IS_ROOT_CONFIGURED, installed_handler
 
@@ -37,11 +37,9 @@ def configure_root_logger(*, force: bool = False) -> None:
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
-        # Fields a stdlib logger was handed in ``extra``, which is the only way
-        # one carries them.  A no-op for a structlog logger's own records.
+        # Fields a stdlib logger was handed in ``extra`` - the only way one carries them.
         structlog.stdlib.ExtraAdder(),
-        # An exception becomes text here.  Left as the tuple the record holds,
-        # the JSON renderer writes it out as a repr and the frames are lost.
+        # An exception becomes text here - left as a tuple, the renderer writes a repr and loses the frames.
         structlog.processors.format_exc_info,
     ]
 
@@ -91,7 +89,7 @@ installed_asyncio_handler: bool = False
 
 
 def install_excepthook() -> None:
-    """Install ``sys.excepthook`` that logs unhandled exceptions as JSON."""
+    """Install a ``sys.excepthook`` that logs unhandled exceptions."""
     global original_excepthook, installed_excepthook
 
     if installed_excepthook:
@@ -141,7 +139,6 @@ def install_asyncio_exception_handler() -> None:
         else:
             logger.error(message, exc_info=exception)
 
-        # Forward to original handler if one existed
         if original_loop_exception_handler:
             original_loop_exception_handler(loop, context)
 
@@ -165,7 +162,6 @@ def get_logger(name: str, *, level: int | None = logging.INFO) -> logging.Logger
     if level is not None:
         logger.setLevel(level)
     else:
-        # Inherit root level so propagation works
         logger.setLevel(logging.NOTSET)
 
     logger.propagate = True

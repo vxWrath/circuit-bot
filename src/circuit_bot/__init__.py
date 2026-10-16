@@ -72,8 +72,8 @@ def main() -> None:
     """Sync entry point for the ``circuit-bot`` console script.
 
     The loop is uvloop's or there is no run at all: signal handling is wired up
-    against it, and uvloop doesn't support Windows - so a bot started there
-    stops here, loudly, rather than running with no way to shut it down.
+    against it, and uvloop doesn't support Windows, so a bot started there stops
+    here, loudly.
     """
 
     try:
