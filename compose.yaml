@@ -32,7 +32,7 @@ services:
       redis:
         condition: service_healthy
     init: true
-    restart: unless-stopped
+    restart: no
     # Shutdown cancels tasks and closes both pools; 10s is tight for that.
     stop_grace_period: 30s
 
