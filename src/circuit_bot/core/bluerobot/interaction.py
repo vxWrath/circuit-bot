@@ -14,7 +14,7 @@ from ..model import Model
 
 if TYPE_CHECKING:
     from .bot import CircuitBot
-
+    from .cooldown import InteractionCooldownHandler
 __all__ = (
     "BaseItem",
     "BaseLayoutView",
@@ -121,6 +121,17 @@ class Interaction(discord.Interaction["CircuitBot"]):
             return await self.edit_original_response(**kwargs)
         else:
             return await self.response.edit_message(**kwargs)
+
+    @property
+    def cooldown(self) -> "InteractionCooldownHandler":
+        if not self.command:
+            raise ValueError("Interaction has no command")
+
+        command_name = getattr(self.command, "qualified_name", self.command.name)
+        return self.client.get_cooldown_manager(command_name).handler_for(self)
+
+    def cooldown_for(self, command_name: str) -> "InteractionCooldownHandler":
+        return self.client.get_cooldown_manager(command_name).handler_for(self)
 
 
 BASE_TEMPLATE = r"([0-9a-fA-F]{2})"

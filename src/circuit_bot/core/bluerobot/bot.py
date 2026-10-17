@@ -18,7 +18,7 @@ from ..logging import get_logger
 from ..roblox import RobloxClient
 from .app_command import CachedAppCommand, CommandNotFound
 from .color import Color
-from .cooldown import CooldownManager
+from .cooldown import CooldownManager, CooldownManagerNotFound
 from .interaction import BaseItem
 from .tree import CircuitTree
 
@@ -254,14 +254,23 @@ class CircuitBot(commands.Bot):
         entities: Sequence[Command[Any, ..., Any] | Group | ContextMenu],
     ) -> None:
         for entity in entities:
-            if isinstance(entity, Command):
+            if isinstance(entity, (Command, ContextMenu)):
                 manager = getattr(entity.callback, "__cooldown_manager__", None)
 
                 if manager is not None:
-                    cooldown_managers[entity.qualified_name] = manager
+                    name = getattr(entity, "qualified_name", entity.name)
+                    cooldown_managers[name] = manager
 
             elif isinstance(entity, Group):
                 self.get_cooldown_managers(cooldown_managers, entity.commands)
+
+    def get_cooldown_manager(self, command_name: str) -> CooldownManager:
+        """The manager registered for *command_name*, raising if it has none."""
+
+        try:
+            return self.cooldown_managers[command_name]
+        except KeyError:
+            raise CooldownManagerNotFound(f"No cooldown manager is registered for {command_name!r}") from None
 
     def retrieve_command(self, name: str) -> CachedAppCommand:
         """Retrieve a command from the cache."""

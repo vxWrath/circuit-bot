@@ -13,11 +13,22 @@ from discord.app_commands.commands import CheckInputParameter, Command, ContextM
 from discord.app_commands.errors import CommandOnCooldown
 from msgspec import field
 
+from ..exception import CircuitException
 from ..logging import get_logger
 from ..model import Model
 from .interaction import Interaction
 
-__all__ = ["Cooldown", "CooldownManager", "changeable_cooldown", "cooldown"]
+__all__ = (
+    "Cooldown",
+    "CooldownError",
+    "CooldownManager",
+    "CooldownManagerNotFound",
+    "InteractionChangeableCooldownHandler",
+    "InteractionCooldownHandler",
+    "InteractionRegularCooldownHandler",
+    "changeable_cooldown",
+    "cooldown",
+)
 
 logger = get_logger("cooldowns")
 
@@ -28,6 +39,14 @@ CooldownKey = Callable[[Interaction], CooldownFuncReturn[T]]
 
 RegularCooldownFactory = Callable[[Interaction], CooldownFuncReturn[T]]
 ChangeableCooldownFactory = Callable[[Interaction, int, int], CooldownFuncReturn[T]]
+
+
+class CooldownError(CircuitException):
+    """Base for cooldown errors."""
+
+
+class CooldownManagerNotFound(CooldownError):
+    """Raised when a command has no cooldown manager registered."""
 
 
 class Cooldown(Model):
@@ -187,6 +206,45 @@ class CooldownManager:
 
         logger.debug("Cooldown hit for command=%s key=%s retry_after=%.1fs", self.id, key, retry_after)
         raise CommandOnCooldown(bucket, retry_after)  # type: ignore
+
+    def handler_for(self, interaction: Interaction) -> "InteractionCooldownHandler":
+        return InteractionCooldownHandler(self, interaction)
+
+
+class InteractionCooldownHandler:
+    def __init__(self, cooldown_manager: CooldownManager, interaction: Interaction) -> None:
+        self.cooldown_manager = cooldown_manager
+        self.interaction = interaction
+
+    @property
+    def regular(self) -> "InteractionRegularCooldownHandler":
+        """Use the manager's regular bucket."""
+        if self.cooldown_manager.changeable:
+            raise CooldownError("This command uses a changeable cooldown; call .changeable.add(rate, per)")
+        return InteractionRegularCooldownHandler(self)
+
+    @property
+    def changeable(self) -> "InteractionChangeableCooldownHandler":
+        """Use the manager's changeable bucket."""
+        if not self.cooldown_manager.changeable:
+            raise CooldownError("This command uses a regular cooldown; call .regular.add()")
+        return InteractionChangeableCooldownHandler(self)
+
+
+class InteractionRegularCooldownHandler:
+    def __init__(self, parent: InteractionCooldownHandler) -> None:
+        self.parent = parent
+
+    async def add(self) -> None:
+        await self.parent.cooldown_manager.add_regular_bucket(self.parent.interaction)
+
+
+class InteractionChangeableCooldownHandler:
+    def __init__(self, parent: InteractionCooldownHandler) -> None:
+        self.parent = parent
+
+    async def add(self, rate: int, per: int) -> None:
+        await self.parent.cooldown_manager.add_changeable_bucket(self.parent.interaction, rate, per)
 
 
 def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
