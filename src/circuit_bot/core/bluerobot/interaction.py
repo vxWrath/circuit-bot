@@ -19,8 +19,10 @@ __all__ = (
     "BaseItem",
     "BaseLayoutView",
     "BaseView",
+    "DeferOptions",
     "GuildOnly",
     "Interaction",
+    "InteractionOptions",
     "MemberOnly",
     "UserOnly",
     "view_interaction_check",
@@ -97,6 +99,24 @@ class Interaction(discord.Interaction["CircuitBot"]):
     """
 
     __slots__ = ()
+
+    def require_guild(self) -> discord.Guild:
+        if self.guild is None:
+            raise GuildOnly(interaction=True)
+
+        return self.guild
+
+    def require_user(self) -> discord.User:
+        if self.user is None or not isinstance(self.user, discord.User):
+            raise UserOnly(interaction=True)
+
+        return self.user
+
+    def require_member(self) -> discord.Member:
+        if self.user is None or not isinstance(self.user, discord.Member):
+            raise MemberOnly(interaction=True)
+
+        return self.user
 
     async def respond(
         self, **kwargs: Any
