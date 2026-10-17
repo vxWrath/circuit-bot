@@ -16,9 +16,9 @@ class PlayerProfile(Profile["PlayerService"]):
     """One player, filled in on demand.
 
     Open it through :meth:`PlayerService.profile` and ask for the parts you
-    render - each is fetched once and kept.  Methods that take a snowflake on
-    the service have a counterpart here with it filled in, and a profile never
-    reaches for a client itself.
+    render - each is fetched once and kept.  The Roblox parts read the row first
+    and raise ``RecordNotFoundError`` when there is no such player, and a profile
+    never reaches for a client itself.
     """
 
     def __init__(self, service: "PlayerService", snowflake: int) -> None:
@@ -42,17 +42,35 @@ class PlayerProfile(Profile["PlayerService"]):
         """The player's full row, or ``None`` if there's no such player."""
         return await self.row(PlayerRow)
 
-    async def roblox_id(self) -> int | None:
-        """The Roblox account linked to this player, or ``None`` when there's none."""
-        return await self.ensure_part("roblox_id", self.service.roblox_id, snowflake=self.snowflake)
-
     async def roblox_user(self) -> RobloxUser | None:
-        """The player's Roblox account, or ``None`` when none is linked."""
-        return await self.ensure_part(RobloxUser, self.service.roblox_user, snowflake=self.snowflake)
+        """The player's Roblox account, or ``None`` when none is linked.
+
+        Raises ``RecordNotFoundError`` when there is no such player.
+        """
+        player = await self.player()
+
+        if player is None:
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+
+        if player.roblox_id is None:
+            return None
+
+        return await self.ensure_part(RobloxUser, self.service.roblox_user, roblox_id=player.roblox_id)
 
     async def headshot_url(self) -> str | None:
-        """The player's Roblox headshot, or ``None`` when none is available."""
-        return await self.ensure_part("headshot_url", self.service.headshot_url, snowflake=self.snowflake)
+        """The player's Roblox headshot, or ``None`` when none is available.
+
+        Raises ``RecordNotFoundError`` when there is no such player.
+        """
+        player = await self.player()
+
+        if player is None:
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+
+        if player.roblox_id is None:
+            return None
+
+        return await self.ensure_part("headshot_url", self.service.headshot_url, roblox_id=player.roblox_id)
 
     async def link_roblox(self, roblox_id: int) -> PlayerRow:
         """Link a Roblox account to this player, or raise ``RecordNotFoundError``.

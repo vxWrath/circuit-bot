@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 import asyncpg
@@ -9,7 +10,7 @@ from ...config import get_postgres_settings
 from ..logging import get_logger
 from .connection import DatabaseConnection
 from .database import Database, IsolationLevel
-from .exceptions import DatabaseNotConnected
+from .exceptions import DatabaseError, DatabaseNotConnected
 from .repository import Repository
 from .row import Row
 
@@ -21,6 +22,19 @@ __all__ = ("DatabasePool",)
 logger = get_logger("database")
 
 JSONB_VERSION = b"\x01"
+
+# The .sql files that build the schema, shipped inside the package.
+MIGRATIONS_DIR = Path(__file__).parent / "migrations"
+
+# One row per migration that has run.
+TRACKING_TABLE = "schema_migrations"
+
+CREATE_TRACKING_TABLE = f"""
+CREATE TABLE IF NOT EXISTS {TRACKING_TABLE} (
+    name text PRIMARY KEY,
+    applied_at timestamptz NOT NULL DEFAULT now()
+)
+"""
 
 
 def jsonb_encode(obj: Any) -> bytes:
@@ -123,6 +137,42 @@ class DatabasePool(Database):
         self._pool = None
 
         logger.info("PostgreSQL pool closed")
+
+    async def migrate(self) -> list[str]:
+        """Apply every migration file that hasn't been applied, in filename order.
+
+        Each file runs in its own transaction and so must be transaction-safe; a
+        failure leaves the files before it applied.  A name applies once ever, so
+        editing or renaming an applied file is a new migration.  Each statement is
+        bounded by the pool's ``command_timeout``.  Returns the names applied.
+        """
+
+        if not MIGRATIONS_DIR.is_dir():
+            raise DatabaseError(f"No migrations directory at {MIGRATIONS_DIR}")
+
+        await self.execute(CREATE_TRACKING_TABLE)
+
+        applied = {row["name"] for row in await self.fetch(f"SELECT name FROM {TRACKING_TABLE}")}
+
+        files = sorted(MIGRATIONS_DIR.glob("*.sql"))
+        pending = [path for path in files if path.stem not in applied]
+
+        for path in pending:
+            async with self.transaction() as conn:
+                # Whole, and with no parameters: execute() takes several statements
+                # at once only through the simple query protocol.
+                await conn.execute(path.read_text(encoding="utf-8"))
+                await conn.execute(f"INSERT INTO {TRACKING_TABLE} (name) VALUES ($1)", path.stem)
+
+            logger.info("Applied migration %s", path.stem)
+
+        for name in sorted(applied - {path.stem for path in files}):
+            logger.warning("Migration %s is recorded but has no file", name)
+
+        if not pending:
+            logger.info("Schema up to date, nothing to apply")
+
+        return [path.stem for path in pending]
 
     @property
     def pool(self) -> asyncpg.Pool:

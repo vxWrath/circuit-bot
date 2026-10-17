@@ -1,19 +1,22 @@
+import datetime
+
 from ...core.database import Row
 
-__all__ = ("NewPlayer", "PlayerRef", "PlayerRow", "PlayerTable")
+__all__ = ("CreatePlayer", "PlayerRow", "PlayerTable")
 
 
 class PlayerTable(Row):
     """The ``players`` table: one row per player, keyed by their Discord snowflake.
 
-    Columns are provisional; reconcile them with the real schema before
-    anything writes.
+    Nothing names a player here - Roblox names resolve through the API and Discord
+    names through the member cache, both from the snowflake.
     """
 
     class Meta:
         abstract = True
         table = "players"
         primary_key = "snowflake"
+        generated = ("created_at", "updated_at")
 
 
 class PlayerRow(PlayerTable):
@@ -21,22 +24,15 @@ class PlayerRow(PlayerTable):
 
     snowflake: int
     roblox_id: int | None
-    name: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
-class NewPlayer(PlayerTable, kw_only=True):
+class CreatePlayer(PlayerTable, kw_only=True):
     """A player, as an insert sends one.
 
     Built with keywords, the inherited fields included.
     """
 
     snowflake: int
-    name: str
     roblox_id: int | None = None
-
-
-class PlayerRef(PlayerTable):
-    """A player, just enough to name them."""
-
-    snowflake: int
-    name: str

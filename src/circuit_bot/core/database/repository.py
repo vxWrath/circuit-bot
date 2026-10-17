@@ -179,15 +179,21 @@ class Repository[R: Row]:
     async def update(self, obj: R, **changes: Any) -> R | None:
         """Partial update - only touches the fields you pass, and only reads back those.
 
-        The row is *obj*'s, looked up by the primary key its table's ``Meta``
-        declares, and the model returned is *obj* with the written columns replaced
-        by whatever the database made of them.  ``None`` means no row matched.
+        A shape that declares an ``updated_at`` field has it written on every
+        update.  The row is *obj*'s, looked up by the primary key its table's
+        ``Meta`` declares, and the model returned is *obj* with the written columns
+        replaced by whatever the database made of them.  ``None`` means no row
+        matched.
         """
 
         if not changes:
             raise RepositoryError("update() called with no fields to change")
 
         self.check_columns(changes)
+
+        # Written after the caller's columns are checked, so this needs no checking of its own.
+        if "updated_at" in self._fields:
+            changes["updated_at"] = datetime.datetime.now(datetime.UTC)
 
         try:
             primary_key = getattr(obj, self.primary_key_name)

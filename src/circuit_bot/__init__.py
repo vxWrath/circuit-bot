@@ -40,6 +40,7 @@ async def run() -> None:
     try:
         await bot.cache.connect()
         await bot.database.connect()
+        await bot.database.migrate()
 
         logger.info("Bot started")
 
