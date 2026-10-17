@@ -3,7 +3,6 @@ import signal
 
 from circuit_bot.core import (
     CircuitBot,
-    get_env,
     get_logger,
     install_asyncio_exception_handler,
     install_excepthook,
@@ -26,7 +25,6 @@ async def run() -> None:
     install_excepthook()
     install_asyncio_exception_handler()
 
-    token = get_env("DISCORD_TOKEN")
     bot = CircuitBot()
 
     running_task = asyncio.current_task()
@@ -46,7 +44,7 @@ async def run() -> None:
 
         async with bot:
             try:
-                await bot.login(token)
+                await bot.login(bot.config.token)
                 logger.info("Logged in as %s", bot.user)
 
                 await bot.connect(reconnect=True)
