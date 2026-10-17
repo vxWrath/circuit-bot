@@ -1,5 +1,6 @@
 from .app_command import *
 from .bot import *
+from .checks import *
 from .color import *
 from .cooldown import *
 from .discord_logger import *

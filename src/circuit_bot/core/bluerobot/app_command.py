@@ -6,12 +6,13 @@ from discord import app_commands
 from ..exception import CircuitException
 from ..model import Model
 
-__all__ = ("CachedAppCommand", "CircuitGroup", "CommandNotFound", "autocomplete", "command")
+__all__ = ("CachedAppCommand", "CircuitGroup", "CommandNotFound", "autocomplete", "check", "command")
 
 CommandCallback = Callable[..., Coroutine[Any, Any, Any]]
 CommandDecorator = Callable[[CommandCallback], app_commands.Command[Any, ..., Any]]
 
 F = TypeVar("F", bound=CommandCallback)
+T = TypeVar("T")
 
 # discord.py requires the callback's interaction parameter to be exactly
 # discord.Interaction; the tree hands every callback the subclass instead.
@@ -21,6 +22,11 @@ command = cast(Callable[..., CommandDecorator], app_commands.command)
 def autocomplete(**parameters: Any) -> Callable[[F], F]:
     """``app_commands.autocomplete`` that accepts the bot's interaction subclass."""
     return cast(Callable[[F], F], app_commands.autocomplete(**parameters))
+
+
+def check(predicate: Callable[..., bool | Coroutine[Any, Any, bool]]) -> Callable[[T], T]:
+    """``app_commands.check`` that accepts checks taking the bot's interaction subclass."""
+    return cast(Callable[[T], T], app_commands.check(predicate))
 
 
 class CircuitGroup(app_commands.Group):

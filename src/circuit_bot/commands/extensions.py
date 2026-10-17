@@ -12,6 +12,7 @@ from ..core import (
     InteractionOptions,
     LayoutBuilder,
     autocomplete,
+    developer_only,
 )
 
 DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True))}
@@ -30,22 +31,24 @@ class Extensions(commands.Cog):
     def __init__(self, bot: CircuitBot):
         self.bot = bot
 
-    ext = CircuitGroup(name="ext", description="Manage the bot's command and event extensions.")
+    ext = CircuitGroup(name="ext", description="Manage the bot's command and event extensions.", guild_only=True)
 
     @ext.command(name="reload", description="Reload every command extension.", extras=DEFER)
+    @developer_only()
     async def reload(self, interaction: Interaction):
         await self.bot.load_commands_and_events()
 
-        text = f"{CommonEmojis.SUCCESS} **Reloaded command extensions**"
+        text = f"{CommonEmojis.SUCCESS} **Reloaded command & event extensions**"
         layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
 
         await interaction.respond(view=layout)
 
     @ext.command(name="unload", description="Unload every command extension.", extras=DEFER)
+    @developer_only()
     async def unload(self, interaction: Interaction):
         await self.bot.unload_commands_and_events()
 
-        text = f"{CommonEmojis.SUCCESS} **Unloaded command extensions**"
+        text = f"{CommonEmojis.SUCCESS} **Unloaded command & event extensions**"
         layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
 
         await interaction.respond(view=layout)
@@ -54,6 +57,7 @@ class Extensions(commands.Cog):
     @describe(guild_id="The guild to use")
     @rename(guild_id="guild")
     @autocomplete(guild_id=guild_autocomplete)
+    @developer_only()
     async def sync(self, interaction: Interaction, guild_id: str | None = None):
         guild: discord.Guild | None = None
 
