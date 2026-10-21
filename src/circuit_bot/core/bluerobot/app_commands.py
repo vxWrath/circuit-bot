@@ -1,4 +1,5 @@
 from collections.abc import Callable, Coroutine
+from enum import Enum
 from typing import Any, TypeVar, cast
 
 from discord import app_commands
@@ -6,7 +7,16 @@ from discord import app_commands
 from ..exception import CircuitException
 from ..model import Model
 
-__all__ = ("CachedAppCommand", "CircuitGroup", "CommandNotFound", "autocomplete", "check", "command")
+__all__ = (
+    "CachedAppCommand",
+    "CheckFailure",
+    "CheckType",
+    "CircuitGroup",
+    "CommandNotFound",
+    "autocomplete",
+    "check",
+    "command",
+)
 
 CommandCallback = Callable[..., Coroutine[Any, Any, Any]]
 CommandDecorator = Callable[[CommandCallback], app_commands.Command[Any, ..., Any]]
@@ -27,6 +37,17 @@ def autocomplete(**parameters: Any) -> Callable[[F], F]:
 def check(predicate: Callable[..., bool | Coroutine[Any, Any, bool]]) -> Callable[[T], T]:
     """``app_commands.check`` that accepts checks taking the bot's interaction subclass."""
     return cast(Callable[[T], T], app_commands.check(predicate))
+
+
+class CheckType(Enum):
+    DEVELOPER = "developer_only"
+    GUILD_OWNER = "guild_owner_only"
+
+
+class CheckFailure(app_commands.CheckFailure):
+    def __init__(self, check_type: CheckType, **kwargs: Any):
+        self.check_type = check_type
+        self.kwargs = kwargs
 
 
 class CircuitGroup(app_commands.Group):

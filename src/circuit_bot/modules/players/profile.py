@@ -42,6 +42,27 @@ class PlayerProfile(Profile["PlayerService"]):
         """The player's full row, or ``None`` if there's no such player."""
         return await self.row(PlayerRow)
 
+    async def require_player(self) -> PlayerRow:
+        """The player's full row, or raise ``RecordNotFoundError``."""
+        player = await self.player()
+
+        if player is None:
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+
+        return player
+
+    async def ensure_player(self) -> PlayerRow:
+        """The player's full row, or create it if there's no such player."""
+        player = await self.player()
+
+        if player is None:
+            await self.service.create(snowflake=self.snowflake)
+            # player() cached the miss as None, so drop it before re-reading
+            self.invalidate_parts(PlayerRow)
+            player = await self.require_player()
+
+        return player
+
     async def roblox_user(self) -> RobloxUser | None:
         """The player's Roblox account, or ``None`` when none is linked.
 

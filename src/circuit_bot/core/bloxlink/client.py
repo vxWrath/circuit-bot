@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any
 
 from ..api import APIClient, Errors
 from ..cache.exceptions import CacheError
-from ..env import get_env
 from .exceptions import BloxlinkAPIError, BloxlinkError, BloxlinkRateLimitError, BloxlinkUnavailableError
 
 if TYPE_CHECKING:
@@ -38,7 +37,7 @@ class BloxlinkClient(APIClient):
     def __init__(self, *, bot: "CircuitBot") -> None:
         super().__init__(bot=bot)
 
-        self.api_key = get_env("BLOXLINK_API_KEY")
+        self.api_key = bot.config.bloxlink_api_key
 
     def request_headers(self) -> dict[str, str]:
         """Every request carries the API key that pays for it."""

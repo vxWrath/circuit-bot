@@ -2,7 +2,7 @@ import inspect
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import aiohttp
 import discord
@@ -16,7 +16,8 @@ from ..database import DatabasePool
 from ..env import is_dev
 from ..logging import get_logger
 from ..roblox import RobloxClient
-from .app_command import CachedAppCommand, CommandNotFound
+from ..service import Service, ServiceNotFound
+from .app_commands import CachedAppCommand, CommandNotFound
 from .color import Color
 from .cooldown import CooldownManager, CooldownManagerNotFound
 from .interaction import BaseItem
@@ -67,6 +68,7 @@ class CircuitBot(commands.Bot):
         self.extension_names: list[str] = []
         self.app_commands_cache: dict[str, CachedAppCommand] = {}
         self.cooldown_managers: dict[str, CooldownManager] = {}
+        self.services: dict[type[Service], Service] = {}
 
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(enable_cleanup_closed=True),
@@ -167,6 +169,8 @@ class CircuitBot(commands.Bot):
                 logger.info("Loaded event extension %s", cog_path)
 
             self.extension_names.append(cog_path)
+
+        self.fill_services()
 
         return self.extension_names
 
@@ -278,6 +282,21 @@ class CircuitBot(commands.Bot):
             return self.app_commands_cache[name]
         except KeyError:
             raise CommandNotFound(name) from None
+
+    def fill_services(self) -> None:
+        self.services = {}
+
+        for cls in Service.__subclasses__():
+            self.services[cls] = cls(bot=self)
+
+    def get_service[T: Service](self, cls: type[T]) -> T:
+        """Get a service by its class."""
+
+        try:
+            # fill_services keys each service by its own class, so the value is the caller's T.
+            return cast(T, self.services[cls])
+        except KeyError:
+            raise ServiceNotFound(cls) from None
 
 
 async def send_connection_webhook(bot: CircuitBot, embed: discord.Embed) -> None:

@@ -1,10 +1,13 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import msgspec
 
 from ..api import APIClient, Errors
 from .exceptions import RobloxAPIError, RobloxError, RobloxRateLimitError, RobloxUnavailableError
 from .models import RobloxUser, RobloxUserIngest
+
+if TYPE_CHECKING:
+    from ..bluerobot import CircuitBot
 
 __all__ = ("RobloxClient", "RobloxUser")
 
@@ -27,6 +30,12 @@ class RobloxClient(APIClient):
     )
 
     BASE_URL = "https://{api}.roblox.com/v{version}"
+    OPEN_CLOUD_URL = "https://apis.roblox.com/cloud/v{version}"
+
+    def __init__(self, *, bot: "CircuitBot") -> None:
+        super().__init__(bot=bot)
+
+        self.api_key = bot.config.roblox_api_key
 
     def error_detail(self, payload: Any) -> str | None:
         """Roblox reports what went wrong as ``{"errors": [{"message": ...}]}``."""
@@ -43,25 +52,23 @@ class RobloxClient(APIClient):
     async def fetch_user(self, user_id: int) -> RobloxUser | None:
         """Fetch *user_id*'s profile from the users API."""
 
-        url = self.BASE_URL.format(api="users", version="1")
-        url += "/users"
+        url = self.OPEN_CLOUD_URL.format(version="2")
+        url += f"/users/{user_id}"
 
-        data = await self.request("POST", url, json={"userIds": [user_id], "excludeBannedUsers": True})
+        data = await self.request("GET", url, headers={"x-api-key": self.api_key})
 
         if data is None:
             return None
 
-        users: list[Any] = data.get("data", [])
-
-        if not users:
+        if "code" in data:
             return None
 
         try:
-            ingested = msgspec.convert(users[0], type=RobloxUserIngest)
+            ingested = msgspec.convert(data, type=RobloxUserIngest)
         except msgspec.DecodeError as e:
             raise RobloxAPIError(f"Roblox API returned invalid user data for {url} (user id {user_id})") from e
 
-        return msgspec.convert(ingested, RobloxUser, from_attributes=True)
+        return msgspec.convert(ingested, RobloxUser, from_attributes=True, strict=False)
 
     async def fetch_headshot(self, user_id: int) -> str | None:
         """Fetch *user_id*'s headshot URL from the thumbnails API."""

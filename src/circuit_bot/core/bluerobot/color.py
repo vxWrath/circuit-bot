@@ -27,4 +27,4 @@ class Color(discord.Color):
 
     @classmethod
     def circuit_blue(cls) -> Self:
-        return cls(0x408dff)
+        return cls(0x408DFF)

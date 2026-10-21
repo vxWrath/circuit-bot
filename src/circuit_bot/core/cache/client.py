@@ -1,9 +1,9 @@
 import random
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING, Any, overload
 
 import msgspec
-from redis.asyncio import ConnectionPool, RedisError
+from redis.asyncio import ConnectionPool, RedisError, WatchError
 from redis.asyncio import Redis as AsyncRedis
 
 from ...config import get_redis_settings
@@ -306,6 +306,47 @@ class CacheClient:
             return await self.redis.incrby(key, amount)
         except RedisError as e:
             raise CacheError(f"Redis INCRBY failed for key {key!r}") from e
+
+    async def update[T: msgspec.Struct](
+        self, *path: Any, cls: type[T], change: Callable[[T | None], tuple[T | None, int | None]]
+    ) -> T | None:
+        """Read the value at *path*, apply *change*, and write it back atomically.
+
+        *change* receives the current value or ``None`` and returns the value to
+        store with its TTL; a ``None`` value leaves the entry untouched.  Returns
+        the stored value, or ``None`` if *change* stored nothing.  A Redis failure
+        raises :class:`CacheError`.
+        """
+
+        self._codec.validate_cls(cls)
+        key = self.key_from_path(*path)
+
+        while True:
+            try:
+                async with self.redis.pipeline(transaction=True) as pipe:
+                    try:
+                        await pipe.watch(key)
+                        data: bytes | None = await pipe.get(key)  # type: ignore
+
+                        if data is not None:
+                            current = self._codec.decode(data, cls, key=key)
+                        else:
+                            current = None
+
+                        value, ex = change(current)
+
+                        if value is None:
+                            return None
+
+                        pipe.multi()
+                        pipe.set(key, self._codec.encode(value), ex=ex)
+
+                        await pipe.execute()
+                        return value
+                    except WatchError:
+                        continue
+            except RedisError as e:
+                raise CacheError(f"Redis transaction failed for key {key!r}") from e
 
     # -- hash operations (path-based) ---------------------------------------
 

@@ -1,11 +1,16 @@
 from typing import TYPE_CHECKING
 
 from .database import Repository, Row
+from .exception import CircuitException
 
 if TYPE_CHECKING:
     from .bluerobot import CircuitBot
 
 __all__ = ("Service",)
+
+
+class ServiceNotFound(CircuitException):
+    """Raised when a service is requested but not found."""
 
 
 class Service:

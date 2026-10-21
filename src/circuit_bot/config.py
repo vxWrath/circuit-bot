@@ -21,14 +21,19 @@ __all__ = (
 
 class BotConfig(NamedTuple):
     """What :class:`~circuit_bot.core.bluerobot.CircuitBot` reads to log in, find
-    its guild, announce itself and load extensions."""
+    its guild, announce itself, load extensions and call the APIs it depends on."""
 
     token: str
     guild_id: int
     connection_webhook_url: str
+    roblox_api_key: str
+    bloxlink_api_key: str
     sync_sentinel: Path
     command_path: Path = PACKAGE_PATH / "commands"
     event_path: Path = PACKAGE_PATH / "events"
+
+    verified_role_id: int = 1553923281239941261
+    roblox_link_log_channel_id: int = 1561244309788037170
 
 
 class PostgresSettings(NamedTuple):
@@ -53,8 +58,7 @@ class RedisSettings(NamedTuple):
 
 
 def get_bot_config() -> BotConfig:
-    """Read the ``DISCORD_TOKEN``, ``GUILD_ID`` and ``CONNECTION_WEBHOOK_URL``
-    environment variables.
+    """Read the Discord credentials and the ``ROBLOX_API_KEY`` and ``BLOXLINK_API_KEY`` keys.
 
     ``SYNC_SENTINEL`` overrides where the one-time command-sync marker is kept;
     it defaults to a file in the system temp directory.
@@ -64,6 +68,8 @@ def get_bot_config() -> BotConfig:
         token=get_env("DISCORD_TOKEN"),
         guild_id=int(get_env("GUILD_ID")),
         connection_webhook_url=get_env("CONNECTION_WEBHOOK_URL"),
+        roblox_api_key=get_env("ROBLOX_API_KEY"),
+        bloxlink_api_key=get_env("BLOXLINK_API_KEY"),
         sync_sentinel=Path(get_env("SYNC_SENTINEL", str(DEFAULT_SYNC_SENTINEL))),
     )
 

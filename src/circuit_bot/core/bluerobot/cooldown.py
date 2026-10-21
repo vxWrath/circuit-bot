@@ -37,7 +37,6 @@ T = TypeVar("T")
 CooldownFuncReturn = T | Coroutine[None, None, T]
 CooldownKey = Callable[[Interaction], CooldownFuncReturn[T]]
 
-RegularCooldownFactory = Callable[[Interaction], CooldownFuncReturn[T]]
 ChangeableCooldownFactory = Callable[[Interaction, int, int], CooldownFuncReturn[T]]
 
 
@@ -55,7 +54,6 @@ class Cooldown(Model):
 
     window: float = field(default=0.0)  # time of first attempt
     tokens: int | None = field(default=None)  # attempts left
-    last: float = field(default=0.0)  # time of latest attempt
 
     def __post_init__(self):
         if self.tokens is None:
@@ -83,8 +81,6 @@ class Cooldown(Model):
 
     def update_rate_limit(self, current_time: float | None = None, *, tokens: int = 1) -> float | None:
         current_time = current_time or time.time()
-        self.last = current_time
-
         self.tokens = self.get_tokens(current_time)
 
         if self.tokens == self.rate:
@@ -98,22 +94,16 @@ class Cooldown(Model):
 
 
 class CooldownManager:
-    """A token bucket stored in Redis under the manager's command id and key.
-
-    With ``premium_excluded``, an interaction carrying a live premium
-    entitlement skips the cooldown and spends no token.
-    """
+    """A cooldown bucket stored in Redis under the manager's command id and key."""
 
     @overload
     def __init__(
         self,
         key: CooldownKey[Hashable],
-        factory: RegularCooldownFactory[Cooldown | None],
         *,
         rate: int,
         per: int,
         changeable: Literal[False],
-        premium_excluded: bool = False,
     ) -> None: ...
 
     @overload
@@ -125,19 +115,20 @@ class CooldownManager:
         rate: int,
         per: int,
         changeable: Literal[True],
-        premium_excluded: bool = False,
     ) -> None: ...
 
     def __init__(
         self,
         key: CooldownKey[Hashable],
-        factory: RegularCooldownFactory[Cooldown | None] | ChangeableCooldownFactory[Cooldown | None],
+        factory: ChangeableCooldownFactory[Cooldown | None] | None = None,
         *,
         rate: int,
         per: int,
         changeable: bool,
-        premium_excluded: bool = False,
     ) -> None:
+        if changeable and factory is None:
+            raise CooldownError("A changeable cooldown manager needs a factory")
+
         self.id = ""  # will be set in the decorator
 
         self.key = key
@@ -146,64 +137,54 @@ class CooldownManager:
         self.per = per
 
         self.changeable = changeable
-        self.premium_excluded = premium_excluded
 
-    async def add_regular_bucket(self, interaction: Interaction) -> Cooldown | None:
+    async def spend_regular(self, interaction: Interaction) -> None:
         key = str(await discord.utils.maybe_coroutine(self.key, interaction))
-        bucket = await interaction.client.cache.get("cooldown", self.id, key, cls=Cooldown)
+        await self.spend_token(interaction, key, rate=self.rate, per=self.per)
 
-        if bucket is None:
-            logger.debug("Creating new cooldown bucket for command=%s key=%s", self.id, key)
-            bucket = await discord.utils.maybe_coroutine(
-                cast(RegularCooldownFactory[Cooldown], self.factory), interaction
-            )
-
-        await interaction.client.cache.set("cooldown", self.id, key, value=bucket, ex=self.per)
-        return bucket
-
-    async def add_changeable_bucket(self, interaction: Interaction, rate: int, per: int) -> Cooldown | None:
+    async def spend_changeable(self, interaction: Interaction, rate: int, per: int) -> None:
         key = str(await discord.utils.maybe_coroutine(self.key, interaction))
-        bucket_exists = await interaction.client.cache.exists("cooldown", self.id, key)
 
-        if bucket_exists:
-            return None
+        if await self.spend_token(interaction, key):
+            return
 
-        bucket = await discord.utils.maybe_coroutine(
-            cast(ChangeableCooldownFactory[Cooldown | None], self.factory), interaction, rate, per
-        )
+        factory = cast(ChangeableCooldownFactory[Cooldown | None], self.factory)
+        bucket = await discord.utils.maybe_coroutine(factory, interaction, rate, per)
 
         if bucket is not None:
-            logger.debug("Creating new changeable cooldown bucket for command=%s key=%s", self.id, key)
-            await interaction.client.cache.set("cooldown", self.id, key, value=bucket, ex=per)
+            await self.spend_token(interaction, key, rate=bucket.rate, per=bucket.per)
 
-    async def get_bucket(self, interaction: Interaction) -> Cooldown | None:
-        key = str(await discord.utils.maybe_coroutine(self.key, interaction))
-        return await interaction.client.cache.get("cooldown", self.id, key, cls=Cooldown)
+    async def spend_token(
+        self, interaction: Interaction, key: str, *, rate: int | None = None, per: int | None = None
+    ) -> bool:
+        """Spend one token atomically, creating the bucket if *rate* and *per* are given."""
 
-    @staticmethod
-    def is_premium(interaction: Interaction) -> bool:
-        """Whether the interaction carries a live premium entitlement."""
+        def change(bucket: Cooldown | None) -> tuple[Cooldown | None, int | None]:
+            if bucket is None:
+                if rate is None or per is None:
+                    return None, None
+                bucket = Cooldown(rate=rate, per=per, window=0.0, tokens=rate)
 
-        return any(not entitlement.deleted and not entitlement.is_expired() for entitlement in interaction.entitlements)
+            bucket.update_rate_limit()
+            return bucket, bucket.per
+
+        spent = await interaction.client.cache.update("cooldown", self.id, key, cls=Cooldown, change=change)
+        return spent is not None
 
     async def predicate(self, interaction: Interaction) -> Literal[True]:
-        if self.premium_excluded and self.is_premium(interaction):
-            return True
-
+        # Checking is side-effect free; the command spends with .spend() after it succeeds.
         key = str(await discord.utils.maybe_coroutine(self.key, interaction))
         bucket = await interaction.client.cache.get("cooldown", self.id, key, cls=Cooldown)
 
         if bucket is None:
             return True
 
-        retry_after = bucket.update_rate_limit()
+        current_time = time.time()
 
-        # A changeable bucket carries the rate it was created with, not the default.
-        await interaction.client.cache.set("cooldown", self.id, key, value=bucket, ex=bucket.per)
-
-        if retry_after is None:
+        if bucket.get_tokens(current_time) > 0:
             return True
 
+        retry_after = bucket.get_retry_after(current_time)
         logger.debug("Cooldown hit for command=%s key=%s retry_after=%.1fs", self.id, key, retry_after)
         raise CommandOnCooldown(bucket, retry_after)  # type: ignore
 
@@ -220,14 +201,14 @@ class InteractionCooldownHandler:
     def regular(self) -> "InteractionRegularCooldownHandler":
         """Use the manager's regular bucket."""
         if self.cooldown_manager.changeable:
-            raise CooldownError("This command uses a changeable cooldown; call .changeable.add(rate, per)")
+            raise CooldownError("This command uses a changeable cooldown; call .changeable.spend(rate, per)")
         return InteractionRegularCooldownHandler(self)
 
     @property
     def changeable(self) -> "InteractionChangeableCooldownHandler":
         """Use the manager's changeable bucket."""
         if not self.cooldown_manager.changeable:
-            raise CooldownError("This command uses a regular cooldown; call .regular.add()")
+            raise CooldownError("This command uses a regular cooldown; call .regular.spend()")
         return InteractionChangeableCooldownHandler(self)
 
 
@@ -235,41 +216,40 @@ class InteractionRegularCooldownHandler:
     def __init__(self, parent: InteractionCooldownHandler) -> None:
         self.parent = parent
 
-    async def add(self) -> None:
-        await self.parent.cooldown_manager.add_regular_bucket(self.parent.interaction)
+    async def spend(self) -> None:
+        """Spend a token, creating the bucket if it is missing."""
+        await self.parent.cooldown_manager.spend_regular(self.parent.interaction)
 
 
 class InteractionChangeableCooldownHandler:
     def __init__(self, parent: InteractionCooldownHandler) -> None:
         self.parent = parent
 
-    async def add(self, rate: int, per: int) -> None:
-        await self.parent.cooldown_manager.add_changeable_bucket(self.parent.interaction, rate, per)
+    async def spend(self, rate: int, per: int) -> None:
+        """Spend a token, creating the bucket at *rate* per *per* seconds if it is missing."""
+        await self.parent.cooldown_manager.spend_changeable(self.parent.interaction, rate, per)
 
 
 def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
     def decorator(func: CheckInputParameter) -> CheckInputParameter:
-        if isinstance(func, (Command, ContextMenu)):
-            manager.id = hashlib.md5(func.qualified_name.encode()).hexdigest()
+        target = func.callback if isinstance(func, (Command, ContextMenu)) else func
+        manager.id = hashlib.md5(target.__qualname__.encode()).hexdigest()
 
+        if isinstance(func, (Command, ContextMenu)):
             func.checks.append(manager.predicate)  # type: ignore
         else:
-            manager.id = hashlib.md5(func.__qualname__.encode()).hexdigest()
-
             if not hasattr(func, "__discord_app_commands_checks__"):
                 func.__discord_app_commands_checks__ = []
 
             func.__discord_app_commands_checks__.append(manager.predicate)
 
-        func.__cooldown_manager__ = manager  # type: ignore
+        target.__cooldown_manager__ = manager  # type: ignore
         return func
 
     return decorator  # type: ignore
 
 
-def cooldown(
-    rate: int, per: int, *, key: CooldownKey[Hashable] | None = discord.utils.MISSING, premium_excluded: bool = False
-) -> Callable[[T], T]:
+def cooldown(rate: int, per: int, *, key: CooldownKey[Hashable] | None = discord.utils.MISSING) -> Callable[[T], T]:
     if key is discord.utils.MISSING:
         key_func = lambda i: i.user.id
     elif key is None:
@@ -277,16 +257,13 @@ def cooldown(
     else:
         key_func = key
 
-    factory = lambda i: Cooldown(rate=rate, per=per, window=0.0, tokens=rate, last=0.0)
-    manager = CooldownManager(
-        key_func, factory, rate=rate, per=per, changeable=False, premium_excluded=premium_excluded
-    )
+    manager = CooldownManager(key_func, rate=rate, per=per, changeable=False)
 
     return cooldown_check(manager)
 
 
 def changeable_cooldown(
-    rate: int, per: int, *, key: CooldownKey[Hashable] | None = discord.utils.MISSING, premium_excluded: bool = False
+    rate: int, per: int, *, key: CooldownKey[Hashable] | None = discord.utils.MISSING
 ) -> Callable[[T], T]:
     if key is discord.utils.MISSING:
         key_func = lambda i: i.user.id
@@ -295,7 +272,7 @@ def changeable_cooldown(
     else:
         key_func = key
 
-    factory = lambda i, r, p: Cooldown(rate=r, per=p, window=0.0, tokens=r, last=0.0)
-    manager = CooldownManager(key_func, factory, rate=rate, per=per, changeable=True, premium_excluded=premium_excluded)
+    factory = lambda i, r, p: Cooldown(rate=r, per=p, window=0.0, tokens=r)
+    manager = CooldownManager(key_func, factory, rate=rate, per=per, changeable=True)
 
     return cooldown_check(manager)
