@@ -24,6 +24,7 @@ __all__ = (
     "InteractionCooldownHandler",
     "InteractionCooldowns",
     "cooldown",
+    "shared_cooldown",
 )
 
 logger = get_logger("cooldowns")
@@ -84,24 +85,32 @@ class Cooldown(Model):
 
 
 class CooldownManager:
-    """A cooldown bucket stored in Redis under the manager's command id and key.
+    """A cooldown bucket stored in Redis under the manager's id and key.
 
     The decorator fixes the key and may set default *limit* and *duration*; a
     spend overrides either, re-shaping the bucket, so one manager can enforce
     different windows from different paths.  Checked pre-invoke through
     :meth:`predicate`, which runs before every command run;
     :meth:`InteractionCooldownHandler.spend` reserves a token once the command
-    succeeds.
+    succeeds.  A *shared* manager's id hashes its name alone, so every command
+    decorated with the same name checks and spends the same bucket.
     """
 
     def __init__(
-        self, key: CooldownKey[Hashable], *, name: str, limit: int | None = None, duration: int | None = None
+        self,
+        key: CooldownKey[Hashable],
+        *,
+        name: str,
+        limit: int | None = None,
+        duration: int | None = None,
+        shared: bool = False,
     ) -> None:
         self.name = name  # decorator-supplied; names it among a command's cooldowns
         self.id = ""  # set by the decorator
         self.key = key
         self.limit = limit  # decorator defaults; overridable at spend
         self.duration = duration
+        self.shared = shared  # set by shared_cooldown; buckets the id by name alone
 
     async def _key(self, interaction: Interaction) -> str:
         return str(await discord.utils.maybe_coroutine(self.key, interaction))
@@ -215,7 +224,13 @@ class InteractionCooldowns:
 def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
     def decorator(func: CheckInputParameter) -> CheckInputParameter:
         target = func.callback if isinstance(func, (Command, ContextMenu)) else func
-        manager.id = hashlib.md5(f"{target.__qualname__}:{manager.name}".encode()).hexdigest()
+
+        # The id namespaces the bucket in Redis.  A shared manager hashes its
+        # name alone, so every command decorated with it shares one bucket.
+        if manager.shared:
+            manager.id = hashlib.md5(f"shared:{manager.name}".encode()).hexdigest()
+        else:
+            manager.id = hashlib.md5(f"{target.__qualname__}:{manager.name}".encode()).hexdigest()
 
         # The predicate runs before every command run; the command spends a
         # token once it succeeds.
@@ -241,6 +256,28 @@ def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
     return decorator  # type: ignore
 
 
+def _make_manager(
+    key: CooldownKey[Hashable] | None,
+    *,
+    name: str,
+    limit: int | None,
+    duration: int | timedelta | None,
+    shared: bool,
+) -> CooldownManager:
+    """Build the manager behind :func:`cooldown` and :func:`shared_cooldown`."""
+    if key is discord.utils.MISSING:
+        key_func = lambda i: i.user.id
+    elif key is None:
+        key_func = lambda _: None
+    else:
+        key_func = key
+
+    if isinstance(duration, timedelta):
+        duration = int(duration.total_seconds())
+
+    return CooldownManager(key_func, name=name, limit=limit, duration=duration, shared=shared)
+
+
 def cooldown(
     name: str,
     /,
@@ -257,16 +294,22 @@ def cooldown(
     checked pre-invoke; the spend reserves the token under its limit and
     duration, overriding either default.
     """
-    if key is discord.utils.MISSING:
-        key_func = lambda i: i.user.id
-    elif key is None:
-        key_func = lambda _: None
-    else:
-        key_func = key
+    return cooldown_check(_make_manager(key, name=name, limit=limit, duration=duration, shared=False))
 
-    if isinstance(duration, timedelta):
-        duration = int(duration.total_seconds())
 
-    manager = CooldownManager(key_func, name=name, limit=limit, duration=duration)
+def shared_cooldown(
+    name: str,
+    /,
+    limit: int | None = None,
+    duration: int | timedelta | None = None,
+    *,
+    key: CooldownKey[Hashable] | None = discord.utils.MISSING,
+) -> Callable[[T], T]:
+    """A cooldown shared by every command decorated with the same *name*.
 
-    return cooldown_check(manager)
+    Takes the same arguments as :func:`cooldown`; each decoration is its own
+    manager, but all of them hash the name alone for the bucket id, so they
+    check and spend one bucket.  Keep the defaults consistent per name - a
+    spend falls back to the decorator of the command running it.
+    """
+    return cooldown_check(_make_manager(key, name=name, limit=limit, duration=duration, shared=True))

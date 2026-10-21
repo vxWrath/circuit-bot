@@ -17,6 +17,7 @@ from ..core import (
     RobloxError,
     RobloxRateLimitError,
     cooldown,
+    shared_cooldown,
 )
 from ..modules import (
     PlayerService,
@@ -36,8 +37,8 @@ class Update(commands.Cog):
     update = CircuitGroup(name="update", description="Update your own data.", guild_only=True)
 
     @update.command(name="roblox", description="Update your linked Roblox account.", extras=DEFER)
-    @cooldown("bloxlink", limit=1, duration=timedelta(minutes=1))
-    @cooldown("roblox", limit=1, duration=timedelta(minutes=1))
+    @shared_cooldown("bloxlink", limit=1, duration=timedelta(minutes=1))
+    @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     @cooldown("weekly", limit=1, duration=timedelta(days=7))
     async def update_roblox(self, interaction: Interaction):
         member = interaction.require_member()

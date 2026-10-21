@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import discord
 from discord.app_commands import describe
 from discord.ext import commands
@@ -17,6 +19,7 @@ from ..core import (
     RobloxRateLimitError,
     developer_only,
     get_logger,
+    shared_cooldown,
 )
 from ..modules import (
     PlayerService,
@@ -49,6 +52,7 @@ class Force(commands.Cog):
     @roblox.command(name="update", description="Set a player's linked Roblox account.", extras=DEFER)
     @describe(member="The member to update", roblox_id="The Roblox ID to link")
     @developer_only()
+    @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     async def roblox_update(self, interaction: Interaction, member: discord.Member, roblox_id: int):
         await self.link_roblox(interaction, member, roblox_id)
 
@@ -105,13 +109,21 @@ class Force(commands.Cog):
     )
     @describe(member="The member to update")
     @developer_only()
+    @shared_cooldown("bloxlink", limit=1, duration=timedelta(minutes=1))
+    @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     async def bloxlink_update(self, interaction: Interaction, member: discord.Member):
+        cooldowns = interaction.cooldowns
+
         try:
             resolved = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
+            await cooldowns.bloxlink.spend()
         except BloxlinkRateLimitError as e:
+            await cooldowns.bloxlink.spend(duration=int(e.retry_after) + 1 if e.retry_after is not None else None)
+
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Bloxlink is rate limited. Try again{retry}.**")
         except BloxlinkError:
+            await cooldowns.bloxlink.spend()
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **Bloxlink is unreachable right now. Try again later.**"
             )
@@ -126,16 +138,21 @@ class Force(commands.Cog):
     async def link_roblox(self, interaction: Interaction, member: discord.Member, roblox_id: int):
         """Validate *roblox_id*, guard the unique link, and write it for *member*."""
         service = self.bot.get_service(PlayerService)
+        cooldowns = interaction.cooldowns
 
         # Validate the account exists.  The embed needs the Roblox profile
         # anyway, and refusing a deleted account before the write beats linking
         # one.  The result is cached, so this is cheap.
         try:
             rblx = await service.roblox_user(roblox_id=roblox_id)
+            await cooldowns.roblox.spend()
         except RobloxRateLimitError as e:
+            await cooldowns.roblox.spend(duration=int(e.retry_after) + 1 if e.retry_after is not None else None)
+
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Roblox is rate limited. Try again{retry}.**")
         except RobloxError:
+            await cooldowns.roblox.spend()
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **The Roblox API is unreachable right now. Try again later.**"
             )
