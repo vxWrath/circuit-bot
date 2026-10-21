@@ -16,7 +16,7 @@ from ..core import (
     RecordNotFoundError,
     RobloxError,
     RobloxRateLimitError,
-    dynamic_cooldown,
+    cooldown,
 )
 from ..modules import (
     PlayerService,
@@ -36,9 +36,9 @@ class Update(commands.Cog):
     update = CircuitGroup(name="update", description="Update your own data.", guild_only=True)
 
     @update.command(name="roblox", description="Update your linked Roblox account.", extras=DEFER)
-    @dynamic_cooldown(name="bloxlink")
-    @dynamic_cooldown(name="roblox")
-    @dynamic_cooldown(name="weekly")
+    @cooldown("bloxlink", limit=1, duration=timedelta(minutes=1))
+    @cooldown("roblox", limit=1, duration=timedelta(minutes=1))
+    @cooldown("weekly", limit=1, duration=timedelta(days=7))
     async def update_roblox(self, interaction: Interaction):
         member = interaction.require_member()
         service = self.bot.get_service(PlayerService)
@@ -47,14 +47,14 @@ class Update(commands.Cog):
         # Resolve through Bloxlink, like the join event does.
         try:
             roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
-            await cooldowns.bloxlink.dynamic.spend(rate=1, per=timedelta(minutes=1))
+            await cooldowns.bloxlink.spend()
         except BloxlinkRateLimitError as e:
-            await cooldowns.bloxlink.dynamic.spend(rate=1, per=int(e.retry_after)+1 if e.retry_after is not None else timedelta(minutes=1))
+            await cooldowns.bloxlink.spend(duration=int(e.retry_after) + 1 if e.retry_after is not None else None)
 
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Bloxlink is rate limited. Try again{retry}.**")
         except BloxlinkError:
-            await cooldowns.bloxlink.dynamic.spend(rate=1, per=timedelta(minutes=1))
+            await cooldowns.bloxlink.spend()
 
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **Bloxlink is unreachable right now. Try again later.**"
@@ -66,14 +66,14 @@ class Update(commands.Cog):
         # Validate the account exists, as the force command does.
         try:
             rblx = await service.roblox_user(roblox_id=roblox_id)
-            await cooldowns.roblox.dynamic.spend(rate=1, per=timedelta(minutes=1))
+            await cooldowns.roblox.spend()
         except RobloxRateLimitError as e:
-            await cooldowns.roblox.dynamic.spend(rate=1, per=int(e.retry_after)+1 if e.retry_after is not None else timedelta(minutes=1))
+            await cooldowns.roblox.spend(duration=int(e.retry_after) + 1 if e.retry_after is not None else None)
 
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Roblox is rate limited. Try again{retry}.**")
         except RobloxError:
-            await cooldowns.roblox.dynamic.spend(rate=1, per=timedelta(minutes=1))
+            await cooldowns.roblox.spend()
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **The Roblox API is unreachable right now. Try again later.**"
             )
@@ -101,7 +101,7 @@ class Update(commands.Cog):
                 f"{CommonEmojis.FAIL} **Your player row disappeared mid-update. Try again.**"
             )
 
-        await cooldowns.weekly.dynamic.spend(rate=1, per=timedelta(days=7))
+        await cooldowns.weekly.spend(limit=1, duration=timedelta(days=7))
 
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)
