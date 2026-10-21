@@ -89,7 +89,7 @@ class Force(commands.Cog):
 
         invoker = interaction.require_member()
 
-        embed = discord.Embed(title="Account Unlinked", color=Color.brand_red())
+        embed = discord.Embed(title="Member Forcibly Unlinked", color=Color.brand_red())
         embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
         embed.add_field(name="Removed Roblox", value=roblox_field(rblx, previous_roblox_id), inline=True)
         embed.add_field(name="Invoker", value=discord_member_field(invoker), inline=True)
@@ -169,7 +169,7 @@ class Force(commands.Cog):
         headshot = await headshot_or_none(profile, roblox_id)
         invoker = interaction.require_member()
 
-        embed = discord.Embed(title="Account Force-Linked", color=Color.brand_green())
+        embed = discord.Embed(title="Member Force-Linked", color=Color.brand_green())
         embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
         embed.add_field(name="Roblox", value=roblox_field(rblx), inline=True)
         embed.add_field(

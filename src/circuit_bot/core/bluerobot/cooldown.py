@@ -141,6 +141,7 @@ class CooldownManager:
             if bucket is None:
                 if rate is None or per is None:
                     return None, None
+                
                 bucket = Cooldown(rate=rate, per=per, window=0.0, tokens=rate)
 
             bucket.update_rate_limit()
@@ -199,16 +200,6 @@ class DynamicCooldownManager(CooldownManager):
 
     async def spend(self, interaction: Interaction, *, rate: int, per: int) -> None:
         resolved = await self._key(interaction)
-        bucket = await interaction.client.cache.get("cooldown", self.id, resolved, cls=Cooldown)
-
-        if bucket is not None:
-            current_time = time.time()
-
-            if bucket.get_tokens(current_time) == 0:
-                retry_after = bucket.get_retry_after(current_time)
-                logger.debug("Cooldown hit for command=%s key=%s retry_after=%.1fs", self.id, resolved, retry_after)
-                raise CommandOnCooldown(bucket, retry_after)  # type: ignore
-
         await self.spend_token(interaction, resolved, rate=rate, per=per)
 
 

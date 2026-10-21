@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 import discord
-from discord.app_commands.errors import CommandOnCooldown
 from discord.ext import commands
 
 from ..core import (
@@ -48,22 +47,17 @@ class Update(commands.Cog):
         # Resolve through Bloxlink, like the join event does.
         try:
             roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
+            await cooldowns.bloxlink.dynamic.spend(rate=1, per=timedelta(minutes=1))
         except BloxlinkRateLimitError as e:
+            await cooldowns.bloxlink.dynamic.spend(rate=1, per=int(e.retry_after)+1 if e.retry_after is not None else timedelta(minutes=1))
+
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Bloxlink is rate limited. Try again{retry}.**")
         except BloxlinkError:
+            await cooldowns.bloxlink.dynamic.spend(rate=1, per=timedelta(minutes=1))
+
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **Bloxlink is unreachable right now. Try again later.**"
-            )
-
-        # The fetch went through; the spend reserves the window the next
-        # Bloxlink call is refused by pre-invoke.
-        try:
-            await cooldowns["bloxlink"].dynamic.spend(rate=5, per=timedelta(minutes=1))
-        except CommandOnCooldown as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **Bloxlink is on cooldown for you. Try again{retry}.**"
             )
 
         if roblox_id is None:
@@ -72,22 +66,16 @@ class Update(commands.Cog):
         # Validate the account exists, as the force command does.
         try:
             rblx = await service.roblox_user(roblox_id=roblox_id)
+            await cooldowns.roblox.dynamic.spend(rate=1, per=timedelta(minutes=1))
         except RobloxRateLimitError as e:
+            await cooldowns.roblox.dynamic.spend(rate=1, per=int(e.retry_after)+1 if e.retry_after is not None else timedelta(minutes=1))
+
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Roblox is rate limited. Try again{retry}.**")
         except RobloxError:
+            await cooldowns.roblox.dynamic.spend(rate=1, per=timedelta(minutes=1))
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **The Roblox API is unreachable right now. Try again later.**"
-            )
-
-        # The fetch went through; the spend reserves the window the next
-        # Roblox API call is refused by pre-invoke.
-        try:
-            await cooldowns["roblox"].dynamic.spend(rate=5, per=timedelta(minutes=1))
-        except CommandOnCooldown as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **The Roblox API is on cooldown for you. Try again{retry}.**"
             )
 
         if rblx is None:
@@ -102,16 +90,6 @@ class Update(commands.Cog):
                 f"{CommonEmojis.FAIL} **That Roblox account is already linked to another Discord account.**"
             )
 
-        # The predicate refuses repeat updates pre-invoke; this spend reserves
-        # the window the next run is refused by.
-        try:
-            await cooldowns["weekly"].dynamic.spend(rate=1, per=timedelta(days=7))
-        except CommandOnCooldown as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **You can update your Roblox account once a week. Try again{retry}.**"
-            )
-
         profile = service.profile(member.id)
         player = await profile.ensure_player()
         previous_roblox_id = player.roblox_id
@@ -123,10 +101,12 @@ class Update(commands.Cog):
                 f"{CommonEmojis.FAIL} **Your player row disappeared mid-update. Try again.**"
             )
 
+        await cooldowns.weekly.dynamic.spend(rate=1, per=timedelta(days=7))
+
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)
 
-        embed = discord.Embed(title="Account Self-Linked", color=Color.brand_green())
+        embed = discord.Embed(title="Member Self-Linked", color=Color.brand_green())
         embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
         embed.add_field(name="Roblox", value=roblox_field(rblx), inline=True)
         embed.add_field(
