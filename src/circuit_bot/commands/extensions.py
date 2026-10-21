@@ -15,7 +15,7 @@ from ..core import (
     developer_only,
 )
 
-DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True))}
+DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
 
 
 async def guild_autocomplete(interaction: Interaction, current_value: str) -> list[Choice[str]]:
@@ -37,21 +37,13 @@ class Extensions(commands.Cog):
     @developer_only()
     async def reload(self, interaction: Interaction):
         await self.bot.load_commands_and_events()
-
-        text = f"{CommonEmojis.SUCCESS} **Reloaded command & event extensions**"
-        layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
-
-        await interaction.respond(view=layout)
+        await interaction.success(f"{CommonEmojis.SUCCESS} **Reloaded command & event extensions**")
 
     @ext.command(name="unload", description="Unload every command extension.", extras=DEFER)
     @developer_only()
     async def unload(self, interaction: Interaction):
         await self.bot.unload_commands_and_events()
-
-        text = f"{CommonEmojis.SUCCESS} **Unloaded command & event extensions**"
-        layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
-
-        await interaction.respond(view=layout)
+        await interaction.success(f"{CommonEmojis.SUCCESS} **Unloaded command & event extensions**")
 
     @ext.command(name="sync", description="Sync the bot's commands with Discord.", extras=DEFER)
     @describe(guild_id="The guild to use")
@@ -73,14 +65,11 @@ class Extensions(commands.Cog):
         if guild is None:
             assert guild_id is not None
 
-            text = (
+            return await interaction.failure(
                 f"**Couldn't find guild with id `{guild_id}`**"
                 if guild_id.isdigit()
                 else f"**Couldn't find guild named `{guild_id}`**"
             )
-            layout = LayoutBuilder().container(accent_color=Color.brand_red()).text(text).done()
-
-            return await interaction.respond(view=layout)
 
         if guild is discord.utils.MISSING:
             text = "Synced global commands"
@@ -93,10 +82,7 @@ class Extensions(commands.Cog):
         self.bot.app_commands_cache = self.bot.fill_app_commands_cache(app_commands)
         self.bot.attach_cooldown_managers()
 
-        text = f"{CommonEmojis.SUCCESS} **{text} (**`{len(app_commands)}`** commands)**"
-        layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
-
-        await interaction.respond(view=layout)
+        await interaction.success(f"{CommonEmojis.SUCCESS} **{text} (**`{len(app_commands)}`** commands)**")
 
 
 async def setup(bot: CircuitBot):

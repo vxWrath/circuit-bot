@@ -67,7 +67,7 @@ class CircuitBot(commands.Bot):
         self.guild_obj = discord.Object(id=self.config.guild_id, type=discord.Guild)
         self.extension_names: list[str] = []
         self.app_commands_cache: dict[str, CachedAppCommand] = {}
-        self.cooldown_managers: dict[str, CooldownManager] = {}
+        self.cooldown_managers: dict[str, list[CooldownManager]] = {}
         self.services: dict[type[Service], Service] = {}
 
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(
@@ -254,27 +254,35 @@ class CircuitBot(commands.Bot):
 
     def get_cooldown_managers(
         self,
-        cooldown_managers: dict[str, CooldownManager],
+        cooldown_managers: dict[str, list[CooldownManager]],
         entities: Sequence[Command[Any, ..., Any] | Group | ContextMenu],
     ) -> None:
         for entity in entities:
             if isinstance(entity, (Command, ContextMenu)):
-                manager = getattr(entity.callback, "__cooldown_manager__", None)
+                managers = getattr(entity.callback, "__cooldown_managers__", None)
 
-                if manager is not None:
+                if managers is not None:
                     name = getattr(entity, "qualified_name", entity.name)
-                    cooldown_managers[name] = manager
+                    cooldown_managers[name] = managers
 
             elif isinstance(entity, Group):
                 self.get_cooldown_managers(cooldown_managers, entity.commands)
 
-    def get_cooldown_manager(self, command_name: str) -> CooldownManager:
-        """The manager registered for *command_name*, raising if it has none."""
+    def get_cooldown_manager(self, command_name: str, *, name: str) -> CooldownManager:
+        """The cooldown manager named *name* on *command_name*, raising if it has none."""
 
         try:
-            return self.cooldown_managers[command_name]
+            managers = self.cooldown_managers[command_name]
         except KeyError:
-            raise CooldownManagerNotFound(f"No cooldown manager is registered for {command_name!r}") from None
+            raise CooldownManagerNotFound(f"No cooldown managers are registered for {command_name!r}") from None
+
+        for manager in managers:
+            if manager.name == name:
+                return manager
+
+        raise CooldownManagerNotFound(
+            f"No cooldown named {name!r} on {command_name!r}; available: {[manager.name for manager in managers]!r}"
+        )
 
     def retrieve_command(self, name: str) -> CachedAppCommand:
         """Retrieve a command from the cache."""

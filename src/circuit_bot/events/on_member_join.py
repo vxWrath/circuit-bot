@@ -4,8 +4,8 @@ from datetime import timedelta
 import discord
 from discord.ext import commands
 
-from ..core import CircuitBot, Color, get_logger
-from ..modules import PlayerService
+from ..core import CircuitBot, Color, RobloxError, get_logger
+from ..modules import PlayerService, discord_member_field, roblox_field, send_roblox_log
 
 logger = get_logger("on_member_join")
 
@@ -79,54 +79,55 @@ class OnMemberJoin(commands.Cog):
             logger.debug(f"Could not resolve Roblox ID for {member.id}. Likely not verified through Bloxlink.")
             return
 
+        # The same guards the force command runs: don't link an account that
+        # doesn't exist, or one another player already owns - the table's unique
+        # constraint would fail the write anyway, this just skips it cleanly.
+        try:
+            rblx = await service.roblox_user(roblox_id=roblox_id)
+        except RobloxError as e:
+            logger.warning("Could not validate Roblox id %d for %d: %s", roblox_id, member.id, e)
+            return
+
+        if rblx is None:
+            logger.debug(f"Roblox id {roblox_id} for {member.id} doesn't exist; skipping link.")
+            return
+
+        existing = await service.profile_from_roblox_id(roblox_id)
+
+        if existing is not None and existing.snowflake != member.id:
+            logger.debug(
+                f"Roblox id {roblox_id} for {member.id} is already linked to {existing.snowflake}; skipping link."
+            )
+
+            owner = member.guild.get_member(existing.snowflake)
+            owner_text = discord_member_field(owner) if owner is not None else f"`{existing.snowflake}`"
+
+            embed = discord.Embed(title="Duplicate Roblox Link Blocked", color=Color.brand_red())
+            embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
+            embed.add_field(name="Roblox", value=roblox_field(rblx), inline=True)
+            embed.add_field(name="Current Owner", value=owner_text, inline=True)
+
+            await send_roblox_log(self.bot, member.guild, embed)
+            return
+
         await profile.link_roblox(roblox_id)
         logger.debug(f"Linked {member.id} to Roblox ID {roblox_id}")
 
-        rblx = await profile.roblox_user()
         hs_url = await profile.headshot_url()
 
-        if not rblx or not hs_url:
-            logger.debug(f"Could not fetch roblox account info for roblox id {roblox_id}")
-            return
-
-        channel_id = self.bot.config.roblox_link_log_channel_id
-
-        if not channel_id:
-            return
-
-        channel = member.guild.get_channel(channel_id) or await member.guild.fetch_channel(channel_id)
-
-        if channel.type != discord.ChannelType.text:
+        if not hs_url:
+            logger.debug(f"Could not fetch roblox headshot for roblox id {roblox_id}")
             return
 
         embed = discord.Embed(
             title="New Member Verified & Linked",
             color=Color.brand_green(),
         )
-        embed.add_field(
-            name="Discord",
-            value=(
-                f"`{member.id}`\n"
-                f"`Username:` **{member.name}**\n"
-                f"`Mention:` {member.mention}\n"
-                f"`Joined:` {discord.utils.format_dt(member.joined_at, style='R') if member.joined_at else '**Guest**'}\n"
-                f"`Created:` {discord.utils.format_dt(member.created_at, style='R')}"
-            ),
-            inline=True,
-        )
-        embed.add_field(
-            name="Roblox",
-            value=(
-                f"`{rblx.id}`\n"
-                f"`Username:` **{rblx.username}**\n"
-                f"`Display Name:` **{rblx.display_name}**\n"
-                f"`Created:` {discord.utils.format_dt(rblx.created_at, style='R')}"
-            ),
-            inline=True,
-        )
+        embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
+        embed.add_field(name="Roblox", value=roblox_field(rblx), inline=True)
         embed.set_thumbnail(url=hs_url)
 
-        await channel.send(embed=embed)
+        await send_roblox_log(self.bot, member.guild, embed)
 
 
 async def setup(bot: CircuitBot):

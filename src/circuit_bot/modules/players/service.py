@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-from ...core.database import Row
 from ...core.roblox import RobloxUser
 from ...core.service import Service
 from .models import CreatePlayer, PlayerRow
@@ -32,14 +31,29 @@ class PlayerService(Service):
         """Open a player's profile.  Touches nothing until a part is asked for."""
         return PlayerProfile(self, snowflake)
 
-    async def find[R: Row](self, shape: type[R], *, snowflake: int) -> R | None:
-        """The player with *snowflake*, as *shape*, or ``None`` if there's none.
-
-        *shape* has to declare ``snowflake`` - it's the column being looked up.
-        """
-
-        players = await self.get_repository(shape).find_by(snowflake=snowflake)
+    async def find_player(self, *, snowflake: int) -> PlayerRow | None:
+        """The player with *snowflake*, or ``None`` if there's none."""
+        players = await self.player.find_by(snowflake=snowflake)
         return players[0] if players else None
+
+    async def profile_from_roblox_id(self, roblox_id: int) -> PlayerProfile | None:
+        """Open the profile of the player linked to *roblox_id*, or ``None`` when there's no such player.
+
+        Unlike :meth:`profile`, this one has to read the row to learn the
+        snowflake the profile is keyed by.  The row it read is seeded into the
+        profile, so asking for it again costs nothing.
+        """
+        players = await self.player.find_by(roblox_id=roblox_id)
+
+        if not players:
+            return None
+
+        row = players[0]
+
+        profile = self.profile(row.snowflake)
+        profile.set_part(PlayerRow, row)
+
+        return profile
 
     async def create(self, *, snowflake: int, roblox_id: int | None = None) -> CreatePlayer:
         """Add a player, returning the row the database read back."""
@@ -53,6 +67,14 @@ class PlayerService(Service):
         """
 
         return await self.player.update(player, roblox_id=roblox_id)
+
+    async def unlink_roblox(self, player: PlayerRow) -> PlayerRow | None:
+        """Drop the Roblox account on *player*, or ``None`` if the row is gone.
+
+        Mirrors :meth:`link_roblox` - *player* is the row the write is keyed by.
+        """
+
+        return await self.player.update(player, roblox_id=None)
 
     async def roblox_user(self, *, roblox_id: int) -> RobloxUser | None:
         """The Roblox user info of *roblox_id*, or ``None`` when roblox id doesn't exist."""

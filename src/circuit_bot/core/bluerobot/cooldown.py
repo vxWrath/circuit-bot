@@ -1,11 +1,11 @@
 import hashlib
 import time
 from collections.abc import Callable, Coroutine, Hashable
+from datetime import timedelta
 from typing import (
     Literal,
     TypeVar,
     cast,
-    overload,
 )
 
 import discord
@@ -23,11 +23,14 @@ __all__ = (
     "CooldownError",
     "CooldownManager",
     "CooldownManagerNotFound",
-    "InteractionChangeableCooldownHandler",
+    "DynamicCooldownManager",
     "InteractionCooldownHandler",
+    "InteractionCooldowns",
+    "InteractionDynamicCooldownHandler",
     "InteractionRegularCooldownHandler",
-    "changeable_cooldown",
+    "RegularCooldownManager",
     "cooldown",
+    "dynamic_cooldown",
 )
 
 logger = get_logger("cooldowns")
@@ -36,8 +39,6 @@ T = TypeVar("T")
 
 CooldownFuncReturn = T | Coroutine[None, None, T]
 CooldownKey = Callable[[Interaction], CooldownFuncReturn[T]]
-
-ChangeableCooldownFactory = Callable[[Interaction, int, int], CooldownFuncReturn[T]]
 
 
 class CooldownError(CircuitException):
@@ -94,65 +95,42 @@ class Cooldown(Model):
 
 
 class CooldownManager:
-    """A cooldown bucket stored in Redis under the manager's command id and key."""
+    """A cooldown bucket stored in Redis under the manager's command id and key.
 
-    @overload
-    def __init__(
-        self,
-        key: CooldownKey[Hashable],
-        *,
-        rate: int,
-        per: int,
-        changeable: Literal[False],
-    ) -> None: ...
+    The two shapes subclass this.  A :class:`RegularCooldownManager` fixes the
+    key, rate, and window at decoration time; a :class:`DynamicCooldownManager`
+    fixes only the key and decides the rate and window when it is spent.  Both
+    check pre-invoke through :meth:`predicate`, which runs before every command
+    run.
+    """
 
-    @overload
-    def __init__(
-        self,
-        key: CooldownKey[Hashable],
-        factory: ChangeableCooldownFactory[Cooldown | None],
-        *,
-        rate: int,
-        per: int,
-        changeable: Literal[True],
-    ) -> None: ...
+    def __init__(self, *, name: str) -> None:
+        self.name = name  # decorator-supplied; names it among a command's cooldowns
+        self.id = ""  # set by the decorator
 
-    def __init__(
-        self,
-        key: CooldownKey[Hashable],
-        factory: ChangeableCooldownFactory[Cooldown | None] | None = None,
-        *,
-        rate: int,
-        per: int,
-        changeable: bool,
-    ) -> None:
-        if changeable and factory is None:
-            raise CooldownError("A changeable cooldown manager needs a factory")
+    async def predicate(self, interaction: Interaction) -> Literal[True]:
+        """The pre-invoke check - each shape checks the bucket it knows.
 
-        self.id = ""  # will be set in the decorator
+        Called before every command run; side-effect free, the command spends
+        after it succeeds.
+        """
+        raise NotImplementedError
 
-        self.key = key
-        self.factory = factory
-        self.rate = rate
-        self.per = per
+    async def predicate_check(self, interaction: Interaction, key: str) -> Literal[True]:
+        """Pass when the bucket at *key* allows another attempt, raise otherwise."""
+        bucket = await interaction.client.cache.get("cooldown", self.id, key, cls=Cooldown)
 
-        self.changeable = changeable
+        if bucket is None:
+            return True
 
-    async def spend_regular(self, interaction: Interaction) -> None:
-        key = str(await discord.utils.maybe_coroutine(self.key, interaction))
-        await self.spend_token(interaction, key, rate=self.rate, per=self.per)
+        current_time = time.time()
 
-    async def spend_changeable(self, interaction: Interaction, rate: int, per: int) -> None:
-        key = str(await discord.utils.maybe_coroutine(self.key, interaction))
+        if bucket.get_tokens(current_time) > 0:
+            return True
 
-        if await self.spend_token(interaction, key):
-            return
-
-        factory = cast(ChangeableCooldownFactory[Cooldown | None], self.factory)
-        bucket = await discord.utils.maybe_coroutine(factory, interaction, rate, per)
-
-        if bucket is not None:
-            await self.spend_token(interaction, key, rate=bucket.rate, per=bucket.per)
+        retry_after = bucket.get_retry_after(current_time)
+        logger.debug("Cooldown hit for command=%s key=%s retry_after=%.1fs", self.id, key, retry_after)
+        raise CommandOnCooldown(bucket, retry_after)  # type: ignore
 
     async def spend_token(
         self, interaction: Interaction, key: str, *, rate: int | None = None, per: int | None = None
@@ -171,25 +149,67 @@ class CooldownManager:
         spent = await interaction.client.cache.update("cooldown", self.id, key, cls=Cooldown, change=change)
         return spent is not None
 
-    async def predicate(self, interaction: Interaction) -> Literal[True]:
-        # Checking is side-effect free; the command spends with .spend() after it succeeds.
-        key = str(await discord.utils.maybe_coroutine(self.key, interaction))
-        bucket = await interaction.client.cache.get("cooldown", self.id, key, cls=Cooldown)
-
-        if bucket is None:
-            return True
-
-        current_time = time.time()
-
-        if bucket.get_tokens(current_time) > 0:
-            return True
-
-        retry_after = bucket.get_retry_after(current_time)
-        logger.debug("Cooldown hit for command=%s key=%s retry_after=%.1fs", self.id, key, retry_after)
-        raise CommandOnCooldown(bucket, retry_after)  # type: ignore
-
     def handler_for(self, interaction: Interaction) -> "InteractionCooldownHandler":
         return InteractionCooldownHandler(self, interaction)
+
+
+class RegularCooldownManager(CooldownManager):
+    """A cooldown fixed at decoration time: key, rate, and window.
+
+    Checked pre-invoke against the bucket at ``key(interaction)``, and spent
+    with :meth:`InteractionRegularCooldownHandler.spend` once the command
+    succeeds - so a failed run doesn't eat the window.
+    """
+
+    def __init__(self, key: CooldownKey[Hashable], *, rate: int, per: int, name: str) -> None:
+        super().__init__(name=name)
+
+        self.key = key
+        self.rate = rate
+        self.per = per
+
+    async def spend(self, interaction: Interaction) -> None:
+        key = str(await discord.utils.maybe_coroutine(self.key, interaction))
+        await self.spend_token(interaction, key, rate=self.rate, per=self.per)
+
+    async def predicate(self, interaction: Interaction) -> Literal[True]:
+        key = str(await discord.utils.maybe_coroutine(self.key, interaction))
+        return await self.predicate_check(interaction, key)
+
+
+class DynamicCooldownManager(CooldownManager):
+    """A cooldown whose rate and window are decided when it is spent.
+
+    One bucket, at the key fixed at decoration time, checked pre-invoke by
+    :meth:`predicate`.  :meth:`InteractionDynamicCooldownHandler.spend`
+    reserves a token under the given *rate* and *per* - checking the bucket
+    first, so a call that slipped past the predicate still refuses.
+    """
+
+    def __init__(self, key: CooldownKey[Hashable], *, name: str) -> None:
+        super().__init__(name=name)
+
+        self.key = key
+
+    async def _key(self, interaction: Interaction) -> str:
+        return str(await discord.utils.maybe_coroutine(self.key, interaction))
+
+    async def predicate(self, interaction: Interaction) -> Literal[True]:
+        return await self.predicate_check(interaction, await self._key(interaction))
+
+    async def spend(self, interaction: Interaction, *, rate: int, per: int) -> None:
+        resolved = await self._key(interaction)
+        bucket = await interaction.client.cache.get("cooldown", self.id, resolved, cls=Cooldown)
+
+        if bucket is not None:
+            current_time = time.time()
+
+            if bucket.get_tokens(current_time) == 0:
+                retry_after = bucket.get_retry_after(current_time)
+                logger.debug("Cooldown hit for command=%s key=%s retry_after=%.1fs", self.id, resolved, retry_after)
+                raise CommandOnCooldown(bucket, retry_after)  # type: ignore
+
+        await self.spend_token(interaction, resolved, rate=rate, per=per)
 
 
 class InteractionCooldownHandler:
@@ -200,16 +220,16 @@ class InteractionCooldownHandler:
     @property
     def regular(self) -> "InteractionRegularCooldownHandler":
         """Use the manager's regular bucket."""
-        if self.cooldown_manager.changeable:
-            raise CooldownError("This command uses a changeable cooldown; call .changeable.spend(rate, per)")
+        if not isinstance(self.cooldown_manager, RegularCooldownManager):
+            raise CooldownError("This command uses a dynamic cooldown; call .dynamic.spend(rate=..., per=..., key=...)")
         return InteractionRegularCooldownHandler(self)
 
     @property
-    def changeable(self) -> "InteractionChangeableCooldownHandler":
-        """Use the manager's changeable bucket."""
-        if not self.cooldown_manager.changeable:
+    def dynamic(self) -> "InteractionDynamicCooldownHandler":
+        """Use the manager's dynamic bucket."""
+        if not isinstance(self.cooldown_manager, DynamicCooldownManager):
             raise CooldownError("This command uses a regular cooldown; call .regular.spend()")
-        return InteractionChangeableCooldownHandler(self)
+        return InteractionDynamicCooldownHandler(self)
 
 
 class InteractionRegularCooldownHandler:
@@ -218,23 +238,57 @@ class InteractionRegularCooldownHandler:
 
     async def spend(self) -> None:
         """Spend a token, creating the bucket if it is missing."""
-        await self.parent.cooldown_manager.spend_regular(self.parent.interaction)
+        manager = cast(RegularCooldownManager, self.parent.cooldown_manager)
+        await manager.spend(self.parent.interaction)
 
 
-class InteractionChangeableCooldownHandler:
+class InteractionDynamicCooldownHandler:
     def __init__(self, parent: InteractionCooldownHandler) -> None:
         self.parent = parent
 
-    async def spend(self, rate: int, per: int) -> None:
-        """Spend a token, creating the bucket at *rate* per *per* seconds if it is missing."""
-        await self.parent.cooldown_manager.spend_changeable(self.parent.interaction, rate, per)
+    async def spend(self, *, rate: int, per: int | timedelta) -> None:
+        """Check and reserve a token at the manager's key, under *rate* per *per*.
+
+        The predicate already refuses exhausted buckets pre-invoke; this is the
+        reservation and the guard for a call that slips past it.
+        """
+        if isinstance(per, timedelta):
+            per = int(per.total_seconds())
+
+        manager = cast(DynamicCooldownManager, self.parent.cooldown_manager)
+        await manager.spend(self.parent.interaction, rate=rate, per=per)
+
+
+class InteractionCooldowns:
+    """Named access to the cooldown managers on a command.
+
+    Every cooldown is decorated with a name; the command body reaches each
+    through this accessor, ``interaction.cooldowns["<name>"]``.
+    """
+
+    def __init__(self, interaction: Interaction, command_name: str) -> None:
+        self.interaction = interaction
+        self.command_name = command_name
+
+    def __getitem__(self, name: str) -> InteractionCooldownHandler:
+        manager = self.interaction.client.get_cooldown_manager(self.command_name, name=name)
+        return manager.handler_for(self.interaction)
+
+    def __getattr__(self, name: str) -> InteractionCooldownHandler:
+        """Attribute sugar - ``cooldowns.bloxlink``."""
+        try:
+            return self[name]
+        except CooldownManagerNotFound:
+            raise AttributeError(f"No cooldown named {name!r} on {self.command_name!r}") from None
 
 
 def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
     def decorator(func: CheckInputParameter) -> CheckInputParameter:
         target = func.callback if isinstance(func, (Command, ContextMenu)) else func
-        manager.id = hashlib.md5(target.__qualname__.encode()).hexdigest()
+        manager.id = hashlib.md5(f"{target.__qualname__}:{manager.name}".encode()).hexdigest()
 
+        # The predicate runs before every command run.  A dynamic manager
+        # checks its fallback bucket there; its other keys enforce at spend.
         if isinstance(func, (Command, ContextMenu)):
             func.checks.append(manager.predicate)  # type: ignore
         else:
@@ -243,27 +297,26 @@ def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
 
             func.__discord_app_commands_checks__.append(manager.predicate)
 
-        target.__cooldown_manager__ = manager  # type: ignore
+        managers = getattr(target, "__cooldown_managers__", None)
+        if managers is None:
+            managers = []
+            target.__cooldown_managers__ = managers  # type: ignore
+
+        if any(existing.name == manager.name for existing in managers):
+            raise ValueError(f"{target.__qualname__!r} already has a cooldown named {manager.name!r}")
+
+        managers.append(manager)
         return func
 
     return decorator  # type: ignore
 
 
-def cooldown(rate: int, per: int, *, key: CooldownKey[Hashable] | None = discord.utils.MISSING) -> Callable[[T], T]:
-    if key is discord.utils.MISSING:
-        key_func = lambda i: i.user.id
-    elif key is None:
-        key_func = lambda i: None
-    else:
-        key_func = key
-
-    manager = CooldownManager(key_func, rate=rate, per=per, changeable=False)
-
-    return cooldown_check(manager)
-
-
-def changeable_cooldown(
-    rate: int, per: int, *, key: CooldownKey[Hashable] | None = discord.utils.MISSING
+def cooldown(
+    rate: int,
+    per: int | timedelta,
+    *,
+    name: str,
+    key: CooldownKey[Hashable] | None = discord.utils.MISSING,
 ) -> Callable[[T], T]:
     if key is discord.utils.MISSING:
         key_func = lambda i: i.user.id
@@ -272,7 +325,30 @@ def changeable_cooldown(
     else:
         key_func = key
 
-    factory = lambda i, r, p: Cooldown(rate=r, per=p, window=0.0, tokens=r)
-    manager = CooldownManager(key_func, factory, rate=rate, per=per, changeable=True)
+    if isinstance(per, timedelta):
+        per = int(per.total_seconds())
+
+    manager = RegularCooldownManager(key_func, rate=rate, per=per, name=name)
+
+    return cooldown_check(manager)
+
+
+def dynamic_cooldown(*, name: str, key: CooldownKey[Hashable] | None = discord.utils.MISSING) -> Callable[[T], T]:
+    """A cooldown whose rate and window are supplied when it is spent.
+
+    *name* names the manager among the command's cooldowns; the command body
+    reaches it through ``interaction.cooldowns[name]``.  *key* is the bucket's
+    key, fixed at decoration time like a regular cooldown's - the invoker by
+    default.  The bucket is checked pre-invoke; the spend reserves the token
+    under its rate and window.
+    """
+    if key is discord.utils.MISSING:
+        key_func = lambda i: i.user.id
+    elif key is None:
+        key_func = lambda i: None
+    else:
+        key_func = key
+
+    manager = DynamicCooldownManager(key_func, name=name)
 
     return cooldown_check(manager)

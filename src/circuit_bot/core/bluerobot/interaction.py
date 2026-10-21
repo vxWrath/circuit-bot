@@ -4,17 +4,28 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, ClassVar, Self, final
 
 import discord
-from discord.ui import Button, DynamicItem, File, Item, MediaGallery, Section, Separator, TextDisplay, Thumbnail
+from discord.ui import (
+    Button,
+    DynamicItem,
+    File,
+    Item,
+    MediaGallery,
+    Section,
+    Separator,
+    TextDisplay,
+    Thumbnail,
+)
 from discord.ui.dynamic import BaseT
 from discord.ui.select import BaseSelect
 from msgspec import field
 
 from ..exception import CircuitException
 from ..model import Model
+from .color import Color
 
 if TYPE_CHECKING:
     from .bot import CircuitBot
-    from .cooldown import InteractionCooldownHandler
+    from .cooldown import InteractionCooldowns
 __all__ = (
     "BaseItem",
     "BaseLayoutView",
@@ -100,6 +111,16 @@ class Interaction(discord.Interaction["CircuitBot"]):
 
     __slots__ = ()
 
+    def get_options(self) -> InteractionOptions:
+        """Get the interaction's options."""
+
+        if self.command is not None:
+            options = self.command.extras.get("options")
+        else:
+            options = self.extras.get("options")
+
+        return options if options is not None else InteractionOptions()
+
     def require_guild(self) -> discord.Guild:
         if self.guild is None:
             raise GuildOnly(interaction=True)
@@ -142,16 +163,66 @@ class Interaction(discord.Interaction["CircuitBot"]):
         else:
             return await self.response.edit_message(**kwargs)
 
+    async def success(self, text: str) -> None:
+        """Reply with *text* in a green container, ephemeral."""
+
+        # Imported here because layout.py imports this module's views, so a
+        # module-level import would be circular.
+        from .layout import LayoutBuilder
+
+        layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
+        await self.respond(view=layout, ephemeral=True)
+
+    async def failure(self, text: str) -> None:
+        """Reply with *text* in a red container, ephemeral."""
+
+        # Imported here because layout.py imports this module's views, so a
+        # module-level import would be circular.
+        from .layout import LayoutBuilder
+
+        layout = LayoutBuilder().container(accent_color=Color.brand_red()).text(text).done()
+        await self.respond(view=layout, ephemeral=True)
+
+    async def success_edit(self, text: str) -> None:
+        """Edit the response with *text* in a green container"""
+
+        # Imported here because layout.py imports this module's views, so a
+        # module-level import would be circular.
+        from .layout import LayoutBuilder
+
+        layout = LayoutBuilder().container(accent_color=Color.brand_green()).text(text).done()
+        await self.edit(view=layout)
+
+    async def failure_edit(self, text: str) -> None:
+        """Edit the response with *text* in a red container"""
+
+        # Imported here because layout.py imports this module's views, so a
+        # module-level import would be circular.
+        from .layout import LayoutBuilder
+
+        layout = LayoutBuilder().container(accent_color=Color.brand_red()).text(text).done()
+        await self.edit(view=layout)
+
     @property
-    def cooldown(self) -> "InteractionCooldownHandler":
+    def cooldowns(self) -> "InteractionCooldowns":
+        """Named access to every cooldown on this command.
+
+        Cooldowns are decorated with a name; the command body reaches each
+        through ``interaction.cooldowns["<name>"]``.
+        """
         if not self.command:
             raise ValueError("Interaction has no command")
 
-        command_name = getattr(self.command, "qualified_name", self.command.name)
-        return self.client.get_cooldown_manager(command_name).handler_for(self)
+        from .cooldown import InteractionCooldowns
 
-    def cooldown_for(self, command_name: str) -> "InteractionCooldownHandler":
-        return self.client.get_cooldown_manager(command_name).handler_for(self)
+        command_name = getattr(self.command, "qualified_name", self.command.name)
+        return InteractionCooldowns(self, command_name)
+
+    def cooldown_for(self, command_name: str) -> "InteractionCooldowns":
+        """Named access to another command's cooldowns, to spend one here."""
+        from .cooldown import InteractionCooldowns
+
+        return InteractionCooldowns(self, command_name)
 
 
 BASE_TEMPLATE = r"([0-9a-fA-F]{2})"

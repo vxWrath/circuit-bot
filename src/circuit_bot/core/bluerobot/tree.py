@@ -3,6 +3,7 @@ import traceback
 
 import discord
 from discord.app_commands import CommandTree
+from discord.app_commands.errors import CommandOnCooldown
 
 from ..logging import get_logger
 from .color import Color
@@ -71,6 +72,24 @@ class CircuitTree(CommandTree):
         return True
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
+        # Cooldown checks raise pre-invoke, so this is where a refused command
+        # lands - a friendly reply instead of a traceback file.
+        if isinstance(error, CommandOnCooldown):
+            retry = f" in about {int(error.retry_after)}s" if error.retry_after is not None else ""
+            layout = (
+                LayoutBuilder()
+                .container(accent_color=Color.brand_red())
+                .text(f"**You're on cooldown. Try again{retry}.**")
+                .done()
+            )
+
+            try:
+                await interaction.respond(view=layout, ephemeral=True)
+            except discord.HTTPException:
+                pass
+
+            return
+
         logger.error("Error in interaction", exc_info=error)
 
         trace = "".join(traceback.format_exception(error)).encode()

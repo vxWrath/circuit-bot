@@ -7,7 +7,6 @@ from typing import NamedTuple
 from .core.env import get_env
 
 PACKAGE_PATH = Path(__file__).resolve().parent
-DEFAULT_SYNC_SENTINEL = Path(tempfile.gettempdir()) / "circuit-bot.sync"
 
 __all__ = (
     "BotConfig",
@@ -25,10 +24,12 @@ class BotConfig(NamedTuple):
 
     token: str
     guild_id: int
+
     connection_webhook_url: str
     roblox_api_key: str
     bloxlink_api_key: str
-    sync_sentinel: Path
+
+    sync_sentinel: Path = Path(tempfile.gettempdir()) / "circuit-bot.sync"
     command_path: Path = PACKAGE_PATH / "commands"
     event_path: Path = PACKAGE_PATH / "events"
 
@@ -70,7 +71,6 @@ def get_bot_config() -> BotConfig:
         connection_webhook_url=get_env("CONNECTION_WEBHOOK_URL"),
         roblox_api_key=get_env("ROBLOX_API_KEY"),
         bloxlink_api_key=get_env("BLOXLINK_API_KEY"),
-        sync_sentinel=Path(get_env("SYNC_SENTINEL", str(DEFAULT_SYNC_SENTINEL))),
     )
 
 

@@ -1,7 +1,6 @@
-from collections.abc import Callable, Coroutine
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
-from ...core.database import RecordNotFoundError, Row
+from ...core.database import RecordNotFoundError
 from ...core.profile import Profile
 from ...core.roblox import RobloxUser
 from .models import PlayerRow
@@ -15,10 +14,11 @@ __all__ = ("PlayerProfile",)
 class PlayerProfile(Profile["PlayerService"]):
     """One player, filled in on demand.
 
-    Open it through :meth:`PlayerService.profile` and ask for the parts you
-    render - each is fetched once and kept.  The Roblox parts read the row first
-    and raise ``RecordNotFoundError`` when there is no such player, and a profile
-    never reaches for a client itself.
+    Open it through :meth:`PlayerService.profile` (or
+    :meth:`PlayerService.profile_from_roblox_id`, which reads the row once up
+    front) and ask for the parts you render - each is fetched once and kept.
+    The Roblox parts read the row first and raise ``RecordNotFoundError`` when
+    there is no such player, and a profile never reaches for a client itself.
     """
 
     def __init__(self, service: "PlayerService", snowflake: int) -> None:
@@ -26,21 +26,9 @@ class PlayerProfile(Profile["PlayerService"]):
 
         self.snowflake = snowflake
 
-    async def row[R: Row](self, shape: type[R]) -> R | None:
-        """The player's row as *shape*, or ``None`` if there's no such player.
-
-        The shape is the cache key, so asking twice for the same one fetches
-        once, and a narrower shape costs a narrower read.
-        """
-
-        # pyright can't carry `find`'s own type parameter through a callable
-        # passed by value, so it's spelled out here.
-        find = cast("Callable[..., Coroutine[Any, Any, R | None]]", self.service.find)
-        return await self.ensure_part(shape, find, shape, snowflake=self.snowflake)
-
     async def player(self) -> PlayerRow | None:
         """The player's full row, or ``None`` if there's no such player."""
-        return await self.row(PlayerRow)
+        return await self.ensure_part(PlayerRow, self.service.find_player, snowflake=self.snowflake)
 
     async def require_player(self) -> PlayerRow:
         """The player's full row, or raise ``RecordNotFoundError``."""
@@ -119,3 +107,29 @@ class PlayerProfile(Profile["PlayerService"]):
         self.set_part(PlayerRow, linked)
 
         return linked
+
+    async def unlink_roblox(self) -> PlayerRow:
+        """Drop the player's linked Roblox account, or raise ``RecordNotFoundError``.
+
+        Mirrors :meth:`link_roblox` - the raise covers both no such player and
+        the row going between the read and the write, and every other part is
+        dropped.
+        """
+
+        player = await self.player()
+
+        if player is None:
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+
+        # The row went between the read and the write, so the parts read for it
+        # are stale.
+        unlinked = await self.service.unlink_roblox(player)
+
+        if unlinked is None:
+            self.invalidate_parts()
+            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+
+        self.invalidate_parts()
+        self.set_part(PlayerRow, unlinked)
+
+        return unlinked
