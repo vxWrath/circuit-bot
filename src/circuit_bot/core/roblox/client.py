@@ -21,8 +21,8 @@ class RobloxClient(APIClient):
     :class:`RobloxRateLimitError` when it isn't.
     """
 
-    NAME = "Roblox"
-    ERRORS = Errors(
+    name = "Roblox"
+    errors = Errors(
         error=RobloxError,
         api=RobloxAPIError,
         unavailable=RobloxUnavailableError,

@@ -212,19 +212,3 @@ class LayoutBuilder(LayoutMixin, BaseLayoutView):
 
     def _add(self, item: ui.Item) -> None:
         self.add_item(item)
-
-    def thumbnail(
-        self,
-        media: MediaSource,
-        *,
-        description: str | None = None,
-        spoiler: bool = False,
-    ) -> Self:
-        """Add a standalone :class:`discord.ui.Thumbnail`.
-
-        Thumbnails are typically used as a section accessory; pass a
-        ``ui.Thumbnail(...)`` instance directly to :meth:`SectionBuilder.accessory`
-        for that use-case.
-        """
-        self._add(ui.Thumbnail(media, description=description, spoiler=spoiler))
-        return self

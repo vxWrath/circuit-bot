@@ -1,6 +1,7 @@
 """The transport the bot's API clients share."""
 
 import asyncio
+import time
 from collections.abc import Callable, Coroutine
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple
 
@@ -10,7 +11,12 @@ from ..cache.exceptions import CacheError
 from ..logging import get_logger
 from ..ratelimit import RetryPolicy, retry_delay
 from ..singleflight import SingleFlight
-from .exceptions import APIError, APIRateLimitError, APIResponseError, APIUnavailableError
+from .exceptions import (
+    APIError,
+    APIRateLimitError,
+    APIResponseError,
+    APIUnavailableError,
+)
 
 if TYPE_CHECKING:
     from ..bluerobot import CircuitBot
@@ -19,11 +25,7 @@ __all__ = ("APIClient", "Errors")
 
 
 class Errors(NamedTuple):
-    """The errors a client raises, declared together so none is forgotten.
-
-    One per way a request can end badly, and each is the service's own subclass,
-    so a caller can catch the one it means.
-    """
+    """The errors a client raises - one per way a request can end badly."""
 
     error: type[APIError]
     api: type[APIResponseError]
@@ -34,75 +36,64 @@ class Errors(NamedTuple):
 class APIClient:
     """Base for the clients that talk to a third-party HTTP API.
 
-    A subclass must declare :attr:`NAME` and :attr:`ERRORS`, and is refused at
-    definition time otherwise.  The hooks below default to doing nothing, so a
-    client overrides only the ones it has an answer for.
-
-    :meth:`request` sends one HTTP request and raises the client's own errors;
-    :meth:`lookup` puts the cache in front of a fetch.  Both are internal: what
-    ``bot.roblox`` exposes is the subclass's own methods.
+    A subclass declares :attr:`name` and :attr:`errors`, then builds its own
+    methods on :meth:`request` and :meth:`lookup`; the hooks default to doing
+    nothing, so a client overrides only the ones it has an answer for.
     """
 
-    NAME: ClassVar[str]
-    """The API's name, spelled the way this client's messages should read: ``Roblox``."""
-
-    ERRORS: ClassVar[Errors]
-    """The errors this client raises - see :class:`Errors`."""
-
-    RETRY_POLICY: ClassVar[RetryPolicy] = RetryPolicy()
-    """How long this client is willing to sit on a rate limit."""
+    name: ClassVar[str]
+    errors: ClassVar[Errors]
+    retry_policy: ClassVar[RetryPolicy] = RetryPolicy()
+    unavailable_window: ClassVar[float] = 30.0  # fail-fast window after a 5xx
 
     def __init__(self, *, bot: "CircuitBot") -> None:
         self.bot = bot
         self.session = bot.session
+        self.logger = get_logger(self.name.casefold())
 
-        # Named after the API, because the prose of every message this client
-        # logs names it too.
-        self._logger = get_logger(self.NAME.casefold())
+        # Concurrent lookups of the same key share the fetch that fills it.
+        self.in_flight = SingleFlight()
 
-        # Keyed by the cache key a lookup will be remembered under, so two
-        # lookups that would share an entry share the fetch that fills it.
-        self._in_flight = SingleFlight()
+        # Fail-fast windows armed by failures; the rate limit waits out the
+        # API's own retry_after, the outage window is a conservative guess.
+        self.rate_limited_until = 0.0
+        self.unavailable_until = 0.0
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
 
-        missing = [name for name in ("NAME", "ERRORS") if not getattr(cls, name, None)]
-
+        missing = [attr for attr in ("name", "errors") if not getattr(cls, attr, None)]
         if missing:
             raise TypeError(f"{cls.__name__} must declare {', '.join(missing)}")
 
     # -- hooks ---------------------------------------------------------------
 
     def request_headers(self) -> dict[str, str]:
-        """Headers every request to this API carries - override to authenticate.
-
-        Built once per :meth:`request`, not per attempt, so a retry resends what
-        the first try sent; a caller's own ``headers`` merge over the top.
-        """
+        """Headers every request carries - override to authenticate."""
 
         return {}
 
     async def before_request(self) -> None:
         """Run once per attempt, just before the request goes out.
 
-        Where a client spends something to make a request - a unit of quota, a
-        token refresh - it happens here, so only an attempt actually being made
-        pays for it.
+        Where a client spends something to make a request - a unit of quota -
+        it happens here, so only an attempt actually being made pays for it.
         """
 
     def error_detail(self, payload: Any) -> str | None:
-        """The reason an error body gives, in the spelling this API uses.
-
-        ``None`` by default, for an API that reports its errors some other way.
-        """
+        """The reason an error body gives, in this API's spelling."""
 
         return None
+
+    def arm_rate_limit(self, retry_after: float) -> None:
+        """Remember a rate limit so later calls fail fast until it passes."""
+
+        self.rate_limited_until = time.time() + retry_after
 
     # -- requests ------------------------------------------------------------
 
     async def error_message(self, message: str, response: aiohttp.ClientResponse) -> str:
-        """*message*, with the reason an error body gives appended when it gives one."""
+        """*message*, with the reason an error body gives appended."""
 
         try:
             payload = await response.json()
@@ -110,26 +101,63 @@ class APIClient:
             return message
 
         detail = self.error_detail(payload)
-
         return f"{message}: {detail}" if detail else message
 
+    def check_fail_fast(self, method: str, url: str) -> None:
+        """Raise the remembered failure instead of sending, while it's still fresh."""
+
+        now = time.time()
+
+        if now < self.rate_limited_until:
+            remaining = self.rate_limited_until - now
+            self.logger.debug(f"{self.name} API rate limited, failing fast for {remaining:.0f}s: {method} {url}")
+            raise self.errors.ratelimit(
+                f"{self.name} API rate limited; failing fast for {remaining:.0f}s on {method} {url}",
+                retry_after=remaining,
+            )
+
+        if now < self.unavailable_until:
+            remaining = self.unavailable_until - now
+            self.logger.debug(f"{self.name} API unavailable, failing fast for {remaining:.0f}s: {method} {url}")
+            raise self.errors.unavailable(
+                f"{self.name} API unavailable; failing fast for {remaining:.0f}s on {method} {url}"
+            )
+
+    async def handle_response(self, response: aiohttp.ClientResponse, method: str, url: str) -> dict[str, Any] | None:
+        """Parse a non-429 response, raising the error its status means."""
+
+        if response.status == 404:
+            return None
+
+        if response.status >= 500:
+            self.unavailable_until = time.time() + self.unavailable_window
+            raise self.errors.unavailable(f"{self.name} API returned {response.status} for {method} {url}")
+
+        if response.status != 200:
+            message = f"{self.name} API returned {response.status} for {method} {url}"
+            raise self.errors.api(await self.error_message(message, response))
+
+        if not response.content_type.startswith("application/json"):
+            raise self.errors.api(f"{self.name} API returned non-JSON ({response.content_type}) for {method} {url}")
+
+        try:
+            return await response.json()
+        except ValueError as e:
+            raise self.errors.api(f"{self.name} API returned invalid JSON for {method} {url}") from e
+
     async def request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any] | None:
-        """Send an HTTP request to this API and parse the JSON response.
+        """Send one HTTP request and parse the JSON response.
 
-        A 429 is waited out and retried in place while the wait is short enough to
-        sit on, up to :attr:`RETRY_POLICY` attempts; a longer wait raises the
-        client's rate limit error, carrying ``retry_after`` when the API said how
-        long.
-
-        Returns ``None`` when the API answers 404.  Any other failure raises what
-        the client declared in :attr:`ERRORS`: its own error when the request
-        never got through, its response error for an unexpected status or
-        unusable JSON, and its unavailable error for a 5xx.
+        A short 429 wait is retried in place up to :attr:`retry_policy`; a
+        longer one or a 5xx arms a fail-fast window that refuses later calls.
+        Returns ``None`` for a 404 and raises the matching error from
+        :attr:`errors` for anything else.
         """
 
-        self._logger.debug("%s API request: %s %s", self.NAME, method, url)
+        self.check_fail_fast(method, url)
+        self.logger.debug(f"{self.name} API request: {method} {url}")
 
-        # Built once: a retry must not lose the caller's headers to the pop.
+        # Built once, so a retry resends what the first try sent.
         headers = self.request_headers()
         headers.update(kwargs.pop("headers", {}))
 
@@ -143,55 +171,33 @@ class APIClient:
             try:
                 async with self.session.request(method, url, headers=headers, **kwargs) as resp:
                     if resp.status == 429:
-                        delay, requested = retry_delay(resp.headers, attempt, self.RETRY_POLICY)
-
-                        if attempt >= self.RETRY_POLICY.attempts or delay > self.RETRY_POLICY.max_wait:
-                            # Only a header the API actually sent is a promise
-                            # to the caller - our own backoff is a guess.
-                            asked = f" (asked for {requested:.1f}s)" if requested is not None else ""
-                            raise self.ERRORS.ratelimit(
-                                f"{self.NAME} API rate limited {method} {url}{asked}",
-                                retry_after=requested,
-                            )
+                        delay, requested = retry_delay(resp.headers, attempt, self.retry_policy)
 
                         # Hand the connection back before sleeping on it.
                         resp.release()
 
-                        self._logger.warning(
-                            "%s API rate limited %s %s, retrying in %.1fs (attempt %d/%d)",
-                            self.NAME,
-                            method,
-                            url,
-                            delay,
-                            attempt,
-                            self.RETRY_POLICY.attempts,
+                        if attempt < self.retry_policy.attempts and delay <= self.retry_policy.max_wait:
+                            self.logger.warning(
+                                f"{self.name} API rate limited {method} {url}, "
+                                f"retrying in {delay:.1f}s (attempt {attempt}/{self.retry_policy.attempts})"
+                            )
+                            await asyncio.sleep(delay)
+                            continue
+
+                        # Only a header the API sent is a promise - our own
+                        # backoff is a guess.
+                        if requested is not None:
+                            self.arm_rate_limit(requested)
+
+                        asked = f" (asked for {requested:.1f}s)" if requested is not None else ""
+                        raise self.errors.ratelimit(
+                            f"{self.name} API rate limited {method} {url}{asked}", retry_after=requested
                         )
 
-                        await asyncio.sleep(delay)
-                        continue
-
-                    if resp.status == 404:
-                        return None
-
-                    if resp.status >= 500:
-                        raise self.ERRORS.unavailable(f"{self.NAME} API returned {resp.status} for {method} {url}")
-
-                    if resp.status != 200:
-                        message = f"{self.NAME} API returned {resp.status} for {method} {url}"
-                        raise self.ERRORS.api(await self.error_message(message, resp))
-
-                    if not resp.content_type.startswith("application/json"):
-                        raise self.ERRORS.api(
-                            f"{self.NAME} API returned non-JSON ({resp.content_type}) for {method} {url}"
-                        )
-
-                    try:
-                        return await resp.json()
-                    except ValueError as e:
-                        raise self.ERRORS.api(f"{self.NAME} API returned invalid JSON for {method} {url}") from e
+                    return await self.handle_response(resp, method, url)
 
             except (aiohttp.ClientError, TimeoutError) as e:
-                raise self.ERRORS.error(f"{self.NAME} API request failed for {method} {url}") from e
+                raise self.errors.error(f"{self.name} API request failed for {method} {url}") from e
 
     # -- reads ---------------------------------------------------------------
 
@@ -204,12 +210,9 @@ class APIClient:
     ) -> T | None:
         """Serve *path* from the cache, falling back to *fetch*.
 
-        A ``None`` from *fetch* is remembered too, as an absent marker under the
-        same key a value would take.  A cache failure is logged and skipped;
-        *fetch* stays the source of truth.
-
-        Callers asking for the same thing at the same moment share one call to
-        *fetch*, and with it the first caller's arguments.
+        A ``None`` from *fetch* is remembered as an absent marker; a cache
+        failure is logged and skipped.  Concurrent callers asking for the same
+        thing share one call to *fetch*.
         """
 
         key = self.bot.cache.key_from_path(*path)
@@ -223,11 +226,9 @@ class APIClient:
             if cached is not None:
                 return cached
         except CacheError as e:
-            self._logger.warning("Cache read failed for %r, fetching from the API instead: %s", key, e)
+            self.logger.warning(f"Cache read failed for {key!r}, fetching from the API instead: {e}")
 
         async def fetch_and_remember() -> T | None:
-            """Fetch, then keep what came back - the unit concurrent callers share."""
-
             fetched = await fetch(*args)
 
             try:
@@ -236,8 +237,8 @@ class APIClient:
                 else:
                     await self.bot.cache.set(*path, value=fetched)
             except CacheError as e:
-                self._logger.warning("Cache write failed for %r: %s", key, e)
+                self.logger.warning(f"Cache write failed for {key!r}: {e}")
 
             return fetched
 
-        return await self._in_flight.run(key, fetch_and_remember)
+        return await self.in_flight.run(key, fetch_and_remember)

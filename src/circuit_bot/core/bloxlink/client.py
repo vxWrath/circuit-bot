@@ -3,7 +3,12 @@ from typing import TYPE_CHECKING, Any
 
 from ..api import APIClient, Errors
 from ..cache.exceptions import CacheError
-from .exceptions import BloxlinkAPIError, BloxlinkError, BloxlinkRateLimitError, BloxlinkUnavailableError
+from .exceptions import (
+    BloxlinkAPIError,
+    BloxlinkError,
+    BloxlinkRateLimitError,
+    BloxlinkUnavailableError,
+)
 
 if TYPE_CHECKING:
     from ..bluerobot import CircuitBot
@@ -21,8 +26,8 @@ class BloxlinkClient(APIClient):
     gone.  Requires ``BLOXLINK_API_KEY``.
     """
 
-    NAME = "Bloxlink"
-    ERRORS = Errors(
+    name = "Bloxlink"
+    errors = Errors(
         error=BloxlinkError,
         api=BloxlinkAPIError,
         unavailable=BloxlinkUnavailableError,
@@ -57,7 +62,8 @@ class BloxlinkClient(APIClient):
         Runs once per attempt, so a request that is rate limited and retried
         spends a second unit.  Raises :class:`BloxlinkRateLimitError` with
         ``retry_after`` set to the seconds left until the UTC-date counter
-        resets; a cache failure lets the request through uncounted.
+        resets, arming the fail-fast window so later calls refuse until then;
+        a cache failure lets the request through uncounted.
         """
 
         now = datetime.datetime.now(tz=datetime.UTC)
@@ -69,7 +75,7 @@ class BloxlinkClient(APIClient):
         try:
             used = await self.bot.cache.incr(key)
         except CacheError as e:
-            self._logger.warning("Bloxlink quota check failed for %r, sending the request anyway: %s", key, e)
+            self.logger.warning(f"Bloxlink quota check failed for {key!r}, sending the request anyway: {e}")
             return
 
         if used == 1:
@@ -81,17 +87,17 @@ class BloxlinkClient(APIClient):
             except CacheError as e:
                 # A missed expiry only leaves a stale counter behind, so it's
                 # not worth refusing the request over.
-                self._logger.warning("Bloxlink quota expiry failed for %r, leaving it in Redis: %s", key, e)
+                self.logger.warning(f"Bloxlink quota expiry failed for {key!r}, leaving it in Redis: {e}")
 
         if used > self.DAILY_LIMIT:
+            self.arm_rate_limit(resets_in)
+
             raise BloxlinkRateLimitError(
                 f"Bloxlink API quota exhausted: {self.DAILY_LIMIT} requests used for {now.strftime('%Y-%m-%d')} UTC",
                 retry_after=resets_in,
             )
 
-        self._logger.debug(
-            "Bloxlink API quota: %d/%d used for %s UTC", used, self.DAILY_LIMIT, now.strftime("%Y-%m-%d")
-        )
+        self.logger.debug(f"Bloxlink API quota: {used}/{self.DAILY_LIMIT} used for {now.strftime('%Y-%m-%d')} UTC")
 
     async def fetch_roblox_id(self, guild_id: int, discord_user_id: int) -> int | None:
         """Fetch the Roblox account linked to *discord_user_id* in *guild_id*."""

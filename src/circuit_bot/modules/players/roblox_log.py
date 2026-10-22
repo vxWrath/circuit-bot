@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING
 
 import discord
+from discord import ui, utils
 
+from ...core.bluerobot.layout import LayoutBuilder, LayoutMixin
 from ...core.logging import get_logger
 from ...core.roblox import RobloxError, RobloxUser
 
@@ -9,37 +11,72 @@ if TYPE_CHECKING:
     from ...core.bluerobot import CircuitBot
     from .profile import PlayerProfile
 
-__all__ = ("discord_member_field", "headshot_or_none", "roblox_field", "send_roblox_log")
+__all__ = (
+    "add_discord_section",
+    "add_roblox_section",
+    "discord_member_field",
+    "headshot_or_none",
+    "roblox_field",
+    "roblox_headshot_url",
+    "send_roblox_log",
+)
 
 logger = get_logger("roblox_log")
 
 
 def discord_member_field(member: discord.Member) -> str:
-    """The embed field for a member, as the Discord side of a link log."""
+    """The section body for a member's card - the id lives in the section heading."""
     return (
-        f"`{member.id}`\n"
-        f"`Username:` **{member.name}**\n"
+        f"\n`Username:` **{member.name}**\n"
         f"`Mention:` {member.mention}\n"
-        f"`Joined:` {discord.utils.format_dt(member.joined_at, style='R') if member.joined_at else '**Guest**'}\n"
-        f"`Created:` {discord.utils.format_dt(member.created_at, style='R')}"
+        f"`Joined:` {utils.format_dt(member.joined_at, style='R') if member.joined_at else '**Guest**'}\n"
+        f"`Created:` {utils.format_dt(member.created_at, style='R')}"
     )
 
 
-def roblox_field(rblx: RobloxUser | None, roblox_id: int | None = None) -> str:
-    """The embed field for a Roblox account, from its profile when there is one."""
-    if rblx is None:
-        return f"`{roblox_id}`" if roblox_id is not None else "**None**"
-
+def roblox_field(rblx: RobloxUser) -> str:
+    """The section body for a Roblox card - the id lives in the section heading."""
     return (
-        f"`{rblx.id}`\n"
-        f"`Username:` **{rblx.username}**\n"
+        f"\n`Username:` **{rblx.username}**\n"
         f"`Display Name:` **{rblx.display_name}**\n"
-        f"`Created:` {discord.utils.format_dt(rblx.created_at, style='R')}"
+        f"`Created:` {utils.format_dt(rblx.created_at, style='R')}"
     )
 
 
-async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, embed: discord.Embed) -> None:
-    """Post *embed* to the Roblox link-log channel, never raising.
+def roblox_headshot_url(user_id: int) -> str:
+    """A headshot URL that resolves without an API call, for when no headshot was fetched."""
+    return f"https://www.roblox.com/headshot-thumbnail/image?userId={user_id}&width=150&height=150&format=png"
+
+
+def add_discord_section(layout: LayoutMixin, member: discord.Member, *, title: str = "Discord") -> None:
+    """Append *member*'s card to the link log *layout*: heading, details, avatar."""
+    layout.section().text(f"### {title} - `{member.id}`").text(discord_member_field(member)).accessory(
+        ui.Thumbnail(member.display_avatar.url)
+    ).done()
+
+
+def add_roblox_section(
+    layout: LayoutMixin,
+    rblx: RobloxUser | None,
+    roblox_id: int,
+    headshot: str | None,
+    *,
+    title: str = "Roblox",
+) -> None:
+    """Append the Roblox card to the link log *layout*.
+
+    *rblx* is the account's profile when one could be fetched; without it the
+    card shows just the id heading.  *headshot* falls back to a plain headshot
+    URL so the card always has a thumbnail.
+    """
+    section = layout.section().text(f"### {title} - `{roblox_id}`")
+    if rblx is not None:
+        section.text(roblox_field(rblx))
+    section.accessory(ui.Thumbnail(headshot or roblox_headshot_url(roblox_id))).done()
+
+
+async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, layout: LayoutBuilder) -> None:
+    """Post the link-log *layout* to the Roblox link-log channel, never raising.
 
     The link the log describes is already written, so a missing channel or a
     failed send only logs a warning.
@@ -60,9 +97,9 @@ async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, embed: discor
         return
 
     try:
-        await channel.send(embed=embed)
+        await channel.send(view=layout)
     except discord.HTTPException as e:
-        logger.warning("Could not send Roblox link log embed: %s", e)
+        logger.warning("Could not send Roblox link log: %s", e)
 
 
 async def headshot_or_none(profile: "PlayerProfile", roblox_id: int) -> str | None:

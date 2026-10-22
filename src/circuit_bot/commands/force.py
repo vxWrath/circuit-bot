@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import discord
+from discord import SeparatorSpacing
 from discord.app_commands import describe
 from discord.ext import commands
 
@@ -14,6 +15,7 @@ from ..core import (
     DeferOptions,
     Interaction,
     InteractionOptions,
+    LayoutBuilder,
     RecordNotFoundError,
     RobloxError,
     RobloxRateLimitError,
@@ -23,9 +25,9 @@ from ..core import (
 )
 from ..modules import (
     PlayerService,
-    discord_member_field,
+    add_discord_section,
+    add_roblox_section,
     headshot_or_none,
-    roblox_field,
     send_roblox_log,
 )
 
@@ -93,15 +95,20 @@ class Force(commands.Cog):
 
         invoker = interaction.require_member()
 
-        embed = discord.Embed(title="Member Forcibly Unlinked", color=Color.brand_red())
-        embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
-        embed.add_field(name="Removed Roblox", value=roblox_field(rblx, previous_roblox_id), inline=True)
-        embed.add_field(name="Invoker", value=discord_member_field(invoker), inline=True)
+        container = (
+            LayoutBuilder()
+            .container(accent_color=Color.brand_red())
+            .text("## Member Forcibly Unlinked")
+            .separator(spacing=SeparatorSpacing.large)
+        )
 
-        if headshot is not None:
-            embed.set_thumbnail(url=headshot)
+        add_discord_section(container, member)
+        container.separator(spacing=SeparatorSpacing.large)
+        add_roblox_section(container, rblx, previous_roblox_id, headshot, title="Removed Roblox")
+        container.separator(spacing=SeparatorSpacing.large)
+        container.text(f"-# {invoker.name} · {invoker.id}")
 
-        await send_roblox_log(self.bot, member.guild, embed)
+        await send_roblox_log(self.bot, member.guild, container.done())
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unlinked {member.mention} from `{previous_roblox_id}`.**")
 
     @bloxlink.command(
@@ -118,12 +125,9 @@ class Force(commands.Cog):
             resolved = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
             await cooldowns.bloxlink.spend()
         except BloxlinkRateLimitError as e:
-            await cooldowns.bloxlink.spend(duration=int(e.retry_after) + 1 if e.retry_after is not None else None)
-
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Bloxlink is rate limited. Try again{retry}.**")
         except BloxlinkError:
-            await cooldowns.bloxlink.spend()
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **Bloxlink is unreachable right now. Try again later.**"
             )
@@ -147,12 +151,9 @@ class Force(commands.Cog):
             rblx = await service.roblox_user(roblox_id=roblox_id)
             await cooldowns.roblox.spend()
         except RobloxRateLimitError as e:
-            await cooldowns.roblox.spend(duration=int(e.retry_after) + 1 if e.retry_after is not None else None)
-
             retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
             return await interaction.failure(f"{CommonEmojis.FAIL} **Roblox is rate limited. Try again{retry}.**")
         except RobloxError:
-            await cooldowns.roblox.spend()
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **The Roblox API is unreachable right now. Try again later.**"
             )
@@ -186,20 +187,26 @@ class Force(commands.Cog):
         headshot = await headshot_or_none(profile, roblox_id)
         invoker = interaction.require_member()
 
-        embed = discord.Embed(title="Member Force-Linked", color=Color.brand_green())
-        embed.add_field(name="Discord", value=discord_member_field(member), inline=True)
-        embed.add_field(name="Roblox", value=roblox_field(rblx), inline=True)
-        embed.add_field(
-            name="Previous Roblox",
-            value=f"`{previous_roblox_id}`" if previous_roblox_id is not None else "**None**",
-            inline=True,
+        container = (
+            LayoutBuilder()
+            .container(accent_color=Color.brand_green())
+            .text("## Member Force-Linked")
+            .separator(spacing=SeparatorSpacing.large)
         )
-        embed.add_field(name="Invoker", value=discord_member_field(invoker), inline=True)
 
-        if headshot is not None:
-            embed.set_thumbnail(url=headshot)
+        add_discord_section(container, member)
+        container.separator(spacing=SeparatorSpacing.large)
+        add_roblox_section(container, rblx, roblox_id, headshot)
+        container.separator(spacing=SeparatorSpacing.large)
+        container.text(
+            f"`Previous Roblox:` `{previous_roblox_id}`"
+            if previous_roblox_id is not None
+            else "`Previous Roblox:` **None**"
+        )
+        container.separator(spacing=SeparatorSpacing.large)
+        container.text(f"-# {invoker.name} · {invoker.id}")
 
-        await send_roblox_log(self.bot, member.guild, embed)
+        await send_roblox_log(self.bot, member.guild, container.done())
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Linked {member.mention} to `{rblx.username}` (`{roblox_id}`).**"
