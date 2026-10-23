@@ -26,6 +26,7 @@ class BotConfig(NamedTuple):
     guild_id: int
 
     connection_webhook_url: str
+    error_webhook_url: str
     roblox_api_key: str
     bloxlink_api_key: str
 
@@ -59,7 +60,7 @@ class RedisSettings(NamedTuple):
 
 
 def get_bot_config() -> BotConfig:
-    """Read the Discord credentials and the ``ROBLOX_API_KEY`` and ``BLOXLINK_API_KEY`` keys.
+    """Read the Discord credentials, the webhook URLs and the API keys.
 
     ``SYNC_SENTINEL`` overrides where the one-time command-sync marker is kept;
     it defaults to a file in the system temp directory.
@@ -69,6 +70,7 @@ def get_bot_config() -> BotConfig:
         token=get_env("DISCORD_TOKEN"),
         guild_id=int(get_env("GUILD_ID")),
         connection_webhook_url=get_env("CONNECTION_WEBHOOK_URL"),
+        error_webhook_url=get_env("ERROR_WEBHOOK_URL"),
         roblox_api_key=get_env("ROBLOX_API_KEY"),
         bloxlink_api_key=get_env("BLOXLINK_API_KEY"),
     )

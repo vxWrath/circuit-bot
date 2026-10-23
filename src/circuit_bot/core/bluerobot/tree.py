@@ -1,6 +1,4 @@
 import datetime
-import io
-import traceback
 from typing import TYPE_CHECKING
 
 import discord
@@ -13,6 +11,7 @@ from ..logging import get_logger
 from ..roblox import RobloxError
 from .app_commands import CommandNotFound
 from .color import Color, CommonEmojis
+from .errors import report_error
 from .interaction import Interaction, InteractionOptions
 from .layout import LayoutBuilder
 
@@ -101,15 +100,9 @@ class CircuitTree(CommandTree):
 
             return
 
-        logger.error("Error in interaction", exc_info=error)
+        source = interaction.command.qualified_name if interaction.command else "interaction"
 
-        trace = "".join(traceback.format_exception(error)).encode()
-        file = discord.File(io.BytesIO(trace), filename="traceback.txt")
-
-        try:
-            await interaction.respond(file=file, ephemeral=True)
-        except discord.HTTPException:
-            pass
+        await report_error(self.client, source, error, interaction=interaction)
 
     def format_error(self, interaction: Interaction, error: Exception) -> str | None:
         """The reply for an error a user can act on, ``None`` when it needs a traceback."""

@@ -20,6 +20,7 @@ from ..service import Service, ServiceNotFound
 from .app_commands import CachedAppCommand, CommandNotFound
 from .color import Color
 from .cooldown import CooldownManager, CooldownManagerNotFound
+from .errors import report_error
 from .interaction import BaseItem
 from .tree import CircuitTree
 
@@ -127,6 +128,14 @@ class CircuitBot(commands.Bot):
         )
 
         await send_connection_webhook(self, embed=embed)
+
+    async def on_error(self, event_method: str, /, *args: Any, **kwargs: Any) -> None:
+        """Report an exception raised by an event listener."""
+
+        error = sys.exc_info()[1]
+
+        if isinstance(error, Exception):
+            await report_error(self, event_method, error)
 
     @staticmethod
     def extension_name(file_path: Path) -> str:
