@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from discord import SeparatorSpacing
+import discord
 from discord.ext import commands
 
 from ..core import (
@@ -13,7 +13,6 @@ from ..core import (
     DeferOptions,
     Interaction,
     InteractionOptions,
-    LayoutBuilder,
     RecordNotFoundError,
     RobloxError,
     RobloxRateLimitError,
@@ -22,10 +21,11 @@ from ..core import (
 )
 from ..modules import (
     PlayerService,
-    add_discord_section,
-    add_roblox_section,
+    add_discord_field,
+    add_roblox_field,
     headshot_or_none,
     send_roblox_log,
+    set_member_footer,
 )
 
 DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
@@ -101,24 +101,16 @@ class Update(commands.Cog):
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)
 
-        container = (
-            LayoutBuilder()
-            .container(accent_color=Color.brand_green())
-            .text("## Member Self-Linked")
-            .separator(spacing=SeparatorSpacing.large)
+        embed = discord.Embed(
+            description="# Member Self-Linked\n",
+            color=Color.brand_green(),
         )
 
-        add_discord_section(container, member)
-        container.separator(spacing=SeparatorSpacing.large)
-        add_roblox_section(container, rblx, roblox_id, headshot)
-        container.separator(spacing=SeparatorSpacing.large)
-        container.text(
-            f"`Previous Roblox:` `{previous_roblox_id}`"
-            if previous_roblox_id is not None
-            else "`Previous Roblox:` **None**"
-        )
+        add_discord_field(embed, member)
+        add_roblox_field(embed, rblx, roblox_id, headshot, previous_roblox_id=previous_roblox_id)
+        set_member_footer(embed, member)
 
-        await send_roblox_log(self.bot, member.guild, container.done())
+        await send_roblox_log(self.bot, member.guild, embed)
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Linked your account to `{rblx.username}` (`{roblox_id}`).**"

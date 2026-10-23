@@ -2,11 +2,17 @@ import asyncio
 from datetime import timedelta
 
 import discord
-from discord import SeparatorSpacing
 from discord.ext import commands
 
-from ..core import CircuitBot, Color, LayoutBuilder, RobloxError, get_logger
-from ..modules import PlayerService, add_discord_section, add_roblox_section, send_roblox_log
+from ..core import CircuitBot, Color, RobloxError, get_logger
+from ..modules import (
+    FIELD_PREFIX,
+    PlayerService,
+    add_discord_field,
+    add_roblox_field,
+    send_roblox_log,
+    set_member_footer,
+)
 
 logger = get_logger("on_member_join")
 
@@ -102,23 +108,24 @@ class OnMemberJoin(commands.Cog):
 
             owner = member.guild.get_member(existing.snowflake)
 
-            container = (
-                LayoutBuilder()
-                .container(accent_color=Color.brand_red())
-                .text("## Duplicate Roblox Link Blocked")
-                .separator(spacing=SeparatorSpacing.large)
+            embed = discord.Embed(
+                description="# Duplicate Roblox Link Blocked\n",
+                color=Color.brand_red(),
             )
 
-            add_discord_section(container, member)
-            container.separator(spacing=SeparatorSpacing.large)
-            add_roblox_section(container, rblx, roblox_id, None)
-            container.separator(spacing=SeparatorSpacing.large)
+            add_discord_field(embed, member)
+            add_roblox_field(embed, rblx, roblox_id, None)
             if owner is not None:
-                add_discord_section(container, owner, title="Current Owner")
+                add_discord_field(embed, owner, title="Current Owner")
             else:
-                container.text(f"`Current Owner:` `{existing.snowflake}`")
+                embed.add_field(
+                    name=f"{FIELD_PREFIX}✓ Current Owner",
+                    value=f"> **ID:** `{existing.snowflake}`",
+                    inline=True,
+                )
+            set_member_footer(embed, member)
 
-            await send_roblox_log(self.bot, member.guild, container.done())
+            await send_roblox_log(self.bot, member.guild, embed)
             return
 
         await profile.link_roblox(roblox_id)
@@ -130,18 +137,16 @@ class OnMemberJoin(commands.Cog):
             logger.debug(f"Could not fetch roblox headshot for roblox id {roblox_id}")
             return
 
-        container = (
-            LayoutBuilder()
-            .container(accent_color=Color.brand_green())
-            .text("## New Member Verified & Linked")
-            .separator(spacing=SeparatorSpacing.large)
+        embed = discord.Embed(
+            description="# New Member Verified & Linked\n",
+            color=Color.brand_green(),
         )
 
-        add_discord_section(container, member)
-        container.separator(spacing=SeparatorSpacing.large)
-        add_roblox_section(container, rblx, roblox_id, hs_url)
+        add_discord_field(embed, member)
+        add_roblox_field(embed, rblx, roblox_id, hs_url)
+        set_member_footer(embed, member)
 
-        await send_roblox_log(self.bot, member.guild, container.done())
+        await send_roblox_log(self.bot, member.guild, embed)
 
 
 async def setup(bot: CircuitBot):

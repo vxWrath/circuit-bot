@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 import discord
-from discord import SeparatorSpacing
 from discord.app_commands import describe
 from discord.ext import commands
 
@@ -15,7 +14,6 @@ from ..core import (
     DeferOptions,
     Interaction,
     InteractionOptions,
-    LayoutBuilder,
     RecordNotFoundError,
     RobloxError,
     RobloxRateLimitError,
@@ -25,10 +23,13 @@ from ..core import (
 )
 from ..modules import (
     PlayerService,
-    add_discord_section,
-    add_roblox_section,
+    add_discord_field,
+    add_roblox_field,
     headshot_or_none,
+    reset_roblox_nickname,
     send_roblox_log,
+    set_member_footer,
+    set_roblox_nickname,
 )
 
 logger = get_logger("force")
@@ -56,7 +57,7 @@ class Force(commands.Cog):
     @developer_only()
     @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     async def roblox_update(self, interaction: Interaction, member: discord.Member, roblox_id: int):
-        await self.link_roblox(interaction, member, roblox_id)
+        await self.link_roblox(interaction, member, roblox_id, update_nickname=True)
 
     @roblox.command(name="unlink", description="Drop a player's linked Roblox account.", extras=DEFER)
     @describe(member="The member to update")
@@ -93,22 +94,21 @@ class Force(commands.Cog):
                 f"{CommonEmojis.FAIL} **{member.mention}'s player row disappeared mid-update. Try again.**"
             )
 
+        # The unlink is written; nothing below may fail the command.
+        await reset_roblox_nickname(member)
+
         invoker = interaction.require_member()
 
-        container = (
-            LayoutBuilder()
-            .container(accent_color=Color.brand_red())
-            .text("## Member Forcibly Unlinked")
-            .separator(spacing=SeparatorSpacing.large)
+        embed = discord.Embed(
+            description=f"# Member Forcibly Unlinked\n-# {invoker.name} · {invoker.id}\n",
+            color=Color.brand_red(),
         )
 
-        add_discord_section(container, member)
-        container.separator(spacing=SeparatorSpacing.large)
-        add_roblox_section(container, rblx, previous_roblox_id, headshot, title="Removed Roblox")
-        container.separator(spacing=SeparatorSpacing.large)
-        container.text(f"-# {invoker.name} · {invoker.id}")
+        add_discord_field(embed, member)
+        add_roblox_field(embed, rblx, previous_roblox_id, headshot, title="Removed Roblox")
+        set_member_footer(embed, member)
 
-        await send_roblox_log(self.bot, member.guild, container.done())
+        await send_roblox_log(self.bot, member.guild, embed)
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unlinked {member.mention} from `{previous_roblox_id}`.**")
 
     @bloxlink.command(
@@ -139,8 +139,19 @@ class Force(commands.Cog):
 
         await self.link_roblox(interaction, member, resolved)
 
-    async def link_roblox(self, interaction: Interaction, member: discord.Member, roblox_id: int):
-        """Validate *roblox_id*, guard the unique link, and write it for *member*."""
+    async def link_roblox(
+        self,
+        interaction: Interaction,
+        member: discord.Member,
+        roblox_id: int,
+        *,
+        update_nickname: bool = False,
+    ):
+        """Validate *roblox_id*, guard the unique link, and write it for *member*.
+
+        *update_nickname* also renames the member to Bloxlink's nickname format -
+        the force roblox path does, the bloxlink path leaves the nickname alone.
+        """
         service = self.bot.get_service(PlayerService)
         cooldowns = interaction.cooldowns
 
@@ -185,28 +196,22 @@ class Force(commands.Cog):
 
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)
+
+        if update_nickname:
+            await set_roblox_nickname(member, rblx)
+
         invoker = interaction.require_member()
 
-        container = (
-            LayoutBuilder()
-            .container(accent_color=Color.brand_green())
-            .text("## Member Force-Linked")
-            .separator(spacing=SeparatorSpacing.large)
+        embed = discord.Embed(
+            description=f"# Member Force-Linked\n-# {invoker.name} · {invoker.id}\n",
+            color=Color.brand_green(),
         )
 
-        add_discord_section(container, member)
-        container.separator(spacing=SeparatorSpacing.large)
-        add_roblox_section(container, rblx, roblox_id, headshot)
-        container.separator(spacing=SeparatorSpacing.large)
-        container.text(
-            f"`Previous Roblox:` `{previous_roblox_id}`"
-            if previous_roblox_id is not None
-            else "`Previous Roblox:` **None**"
-        )
-        container.separator(spacing=SeparatorSpacing.large)
-        container.text(f"-# {invoker.name} · {invoker.id}")
+        add_discord_field(embed, member)
+        add_roblox_field(embed, rblx, roblox_id, headshot, previous_roblox_id=previous_roblox_id)
+        set_member_footer(embed, member)
 
-        await send_roblox_log(self.bot, member.guild, container.done())
+        await send_roblox_log(self.bot, member.guild, embed)
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Linked {member.mention} to `{rblx.username}` (`{roblox_id}`).**"

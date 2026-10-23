@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
 
 import discord
-from discord import ui, utils
+from discord import utils
 
-from ...core.bluerobot.layout import LayoutBuilder, LayoutMixin
 from ...core.logging import get_logger
 from ...core.roblox import RobloxError, RobloxUser
 
@@ -12,35 +11,56 @@ if TYPE_CHECKING:
     from .profile import PlayerProfile
 
 __all__ = (
-    "add_discord_section",
-    "add_roblox_section",
-    "discord_member_field",
+    "FIELD_PREFIX",
+    "add_discord_field",
+    "add_roblox_field",
+    "discord_card",
     "headshot_or_none",
-    "roblox_field",
+    "roblox_card",
     "roblox_headshot_url",
     "send_roblox_log",
+    "set_member_footer",
 )
 
 logger = get_logger("roblox_log")
 
+# The invisible padding webhook.py gives every field name: a left-to-right
+# mark and an em space, so the two cards line up like they do there.
+FIELD_PREFIX = "‎ "  # noqa: RUF001
 
-def discord_member_field(member: discord.Member) -> str:
-    """The section body for a member's card - the id lives in the section heading."""
+
+def discord_card(member: discord.Member) -> str:
+    """The value for a member's card field - the `>` quote rows from webhook.py."""
     return (
-        f"\n`Username:` **{member.name}**\n"
-        f"`Mention:` {member.mention}\n"
-        f"`Joined:` {utils.format_dt(member.joined_at, style='R') if member.joined_at else '**Guest**'}\n"
-        f"`Created:` {utils.format_dt(member.created_at, style='R')}"
+        f"> **ID:** `{member.id}`\n"
+        f"> **Mention:** {member.mention}\n"
+        f"> **Created:** {utils.format_dt(member.created_at, style='R')}"
     )
 
 
-def roblox_field(rblx: RobloxUser) -> str:
-    """The section body for a Roblox card - the id lives in the section heading."""
-    return (
-        f"\n`Username:` **{rblx.username}**\n"
-        f"`Display Name:` **{rblx.display_name}**\n"
-        f"`Created:` {utils.format_dt(rblx.created_at, style='R')}"
-    )
+def roblox_card(
+    rblx: RobloxUser | None,
+    roblox_id: int,
+    *,
+    previous_roblox_id: int | None = None,
+) -> str:
+    """The value for a Roblox card field - the `>` quote rows from webhook.py.
+
+    Without *rblx* the card shows just the id.  *previous_roblox_id* adds the
+    row the self-link and force-link logs show.
+    """
+    rows = [f"> **ID:** `{roblox_id}`"]
+
+    if rblx is not None:
+        rows += [
+            f"> **Username:** {rblx.username}",
+            f"> **Created:** {utils.format_dt(rblx.created_at, style='R')}",
+        ]
+
+    if previous_roblox_id is not None:
+        rows.append(f"> **Previous:** `{previous_roblox_id}`")
+
+    return "\n".join(rows)
 
 
 def roblox_headshot_url(user_id: int) -> str:
@@ -48,35 +68,41 @@ def roblox_headshot_url(user_id: int) -> str:
     return f"https://www.roblox.com/headshot-thumbnail/image?userId={user_id}&width=150&height=150&format=png"
 
 
-def add_discord_section(layout: LayoutMixin, member: discord.Member, *, title: str = "Discord") -> None:
-    """Append *member*'s card to the link log *layout*: heading, details, avatar."""
-    layout.section().text(f"### {title} - `{member.id}`").text(discord_member_field(member)).accessory(
-        ui.Thumbnail(member.display_avatar.url)
-    ).done()
+def add_discord_field(embed: discord.Embed, member: discord.Member, *, title: str = "Discord") -> None:
+    """Append *member*'s card to the link log *embed* as an inline field."""
+    embed.add_field(name=f"{FIELD_PREFIX}✓ {title}", value=discord_card(member), inline=True)
 
 
-def add_roblox_section(
-    layout: LayoutMixin,
+def add_roblox_field(
+    embed: discord.Embed,
     rblx: RobloxUser | None,
     roblox_id: int,
     headshot: str | None,
     *,
     title: str = "Roblox",
+    previous_roblox_id: int | None = None,
 ) -> None:
-    """Append the Roblox card to the link log *layout*.
+    """Append the Roblox card to the link log *embed*.
 
     *rblx* is the account's profile when one could be fetched; without it the
-    card shows just the id heading.  *headshot* falls back to a plain headshot
-    URL so the card always has a thumbnail.
+    card shows just the id.  *headshot* falls back to a plain headshot URL so
+    the embed always has a thumbnail.
     """
-    section = layout.section().text(f"### {title} - `{roblox_id}`")
-    if rblx is not None:
-        section.text(roblox_field(rblx))
-    section.accessory(ui.Thumbnail(headshot or roblox_headshot_url(roblox_id))).done()
+    embed.add_field(
+        name=f"{FIELD_PREFIX}✓ {title}",
+        value=roblox_card(rblx, roblox_id, previous_roblox_id=previous_roblox_id),
+        inline=True,
+    )
+    embed.set_thumbnail(url=headshot or roblox_headshot_url(roblox_id))
 
 
-async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, layout: LayoutBuilder) -> None:
-    """Post the link-log *layout* to the Roblox link-log channel, never raising.
+def set_member_footer(embed: discord.Embed, member: discord.Member) -> None:
+    """Stamp *member*'s name, id, and avatar on the embed footer, like webhook.py."""
+    embed.set_footer(text=f"{member.name} • {member.id}", icon_url=member.display_avatar.with_size(80))
+
+
+async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, embed: discord.Embed) -> None:
+    """Post the link-log *embed* to the Roblox link-log channel, never raising.
 
     The link the log describes is already written, so a missing channel or a
     failed send only logs a warning.
@@ -97,7 +123,7 @@ async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, layout: Layou
         return
 
     try:
-        await channel.send(view=layout)
+        await channel.send(embed=embed)
     except discord.HTTPException as e:
         logger.warning("Could not send Roblox link log: %s", e)
 
