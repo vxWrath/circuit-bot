@@ -4,8 +4,6 @@ import discord
 from discord.ext import commands
 
 from ..core import (
-    BloxlinkError,
-    BloxlinkRateLimitError,
     CircuitBot,
     CircuitGroup,
     Color,
@@ -14,8 +12,6 @@ from ..core import (
     Interaction,
     InteractionOptions,
     RecordNotFoundError,
-    RobloxError,
-    RobloxRateLimitError,
     cooldown,
     shared_cooldown,
 )
@@ -47,31 +43,15 @@ class Update(commands.Cog):
         cooldowns = interaction.cooldowns
 
         # Resolve through Bloxlink, like the join event does.
-        try:
-            roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
-            await cooldowns.bloxlink.spend()
-        except BloxlinkRateLimitError as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(f"{CommonEmojis.FAIL} **Bloxlink is rate limited. Try again{retry}.**")
-        except BloxlinkError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **Bloxlink is unreachable right now. Try again later.**"
-            )
+        roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
+        await cooldowns.bloxlink.spend()
 
         if roblox_id is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **You aren't verified through Bloxlink.**")
 
         # Validate the account exists, as the force command does.
-        try:
-            rblx = await service.roblox_user(roblox_id=roblox_id)
-            await cooldowns.roblox.spend()
-        except RobloxRateLimitError as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(f"{CommonEmojis.FAIL} **Roblox is rate limited. Try again{retry}.**")
-        except RobloxError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **The Roblox API is unreachable right now. Try again later.**"
-            )
+        rblx = await service.roblox_user(roblox_id=roblox_id)
+        await cooldowns.roblox.spend()
 
         if rblx is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No Roblox user exists with id `{roblox_id}`.**")
@@ -113,7 +93,7 @@ class Update(commands.Cog):
         await send_roblox_log(self.bot, member.guild, embed)
 
         await interaction.success(
-            f"{CommonEmojis.SUCCESS} **Linked your account to `{rblx.username}` (`{roblox_id}`).**"
+            f"{CommonEmojis.SUCCESS} **Successfully updated your linked roblox account to `{rblx.username}` (`{roblox_id}`).**"
         )
 
 

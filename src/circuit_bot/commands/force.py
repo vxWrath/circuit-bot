@@ -5,8 +5,6 @@ from discord.app_commands import describe
 from discord.ext import commands
 
 from ..core import (
-    BloxlinkError,
-    BloxlinkRateLimitError,
     CircuitBot,
     CircuitGroup,
     Color,
@@ -16,7 +14,6 @@ from ..core import (
     InteractionOptions,
     RecordNotFoundError,
     RobloxError,
-    RobloxRateLimitError,
     developer_only,
     get_logger,
     shared_cooldown,
@@ -121,16 +118,8 @@ class Force(commands.Cog):
     async def bloxlink_update(self, interaction: Interaction, member: discord.Member):
         cooldowns = interaction.cooldowns
 
-        try:
-            resolved = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
-            await cooldowns.bloxlink.spend()
-        except BloxlinkRateLimitError as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(f"{CommonEmojis.FAIL} **Bloxlink is rate limited. Try again{retry}.**")
-        except BloxlinkError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **Bloxlink is unreachable right now. Try again later.**"
-            )
+        resolved = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
+        await cooldowns.bloxlink.spend()
 
         if resolved is None:
             return await interaction.failure(
@@ -158,16 +147,8 @@ class Force(commands.Cog):
         # Validate the account exists.  The embed needs the Roblox profile
         # anyway, and refusing a deleted account before the write beats linking
         # one.  The result is cached, so this is cheap.
-        try:
-            rblx = await service.roblox_user(roblox_id=roblox_id)
-            await cooldowns.roblox.spend()
-        except RobloxRateLimitError as e:
-            retry = f" in about {int(e.retry_after)}s" if e.retry_after is not None else ""
-            return await interaction.failure(f"{CommonEmojis.FAIL} **Roblox is rate limited. Try again{retry}.**")
-        except RobloxError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **The Roblox API is unreachable right now. Try again later.**"
-            )
+        rblx = await service.roblox_user(roblox_id=roblox_id)
+        await cooldowns.roblox.spend()
 
         if rblx is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No Roblox user exists with id `{roblox_id}`.**")
@@ -179,6 +160,7 @@ class Force(commands.Cog):
         if existing is not None and existing.snowflake != member.id:
             owner = member.guild.get_member(existing.snowflake)
             owner_text = owner.mention if owner is not None else f"`{existing.snowflake}`"
+
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **Roblox account `{roblox_id}` is already linked to {owner_text}.**"
             )
