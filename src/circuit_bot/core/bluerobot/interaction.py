@@ -22,6 +22,7 @@ from msgspec import field
 from ..exception import CircuitException
 from ..model import Model
 from .color import Color
+from .formatter import ErrorFormatter, format_fail
 
 if TYPE_CHECKING:
     from .bot import CircuitBot
@@ -53,6 +54,16 @@ class GuildOnly(CircuitException):
 class MemberOnly(CircuitException):
     def __init__(self, *, interaction: bool = False):
         super().__init__(f"This {'interaction' if interaction else 'command'} can only be used by a member.")
+
+
+class UserErrorFormatter(ErrorFormatter):
+    """The reply for a misuse error a command raised - the error's own message."""
+
+    def format(self, _: Interaction, error: Exception) -> str | None:
+        if not isinstance(error, (GuildOnly, UserOnly, MemberOnly)):
+            return None
+
+        return format_fail(str(error))
 
 
 class DeferOptions(Model):
@@ -332,8 +343,9 @@ class BaseItem(ABC, DynamicItem[BaseT], template=BASE_TEMPLATE):
 class BaseView(discord.ui.View):
     children: list[DynamicItem[Button[Self] | BaseSelect[Self]]]
 
-    async def on_error(self, interaction: Interaction, error: Exception, _: Item[Any]) -> None:
-        return await interaction.client.tree.on_error(interaction, error)  # type: ignore
+    async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any]) -> None:
+        source = f"item:{getattr(item, 'custom_id', None) or type(item).__name__}"
+        await interaction.client.error_handler.handle(interaction, error, source=source)
 
 
 class BaseLayoutView(discord.ui.LayoutView):
@@ -347,8 +359,9 @@ class BaseLayoutView(discord.ui.LayoutView):
         | Thumbnail[Self]
     ]
 
-    async def on_error(self, interaction: Interaction, error: Exception, _: Item[Any]) -> None:
-        return await interaction.client.tree.on_error(interaction, error)  # type: ignore
+    async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any]) -> None:
+        source = f"item:{getattr(item, 'custom_id', None) or type(item).__name__}"
+        await interaction.client.error_handler.handle(interaction, error, source=source)
 
 
 def view_interaction_check(func: Callable[[Any, Interaction], bool | Awaitable[bool]]):

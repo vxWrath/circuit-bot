@@ -15,6 +15,8 @@ from msgspec import field
 from ..exception import CircuitException
 from ..logging import get_logger
 from ..model import Model
+from .app_commands import CommandNotFound
+from .formatter import ErrorFormatter, format_fail, format_retry
 from .interaction import Interaction
 
 __all__ = (
@@ -37,6 +39,26 @@ CooldownKey = Callable[[Interaction], CooldownFuncReturn[T]]
 
 class CooldownManagerNotFound(CircuitException):
     """Raised when a command has no cooldown manager registered."""
+
+
+class CooldownFormatter(ErrorFormatter):
+    """The reply for a command refused by its cooldown bucket."""
+
+    def format(self, interaction: Interaction, error: Exception) -> str | None:
+        if not isinstance(error, CommandOnCooldown):
+            return None
+
+        retry = format_retry(error.retry_after)
+
+        if interaction.command is None:
+            return format_fail(f"You're on cooldown. Try again {retry}.")
+
+        try:
+            command = interaction.client.retrieve_command(interaction.command.qualified_name)
+        except CommandNotFound:
+            return format_fail(f"You're on cooldown. Try again {retry}.")
+
+        return format_fail(f"{command.mention} is on cooldown. You may try again {retry}.")
 
 
 class Cooldown(Model):

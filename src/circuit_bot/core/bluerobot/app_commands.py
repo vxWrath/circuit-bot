@@ -1,11 +1,15 @@
 from collections.abc import Callable, Coroutine
 from enum import Enum
-from typing import Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from discord import app_commands
 
 from ..exception import CircuitException
 from ..model import Model
+from .formatter import ErrorFormatter, format_fail
+
+if TYPE_CHECKING:
+    from .interaction import Interaction
 
 __all__ = (
     "CachedAppCommand",
@@ -48,6 +52,24 @@ class CheckFailure(app_commands.CheckFailure):
     def __init__(self, check_type: CheckType, **kwargs: Any):
         self.check_type = check_type
         self.kwargs = kwargs
+
+
+# The reply for each check that can refuse a command before it runs.
+CHECK_FAILURE_MESSAGES = {
+    CheckType.DEVELOPER: "This command can only be used by developers.",
+    CheckType.GUILD_OWNER: "This command can only be used by the guild owner.",
+}
+
+
+class CheckFailureFormatter(ErrorFormatter):
+    """The reply for a command refused by one of the bot's own checks."""
+
+    def format(self, _: "Interaction", error: Exception) -> str | None:
+        if not isinstance(error, CheckFailure):
+            return None
+
+        message = CHECK_FAILURE_MESSAGES.get(error.check_type)
+        return format_fail(message) if message is not None else None
 
 
 class CircuitGroup(app_commands.Group):

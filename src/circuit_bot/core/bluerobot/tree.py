@@ -1,37 +1,22 @@
-import datetime
 from typing import TYPE_CHECKING
 
 import discord
 from discord.app_commands import CommandTree
-from discord.app_commands.errors import CommandInvokeError, CommandOnCooldown
 
-from ..api import APIRateLimitError
-from ..bloxlink import BloxlinkError
 from ..logging import get_logger
-from ..roblox import RobloxError
-from .app_commands import CommandNotFound
-from .color import Color, CommonEmojis
-from .errors import report_error
+from .color import Color
 from .interaction import Interaction, InteractionOptions
 from .layout import LayoutBuilder
 
 if TYPE_CHECKING:
-    from .bot import CircuitBot
+    from .bot import CircuitBot  # noqa: F401
 
 __all__ = ("CircuitTree",)
 
 logger = get_logger("tree")
 
-# API failures commands let propagate - each gets a reply naming the service.
-API_ERRORS = (
-    (BloxlinkError, "Bloxlink"),
-    (RobloxError, "Roblox"),
-)
 
-
-class CircuitTree(CommandTree):
-    client: "CircuitBot"
-
+class CircuitTree(CommandTree["CircuitBot"]):
     async def interaction_check(self, interaction: Interaction) -> bool:
         """Hand the callback one of our own interactions.
 
@@ -88,55 +73,6 @@ class CircuitTree(CommandTree):
         return True
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        # Cooldown checks raise pre-invoke, and commands let API failures
-        # propagate, so both land here - a friendly reply instead of a traceback.
-        text = self.format_error(interaction, error)
+        """Hand the error to the bot's error handler, which replies or reports it."""
 
-        if text is not None:
-            try:
-                await interaction.failure(text)
-            except discord.HTTPException:
-                pass
-
-            return
-
-        source = interaction.command.qualified_name if interaction.command else "interaction"
-
-        await report_error(self.client, source, error, interaction=interaction)
-
-    def format_error(self, interaction: Interaction, error: Exception) -> str | None:
-        """The reply for an error a user can act on, ``None`` when it needs a traceback."""
-
-        if isinstance(error, CommandInvokeError):
-            error = error.original
-
-        if isinstance(error, CommandOnCooldown):
-            retry_at = discord.utils.utcnow() + datetime.timedelta(seconds=int(error.retry_after) + 1)
-            retry = discord.utils.format_dt(retry_at, "R")
-
-            fallback = f"{CommonEmojis.FAIL} **You're on cooldown. Try again {retry}.**"
-
-            if interaction.command is None:
-                return fallback
-
-            try:
-                command = self.client.retrieve_command(interaction.command.qualified_name)
-            except CommandNotFound:
-                return fallback
-
-            return f"{CommonEmojis.FAIL} **{command.mention} is on cooldown. You may try again {retry}.**"
-
-        for error_type, service in API_ERRORS:
-            if isinstance(error, error_type):
-                if isinstance(error, APIRateLimitError):
-                    if error.retry_after is None:
-                        retry = "later"
-                    else:
-                        retry_at = discord.utils.utcnow() + datetime.timedelta(seconds=int(error.retry_after) + 1)
-                        retry = discord.utils.format_dt(retry_at, "R")
-
-                    return f"{CommonEmojis.FAIL} **{service} is rate limited. Try again {retry}.**"
-
-                return f"{CommonEmojis.FAIL} **{service} is unreachable right now. Try again later.**"
-
-        return None
+        await self.client.error_handler.handle(interaction, error)

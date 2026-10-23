@@ -3,7 +3,7 @@ from typing import Literal
 import discord
 
 from .app_commands import CheckFailure, CheckType, check
-from .interaction import GuildOnly, Interaction
+from .interaction import Interaction
 
 __all__ = (
     "DEV_IDS",
@@ -43,7 +43,7 @@ def developer_only():
 def guild_owner_only():
     def pred(interaction: Interaction) -> Literal[True]:
         if not interaction.guild:
-            raise GuildOnly()
+            raise CheckFailure(CheckType.GUILD_OWNER)
 
         if interaction.user.id != interaction.guild.owner_id:
             raise CheckFailure(CheckType.GUILD_OWNER)

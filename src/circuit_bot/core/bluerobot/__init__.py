@@ -4,6 +4,7 @@ from .color import *
 from .cooldown import *
 from .discord_logger import *
 from .errors import *
+from .formatter import *
 from .interaction import *
 from .layout import *
 from .tree import *

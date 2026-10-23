@@ -6,7 +6,14 @@ from typing import Any, cast
 
 import aiohttp
 import discord
-from discord.app_commands import AppCommand, AppCommandGroup, AppInstallationType, Command, ContextMenu, Group
+from discord.app_commands import (
+    AppCommand,
+    AppCommandGroup,
+    AppInstallationType,
+    Command,
+    ContextMenu,
+    Group,
+)
 from discord.ext import commands
 
 from ...config import PACKAGE_PATH, BotConfig, get_bot_config
@@ -20,7 +27,7 @@ from ..service import Service, ServiceNotFound
 from .app_commands import CachedAppCommand, CommandNotFound
 from .color import Color
 from .cooldown import CooldownManager, CooldownManagerNotFound
-from .errors import report_error
+from .errors import ErrorHandler
 from .interaction import BaseItem
 from .tree import CircuitTree
 
@@ -76,10 +83,17 @@ class CircuitBot(commands.Bot):
             timeout=aiohttp.ClientTimeout(total=10),
         )
 
+        # Each webhook posts through the bot's own session, which the entry point closes.
+        self.stored_webhooks: dict[str, discord.Webhook] = {
+            "error": discord.Webhook.from_url(self.config.error_webhook_url, session=self.session),
+            "connection": discord.Webhook.from_url(self.config.connection_webhook_url, session=self.session),
+        }
+
         self.database: DatabasePool = DatabasePool(bot=self)
         self.cache: CacheClient = CacheClient(bot=self)
         self.bloxlink: BloxlinkClient = BloxlinkClient(bot=self)
         self.roblox: RobloxClient = RobloxClient(bot=self)
+        self.error_handler = ErrorHandler(bot=self)
 
     async def setup_hook(self) -> None:
         first_sync = not self.config.sync_sentinel.exists()
@@ -135,7 +149,7 @@ class CircuitBot(commands.Bot):
         error = sys.exc_info()[1]
 
         if isinstance(error, Exception):
-            await report_error(self, event_method, error)
+            await self.error_handler.handle(None, error, source=event_method)
 
     @staticmethod
     def extension_name(file_path: Path) -> str:
@@ -319,11 +333,7 @@ class CircuitBot(commands.Bot):
 async def send_connection_webhook(bot: CircuitBot, embed: discord.Embed) -> None:
     """Send a webhook to the bot's connection channel."""
 
-    session = bot.session
-    url = bot.config.connection_webhook_url
-
     try:
-        async with session.post(url, json={"embeds": [embed.to_dict()]}) as resp:
-            resp.raise_for_status()
+        await bot.stored_webhooks["connection"].send(embed=embed)
     except Exception as e:
         logger.error("Failed to send webhook", exc_info=e)
