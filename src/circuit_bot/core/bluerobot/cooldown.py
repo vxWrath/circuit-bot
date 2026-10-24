@@ -208,11 +208,10 @@ class InteractionCooldownHandler:
         self.interaction = interaction
 
     async def spend(self, *, limit: int | None = None, duration: int | timedelta | None = None) -> None:
-        """Check and reserve a token at the manager's key, under *limit* per *duration*.
+        """Spend a token at the manager's key, under *limit* per *duration*.
 
-        Each falls back to the decorator's default when omitted.  The predicate
-        already refuses exhausted buckets pre-invoke; this is the reservation
-        and the guard for a call that slips past it.
+        Each falls back to the decorator's default when omitted; a
+        ``timedelta`` *duration* is converted to seconds.
         """
         if isinstance(duration, timedelta):
             duration = int(duration.total_seconds())

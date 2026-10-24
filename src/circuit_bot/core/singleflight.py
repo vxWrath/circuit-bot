@@ -38,8 +38,8 @@ class SingleFlight:
 
         # Wait *on* the call, not by awaiting it: awaiting a task cancels through
         # it, so one caller walking away would cancel what the others are waiting
-        # for.  ``asyncio.shield`` reports the abandoned call's failure to the
-        # loop instead, which the waiting callers are about to be handed anyway.
+        # for.  ``asyncio.wait`` doesn't propagate cancellation, and a call nobody
+        # waits on still has its exception read in ``forget``.
         await asyncio.wait({task})
 
         # The entry is keyed by something the type checker can't tie back to T,

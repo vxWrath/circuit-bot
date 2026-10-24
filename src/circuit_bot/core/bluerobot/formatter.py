@@ -1,6 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import discord
 
@@ -36,8 +36,12 @@ class ErrorFormatter(ABC):
     """One formatting step in :class:`~.errors.ErrorHandler`.
 
     :meth:`format` returns the reply for an error the formatter owns, and
-    ``None`` for every other error, handing it to the next formatter.
+    ``None`` for every other error, handing it to the next formatter.  Set
+    ``report`` to also have an owned error posted to the error webhook after
+    the reply, for failures that mean something to the operator as well.
     """
+
+    report: ClassVar[bool] = False
 
     @abstractmethod
     def format(self, interaction: "Interaction", error: Exception) -> str | None:

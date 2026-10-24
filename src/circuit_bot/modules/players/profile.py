@@ -35,7 +35,7 @@ class PlayerProfile(Profile["PlayerService"]):
         player = await self.player()
 
         if player is None:
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         return player
 
@@ -59,7 +59,7 @@ class PlayerProfile(Profile["PlayerService"]):
         player = await self.player()
 
         if player is None:
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         if player.roblox_id is None:
             return None
@@ -74,7 +74,7 @@ class PlayerProfile(Profile["PlayerService"]):
         player = await self.player()
 
         if player is None:
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         if player.roblox_id is None:
             return None
@@ -93,7 +93,7 @@ class PlayerProfile(Profile["PlayerService"]):
         player = await self.player()
 
         if player is None:
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         # The row went between the read and the write, so the parts read for it
         # are stale.
@@ -101,7 +101,7 @@ class PlayerProfile(Profile["PlayerService"]):
 
         if linked is None:
             self.invalidate_parts()
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         self.invalidate_parts()
         self.set_part(PlayerRow, linked)
@@ -119,7 +119,7 @@ class PlayerProfile(Profile["PlayerService"]):
         player = await self.player()
 
         if player is None:
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         # The row went between the read and the write, so the parts read for it
         # are stale.
@@ -127,7 +127,7 @@ class PlayerProfile(Profile["PlayerService"]):
 
         if unlinked is None:
             self.invalidate_parts()
-            raise RecordNotFoundError(f"players.snowflake={self.snowflake!r} not found")
+            raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
         self.invalidate_parts()
         self.set_part(PlayerRow, unlinked)

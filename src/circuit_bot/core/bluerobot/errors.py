@@ -2,11 +2,14 @@ import io
 import traceback
 from typing import TYPE_CHECKING
 
+import asyncpg
 import discord
 from discord.app_commands.errors import CommandInvokeError
 
 from ..api import APIRateLimitError
 from ..bloxlink import BloxlinkError
+from ..cache import CacheError
+from ..database import DatabaseNotConnected, RecordNotFoundError
 from ..logging import get_logger
 from ..roblox import RobloxError
 from .color import Color
@@ -47,11 +50,44 @@ class ApiErrorFormatter(ErrorFormatter):
         return None
 
 
+class InternalErrorFormatter(ErrorFormatter):
+    """The reply for a failure in the bot's own storage - Redis or Postgres.
+
+    These are never the command's fault, so the reply doesn't name a service
+    or offer a retry time.  Only connection-level Postgres failures are owned
+    - a query error is a bug and stays reported.
+    """
+
+    def format(self, _: Interaction, error: Exception) -> str | None:
+        if isinstance(
+            error,
+            (CacheError, DatabaseNotConnected, asyncpg.PostgresConnectionError, asyncpg.InterfaceError),
+        ):
+            return format_fail("The bot's internal services are unavailable right now. Try again later.")
+
+        return None
+
+
+class RecordNotFoundFormatter(ErrorFormatter):
+    """The reply for a write whose record disappeared between the read and the write.
+
+    The exception knows which table, key, and value came up missing, so the
+    reply names them.
+    """
+
+    def format(self, _: Interaction, error: Exception) -> str | None:
+        if not isinstance(error, RecordNotFoundError):
+            return None
+        return format_fail(f"Couldn't find a `{error.table}` with `{error.key}` equal to `{error.value}`")
+
+
 class ErrorHandler:
-    """Routes every failure to a user-facing reply or to :meth:`report_error`.
+    """Routes every failure to a user-facing reply or to a webhook report.
 
     Each formatter owns one kind of failure; the first that returns a reply
-    wins.  Anything none of them own is reported as an unhandled error.
+    wins, and a formatter that sets ``report`` is also posted to the error
+    webhook as a handled failure.  Anything none of them own is reported as
+    an unhandled error.
     """
 
     def __init__(self, bot: "CircuitBot") -> None:
@@ -78,6 +114,9 @@ class ErrorHandler:
         there is no reply to send - and goes straight to :meth:`report_error`.
         """
 
+        if source is None:
+            source = interaction.command.qualified_name if interaction and interaction.command else "interaction"
+
         if interaction is not None:
             error = error.original if isinstance(error, CommandInvokeError) else error
 
@@ -85,10 +124,12 @@ class ErrorHandler:
                 message = formatter.format(interaction, error)
 
                 if message is not None:
-                    return await self.respond(interaction, message)
+                    await self.respond(interaction, message)
 
-        if source is None:
-            source = interaction.command.qualified_name if interaction and interaction.command else "interaction"
+                    if formatter.report:
+                        await self.report_notice(source, error)
+
+                    return
 
         await self.report_error(source, error, interaction=interaction)
 
@@ -99,6 +140,27 @@ class ErrorHandler:
             await interaction.failure(message)
         except discord.HTTPException:
             pass
+
+    async def report_notice(self, source: str, error: Exception) -> None:
+        """Log *error* and post it to the error webhook without the unhandled framing.
+
+        For a failure a formatter owned on purpose but the operator should
+        still see - a race the database settled, say.  No traceback file: it
+        isn't a bug.
+        """
+
+        logger.warning("Handled failure in %s: %s", source, error)
+
+        embed = discord.Embed(
+            description=f"# Handled Failure\n> **Source:** `{source}`\n```py\n{type(error).__name__}: {error}\n```",
+            color=Color.yellow(),
+            timestamp=discord.utils.utcnow(),
+        )
+
+        try:
+            await self.bot.stored_webhooks["error"].send(embed=embed)
+        except Exception as e:
+            logger.error("Failed to send error webhook", exc_info=e)
 
     async def report_error(
         self,

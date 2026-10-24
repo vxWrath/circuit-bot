@@ -67,8 +67,11 @@ class Update(commands.Cog):
         player = await profile.ensure_player()
         previous_roblox_id = player.roblox_id
 
-        await profile.link_roblox(roblox_id)
+        # The spend reserves the weekly slot before the write, so a cache
+        # failure can't fail the command after the link has already landed.
         await cooldowns.weekly.spend(limit=1, duration=timedelta(days=7))
+
+        await profile.link_roblox(roblox_id)
 
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)

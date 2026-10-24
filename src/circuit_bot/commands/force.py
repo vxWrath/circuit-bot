@@ -12,7 +12,6 @@ from ..core import (
     DeferOptions,
     Interaction,
     InteractionOptions,
-    RecordNotFoundError,
     RobloxError,
     developer_only,
     get_logger,
@@ -83,12 +82,7 @@ class Force(commands.Cog):
 
         headshot = await headshot_or_none(profile, previous_roblox_id)
 
-        try:
-            await profile.unlink_roblox()
-        except RecordNotFoundError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **{member.mention}'s player row disappeared mid-update. Try again.**"
-            )
+        await profile.unlink_roblox()
 
         # The unlink is written; nothing below may fail the command.
         await reset_roblox_nickname(member)
@@ -163,12 +157,7 @@ class Force(commands.Cog):
         player = await profile.ensure_player()
         previous_roblox_id = player.roblox_id
 
-        try:
-            await profile.link_roblox(roblox_id)
-        except RecordNotFoundError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **{member.mention}'s player row disappeared mid-update. Try again.**"
-            )
+        await profile.link_roblox(roblox_id)
 
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)

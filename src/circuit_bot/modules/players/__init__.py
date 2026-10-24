@@ -1,3 +1,4 @@
+from .errors import *
 from .models import *
 from .nickname import *
 from .profile import *

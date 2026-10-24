@@ -45,8 +45,9 @@ class OnMemberJoin(commands.Cog):
             )
 
         # Listen before querying the audit log, so an update landing during the
-        # query isn't missed by both.
-        verified = asyncio.create_task(self.bot.wait_for("member_update", check=check_for_verified_role, timeout=20))
+        # query isn't missed by both.  Bloxlink can take a while to update a
+        # new member's roles, so listen long enough for it to get around to it.
+        verified = asyncio.create_task(self.bot.wait_for("member_update", check=check_for_verified_role, timeout=120))
 
         # the off chance that this event fired late and bloxlink already
         # updated the member's roles

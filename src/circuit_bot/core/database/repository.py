@@ -120,7 +120,7 @@ class Repository[R: Row]:
         result = await self.get_by_pk(primary_key)
 
         if result is None:
-            raise RecordNotFoundError(f"{self.table_name}.{self.primary_key_name}={primary_key!r} not found")
+            raise RecordNotFoundError(self.table_name, self.primary_key_name, primary_key)
 
         return result
 
