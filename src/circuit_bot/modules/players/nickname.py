@@ -15,9 +15,13 @@ logger = get_logger("roblox_nickname")
 def roblox_nickname(rblx: RobloxUser) -> str:
     """The nickname Bloxlink gives verified members: "<display name> (@<username>) ✓".
 
-    Discord caps nicknames at 32 characters, so the display name is trimmed to
-    keep the username and check mark intact.
+    The parenthetical is dropped when the display name is already the username,
+    leaving "<username> ✓".  Discord caps nicknames at 32 characters, so the
+    display name is trimmed to keep the username and check mark intact.
     """
+    if rblx.display_name == rblx.username:
+        return f"{rblx.username} ✓"
+
     suffix = f" (@{rblx.username}) ✓"
     limit = 32 - len(suffix)
     return f"{rblx.display_name[:limit]}{suffix}"

@@ -11,17 +11,15 @@ from ..core import (
     DeferOptions,
     Interaction,
     InteractionOptions,
-    RecordNotFoundError,
     cooldown,
     shared_cooldown,
 )
 from ..modules import (
     PlayerService,
-    add_discord_field,
     add_roblox_field,
     headshot_or_none,
     send_roblox_log,
-    set_member_footer,
+    set_roblox_nickname,
 )
 
 DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
@@ -42,14 +40,14 @@ class Update(commands.Cog):
         service = self.bot.get_service(PlayerService)
         cooldowns = interaction.cooldowns
 
-        # Resolve through Bloxlink, like the join event does.
+        # Resolve through Bloxlink
         roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
         await cooldowns.bloxlink.spend()
 
         if roblox_id is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **You aren't verified through Bloxlink.**")
 
-        # Validate the account exists, as the force command does.
+        # Validate the account exists
         rblx = await service.roblox_user(roblox_id=roblox_id)
         await cooldowns.roblox.spend()
 
@@ -69,26 +67,18 @@ class Update(commands.Cog):
         player = await profile.ensure_player()
         previous_roblox_id = player.roblox_id
 
-        try:
-            await profile.link_roblox(roblox_id)
-        except RecordNotFoundError:
-            return await interaction.failure(
-                f"{CommonEmojis.FAIL} **Your player row disappeared mid-update. Try again.**"
-            )
-
+        await profile.link_roblox(roblox_id)
         await cooldowns.weekly.spend(limit=1, duration=timedelta(days=7))
 
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)
+        await set_roblox_nickname(member, rblx)
 
         embed = discord.Embed(
-            description="# Member Self-Linked\n",
+            description=f"# Member Self-Linked\n-# {member.name} · {member.id}\n",
             color=Color.brand_green(),
         )
-
-        add_discord_field(embed, member)
         add_roblox_field(embed, rblx, roblox_id, headshot, previous_roblox_id=previous_roblox_id)
-        set_member_footer(embed, member)
 
         await send_roblox_log(self.bot, member.guild, embed)
 

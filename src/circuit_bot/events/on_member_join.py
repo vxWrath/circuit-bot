@@ -6,12 +6,9 @@ from discord.ext import commands
 
 from ..core import CircuitBot, Color, RobloxError, get_logger
 from ..modules import (
-    FIELD_PREFIX,
     PlayerService,
-    add_discord_field,
     add_roblox_field,
     send_roblox_log,
-    set_member_footer,
 )
 
 logger = get_logger("on_member_join")
@@ -109,21 +106,17 @@ class OnMemberJoin(commands.Cog):
             owner = member.guild.get_member(existing.snowflake)
 
             embed = discord.Embed(
-                description="# Duplicate Roblox Link Blocked\n",
+                description=(
+                    "# Duplicate Roblox Link Blocked\n"
+                    f"-# New member: {member.name} · {member.id}\n"
+                    f"-# Existing member: "
+                    f"{owner.name} · {owner.id}"
+                    if owner is not None
+                    else f"{existing.snowflake}"
+                ),
                 color=Color.brand_red(),
             )
-
-            add_discord_field(embed, member)
             add_roblox_field(embed, rblx, roblox_id, None)
-            if owner is not None:
-                add_discord_field(embed, owner, title="Current Owner")
-            else:
-                embed.add_field(
-                    name=f"{FIELD_PREFIX}✓ Current Owner",
-                    value=f"> **ID:** `{existing.snowflake}`",
-                    inline=True,
-                )
-            set_member_footer(embed, member)
 
             await send_roblox_log(self.bot, member.guild, embed)
             return
@@ -138,13 +131,10 @@ class OnMemberJoin(commands.Cog):
             return
 
         embed = discord.Embed(
-            description="# New Member Verified & Linked\n",
+            description=f"# New Member Verified & Linked\n-# {member.name} · {member.id}\n",
             color=Color.brand_green(),
         )
-
-        add_discord_field(embed, member)
         add_roblox_field(embed, rblx, roblox_id, hs_url)
-        set_member_footer(embed, member)
 
         await send_roblox_log(self.bot, member.guild, embed)
 

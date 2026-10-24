@@ -20,12 +20,11 @@ from ..core import (
 )
 from ..modules import (
     PlayerService,
-    add_discord_field,
     add_roblox_field,
     headshot_or_none,
     reset_roblox_nickname,
     send_roblox_log,
-    set_member_footer,
+    set_enforcer_footer,
     set_roblox_nickname,
 )
 
@@ -54,7 +53,7 @@ class Force(commands.Cog):
     @developer_only()
     @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     async def roblox_update(self, interaction: Interaction, member: discord.Member, roblox_id: int):
-        await self.link_roblox(interaction, member, roblox_id, update_nickname=True)
+        await self.link_roblox(interaction, member, roblox_id)
 
     @roblox.command(name="unlink", description="Drop a player's linked Roblox account.", extras=DEFER)
     @describe(member="The member to update")
@@ -97,13 +96,12 @@ class Force(commands.Cog):
         invoker = interaction.require_member()
 
         embed = discord.Embed(
-            description=f"# Member Forcibly Unlinked\n-# {invoker.name} · {invoker.id}\n",
+            description=f"# Member Forcibly Unlinked\n-# {member.name} · {member.id}\n",
             color=Color.brand_red(),
         )
 
-        add_discord_field(embed, member)
         add_roblox_field(embed, rblx, previous_roblox_id, headshot, title="Removed Roblox")
-        set_member_footer(embed, member)
+        set_enforcer_footer(embed, invoker)
 
         await send_roblox_log(self.bot, member.guild, embed)
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unlinked {member.mention} from `{previous_roblox_id}`.**")
@@ -133,13 +131,9 @@ class Force(commands.Cog):
         interaction: Interaction,
         member: discord.Member,
         roblox_id: int,
-        *,
-        update_nickname: bool = False,
     ):
-        """Validate *roblox_id*, guard the unique link, and write it for *member*.
-
-        *update_nickname* also renames the member to Bloxlink's nickname format -
-        the force roblox path does, the bloxlink path leaves the nickname alone.
+        """Validate *roblox_id*, guard the unique link, write it for *member*,
+        and rename the member to Bloxlink's nickname format.
         """
         service = self.bot.get_service(PlayerService)
         cooldowns = interaction.cooldowns
@@ -179,19 +173,16 @@ class Force(commands.Cog):
         # The link is written; nothing below may fail the command.
         headshot = await headshot_or_none(profile, roblox_id)
 
-        if update_nickname:
-            await set_roblox_nickname(member, rblx)
+        await set_roblox_nickname(member, rblx)
 
         invoker = interaction.require_member()
 
         embed = discord.Embed(
-            description=f"# Member Force-Linked\n-# {invoker.name} · {invoker.id}\n",
+            description=f"# Member Force-Linked\n-# {member.name} · {member.id}\n",
             color=Color.brand_green(),
         )
-
-        add_discord_field(embed, member)
         add_roblox_field(embed, rblx, roblox_id, headshot, previous_roblox_id=previous_roblox_id)
-        set_member_footer(embed, member)
+        set_enforcer_footer(embed, invoker)
 
         await send_roblox_log(self.bot, member.guild, embed)
 

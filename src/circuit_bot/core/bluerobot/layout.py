@@ -47,7 +47,7 @@ class ContentMixin:
         self._add(ui.MediaGallery(*gallery_items))
         return self
 
-    def file(self, url: str, *, spoiler: bool = False) -> Self:
+    def file(self, url: MediaSource, *, spoiler: bool = False) -> Self:
         self._add(ui.File(url, spoiler=spoiler))
         return self
 

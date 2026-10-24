@@ -12,14 +12,12 @@ if TYPE_CHECKING:
 
 __all__ = (
     "FIELD_PREFIX",
-    "add_discord_field",
     "add_roblox_field",
-    "discord_card",
     "headshot_or_none",
     "roblox_card",
     "roblox_headshot_url",
     "send_roblox_log",
-    "set_member_footer",
+    "set_enforcer_footer",
 )
 
 logger = get_logger("roblox_log")
@@ -27,15 +25,6 @@ logger = get_logger("roblox_log")
 # The invisible padding webhook.py gives every field name: a left-to-right
 # mark and an em space, so the two cards line up like they do there.
 FIELD_PREFIX = "‎ "  # noqa: RUF001
-
-
-def discord_card(member: discord.Member) -> str:
-    """The value for a member's card field - the `>` quote rows from webhook.py."""
-    return (
-        f"> **ID:** `{member.id}`\n"
-        f"> **Mention:** {member.mention}\n"
-        f"> **Created:** {utils.format_dt(member.created_at, style='R')}"
-    )
 
 
 def roblox_card(
@@ -68,11 +57,6 @@ def roblox_headshot_url(user_id: int) -> str:
     return f"https://www.roblox.com/headshot-thumbnail/image?userId={user_id}&width=150&height=150&format=png"
 
 
-def add_discord_field(embed: discord.Embed, member: discord.Member, *, title: str = "Discord") -> None:
-    """Append *member*'s card to the link log *embed* as an inline field."""
-    embed.add_field(name=f"{FIELD_PREFIX}✓ {title}", value=discord_card(member), inline=True)
-
-
 def add_roblox_field(
     embed: discord.Embed,
     rblx: RobloxUser | None,
@@ -96,9 +80,9 @@ def add_roblox_field(
     embed.set_thumbnail(url=headshot or roblox_headshot_url(roblox_id))
 
 
-def set_member_footer(embed: discord.Embed, member: discord.Member) -> None:
+def set_enforcer_footer(embed: discord.Embed, member: discord.Member) -> None:
     """Stamp *member*'s name, id, and avatar on the embed footer, like webhook.py."""
-    embed.set_footer(text=f"{member.name} • {member.id}", icon_url=member.display_avatar.with_size(80))
+    embed.set_footer(text=f"Enforced by: {member.name} • {member.id}", icon_url=member.display_avatar.url)
 
 
 async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, embed: discord.Embed) -> None:

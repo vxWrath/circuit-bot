@@ -130,9 +130,10 @@ class ErrorHandler:
             timestamp=discord.utils.utcnow(),
         )
 
-        file = discord.File(io.BytesIO(trace.encode()), filename="traceback.txt")
+        file = discord.File(io.BytesIO(trace.encode()), filename="traceback.py")
 
         try:
-            await self.bot.stored_webhooks["error"].send(embed=embed, file=file)
+            await self.bot.stored_webhooks["error"].send(embed=embed)
+            await self.bot.stored_webhooks["error"].send(file=file)
         except Exception as e:
             logger.error("Failed to send error webhook", exc_info=e)
