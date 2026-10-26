@@ -44,6 +44,9 @@ WORKDIR /app
 
 COPY --from=build /app/.venv /app/.venv
 
+# League settings; deployments can override with CONFIG_PATH to a mounted file.
+COPY config.toml ./
+
 # Needs neither root nor a writable path.
 RUN useradd --system --create-home --uid 10001 circuit
 

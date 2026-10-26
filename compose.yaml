@@ -26,6 +26,8 @@ services:
     volumes:
       # The dev image installs the project editable at /app/src.
       - ./src:/app/src
+      # League settings; the bot reads ./config.toml from its working directory.
+      - ./config.toml:/app/config.toml
     depends_on:
       postgres:
         condition: service_healthy

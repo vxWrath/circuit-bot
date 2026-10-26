@@ -1,6 +1,7 @@
 """Where the bot's settings come from, one field per part."""
 
 import tempfile
+import tomllib
 from pathlib import Path
 from typing import NamedTuple
 
@@ -10,17 +11,82 @@ PACKAGE_PATH = Path(__file__).resolve().parent
 
 __all__ = (
     "BotConfig",
+    "LeagueSettings",
     "PostgresSettings",
     "RedisSettings",
     "get_bot_config",
+    "get_league_settings",
     "get_postgres_settings",
     "get_redis_settings",
 )
 
 
+class LeagueSettings(NamedTuple):
+    """The league's own numbers, read from ``config.toml``.
+
+    Everything here is league-domain and public by nature - role and channel
+    ids, never credentials.  Secrets stay in the environment (see
+    :class:`BotConfig`).
+    """
+
+    verified_role_id: int
+    roblox_link_log_channel_id: int
+    approver_role_id: int
+    pending_teams_channel_id: int
+    new_teams_channel_id: int
+
+
+def get_league_settings() -> LeagueSettings:
+    """Read the league's settings from ``CONFIG_PATH`` (default ``config.toml``).
+
+    The file is required - the bot cannot honestly run a guild it doesn't know
+    how to govern.  A missing file, section, or key raises ``OSError`` naming
+    what's missing.
+    """
+
+    path = Path(get_env("CONFIG_PATH", "config.toml"))
+
+    if not path.is_file():
+        raise OSError(f"Config file '{path}' not found. Create it with the league's role and channel ids.")
+
+    with path.open("rb") as file:
+        data = tomllib.load(file)
+
+    def section(name: str) -> dict:
+        raw = data.get(name)
+
+        if not isinstance(raw, dict):
+            raise OSError(f"Config file '{path}' is missing the [{name}] section.")
+
+        return raw
+
+    guild = section("guild")
+    roles = section("roles")
+    teams = section("teams")
+
+    def id_of(table: dict, table_name: str, key: str) -> int:
+        value = table.get(key)
+
+        if not isinstance(value, int):
+            raise OSError(f"Config file '{path}' is missing an integer '{key}' in [{table_name}].")
+
+        return value
+
+    return LeagueSettings(
+        verified_role_id=id_of(guild, "guild", "verified_role"),
+        roblox_link_log_channel_id=id_of(guild, "guild", "roblox_link_log_channel"),
+        approver_role_id=id_of(roles, "roles", "approver"),
+        pending_teams_channel_id=id_of(teams, "teams", "pending_teams_channel"),
+        new_teams_channel_id=id_of(teams, "teams", "new_teams_channel"),
+    )
+
+
 class BotConfig(NamedTuple):
     """What :class:`~circuit_bot.core.bluerobot.CircuitBot` reads to log in, find
-    its guild, announce itself, load extensions and call the APIs it depends on."""
+    its guild, announce itself, load extensions and call the APIs it depends on.
+
+    The credentials here come from the environment; the league's settings come
+    from ``config.toml`` through :attr:`league`."""
 
     token: str
     guild_id: int
@@ -30,12 +96,11 @@ class BotConfig(NamedTuple):
     roblox_api_key: str
     bloxlink_api_key: str
 
+    league: LeagueSettings
+
     sync_sentinel: Path = Path(tempfile.gettempdir()) / "circuit-bot.sync"
     command_path: Path = PACKAGE_PATH / "commands"
     event_path: Path = PACKAGE_PATH / "events"
-
-    verified_role_id: int = 1553923281239941261
-    roblox_link_log_channel_id: int = 1561244309788037170
 
 
 class PostgresSettings(NamedTuple):
@@ -73,6 +138,7 @@ def get_bot_config() -> BotConfig:
         error_webhook_url=get_env("ERROR_WEBHOOK_URL"),
         roblox_api_key=get_env("ROBLOX_API_KEY"),
         bloxlink_api_key=get_env("BLOXLINK_API_KEY"),
+        league=get_league_settings(),
     )
 
 

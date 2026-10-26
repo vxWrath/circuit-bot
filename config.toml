@@ -1,0 +1,12 @@
+# FF Circuit league settings.
+
+[guild]
+verified_role = 1553923281239941261
+roblox_link_log_channel = 1561244309788037170
+
+[roles]
+approver = 1564127606536667267
+
+[teams]
+pending_teams_channel = 1564128159950045225
+new_teams_channel = 1564127916776890422

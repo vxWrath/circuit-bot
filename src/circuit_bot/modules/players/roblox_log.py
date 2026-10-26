@@ -91,7 +91,7 @@ async def send_roblox_log(bot: "CircuitBot", guild: discord.Guild, embed: discor
     The link the log describes is already written, so a missing channel or a
     failed send only logs a warning.
     """
-    channel_id = bot.config.roblox_link_log_channel_id
+    channel_id = bot.config.league.roblox_link_log_channel_id
 
     if not channel_id:
         return

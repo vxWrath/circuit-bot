@@ -30,18 +30,20 @@ class OnMemberJoin(commands.Cog):
         profile = service.profile(member.id)
         await profile.ensure_player()
 
+        verified_role_id = self.bot.config.league.verified_role_id
+
         def check_for_verified_role(_: discord.Member, after: discord.Member) -> bool:
             return (
                 member.guild.id == after.guild.id
                 and member.id == after.id
-                and after.get_role(self.bot.config.verified_role_id) is not None
+                and after.get_role(verified_role_id) is not None
             )
 
         def added_verified_role(log: discord.AuditLogEntry) -> bool:
             return (
                 log.target is not None
                 and log.target.id == member.id
-                and any(role.id == self.bot.config.verified_role_id for role in getattr(log.after, "roles", ()))
+                and any(role.id == verified_role_id for role in getattr(log.after, "roles", ()))
             )
 
         # Listen before querying the audit log, so an update landing during the
