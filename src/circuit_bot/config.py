@@ -3,7 +3,7 @@
 import tempfile
 import tomllib
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 from .core.env import get_env
 
@@ -51,33 +51,36 @@ def get_league_settings() -> LeagueSettings:
 
     with path.open("rb") as file:
         data = tomllib.load(file)
-
-    def section(name: str) -> dict:
+        
+    def section(name: str) -> dict[str, Any]:
         raw = data.get(name)
 
         if not isinstance(raw, dict):
             raise OSError(f"Config file '{path}' is missing the [{name}] section.")
 
+        sections[name] = raw
         return raw
 
-    guild = section("guild")
-    roles = section("roles")
-    teams = section("teams")
+    sections: dict[str, dict[str, Any]] = {
+        "guild": section("guild"),
+        "roles": section("roles"),
+        "teams": section("teams"),
+    }
 
-    def id_of(table: dict, table_name: str, key: str) -> int:
-        value = table.get(key)
+    def id_of(section: str, key: str) -> int:
+        value = sections[section].get(key)
 
         if not isinstance(value, int):
-            raise OSError(f"Config file '{path}' is missing an integer '{key}' in [{table_name}].")
+            raise OSError(f"Config file '{path}' is missing an integer '{key}' in [{section}].")
 
         return value
 
     return LeagueSettings(
-        verified_role_id=id_of(guild, "guild", "verified_role"),
-        roblox_link_log_channel_id=id_of(guild, "guild", "roblox_link_log_channel"),
-        approver_role_id=id_of(roles, "roles", "approver"),
-        pending_teams_channel_id=id_of(teams, "teams", "pending_teams_channel"),
-        new_teams_channel_id=id_of(teams, "teams", "new_teams_channel"),
+        verified_role_id=id_of("guild", "verified_role"),
+        roblox_link_log_channel_id=id_of("guild", "roblox_link_log_channel"),
+        approver_role_id=id_of("roles", "approver"),
+        pending_teams_channel_id=id_of("teams", "pending_teams_channel"),
+        new_teams_channel_id=id_of("teams", "new_teams_channel"),
     )
 
 
