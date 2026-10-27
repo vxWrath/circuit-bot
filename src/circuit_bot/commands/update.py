@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-import discord
 from discord.ext import commands
 
 from ..core import (
@@ -14,13 +13,7 @@ from ..core import (
     cooldown,
     shared_cooldown,
 )
-from ..modules import (
-    PlayerService,
-    add_roblox_field,
-    headshot_or_none,
-    send_roblox_log,
-    set_roblox_nickname,
-)
+from ..modules import PlayerService, roblox
 
 DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
 
@@ -63,7 +56,7 @@ class Update(commands.Cog):
                 f"{CommonEmojis.FAIL} **That Roblox account is already linked to another Discord account.**"
             )
 
-        profile = service.profile(member.id)
+        profile = service.profile(member)
         player = await profile.ensure_player()
         previous_roblox_id = player.roblox_id
 
@@ -74,16 +67,19 @@ class Update(commands.Cog):
         await profile.link_roblox(roblox_id)
 
         # The link is written; nothing below may fail the command.
-        headshot = await headshot_or_none(profile, roblox_id)
-        await set_roblox_nickname(member, rblx)
+        headshot = await profile.roblox.headshot_or_none()
+        await profile.set_nickname_from_roblox()
 
-        embed = discord.Embed(
-            description=f"# Member Self-Linked\n-# {member.name} · {member.id}\n",
-            color=Color.brand_green(),
+        embed = roblox.build_embed(
+            "Member Self-Linked",
+            member,
+            Color.brand_green(),
+            rblx,
+            roblox_id,
+            headshot,
+            previous_roblox_id=previous_roblox_id,
         )
-        add_roblox_field(embed, rblx, roblox_id, headshot, previous_roblox_id=previous_roblox_id)
-
-        await send_roblox_log(self.bot, member.guild, embed)
+        await roblox.send_log(self.bot, member.guild, embed)
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Successfully updated your linked roblox account to `{rblx.username}` (`{roblox_id}`).**"

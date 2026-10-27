@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING
 
+import discord
+
+from ...core.logging import get_logger
 from ...core.roblox import RobloxUser
 from ...core.service import Service
 from .models import CreatePlayer, PlayerRow
@@ -10,13 +13,15 @@ if TYPE_CHECKING:
 
 __all__ = ("PlayerService",)
 
+logger = get_logger("player_service")
+
 
 class PlayerService(Service):
     """Player reads and writes over the database and the cached clients.
 
-    The one place that composes a player out of the row in Postgres and the
-    Roblox account, so commands have a single surface to ask.  A method spanning
-    several statements opens the
+    The one place that composes a player out of the row in Postgres, the Roblox
+    account, and the guild member, so commands have a single surface to ask.  A
+    method spanning several statements opens the
     transaction itself and builds its repositories on it, so a caller can't
     half-commit it.
     """
@@ -27,9 +32,18 @@ class PlayerService(Service):
         self.player = self.get_repository(PlayerRow)
         self.create_player = self.get_repository(CreatePlayer)
 
-    def profile(self, snowflake: int) -> PlayerProfile:
-        """Open a player's profile.  Touches nothing until a part is asked for."""
-        return PlayerProfile(self, snowflake)
+    def profile(self, member: discord.Member | int) -> PlayerProfile:
+        """Open a player's profile for *member* or their snowflake.  Touches nothing until a part is asked for.
+
+        A member handed over is seeded into the profile, so the guild lookup
+        is saved.
+        """
+        if isinstance(member, discord.Member):
+            profile = PlayerProfile(self, member.id)
+            profile.set_part(discord.Member, member)
+            return profile
+
+        return PlayerProfile(self, member)
 
     async def find_player(self, *, snowflake: int) -> PlayerRow | None:
         """The player with *snowflake*, or ``None`` if there's none."""
@@ -83,3 +97,30 @@ class PlayerService(Service):
     async def headshot_url(self, *, roblox_id: int) -> str | None:
         """The headshot of *roblox_id*, or ``None`` when roblox id doesn't exist."""
         return await self.bot.roblox.get_headshot(roblox_id)
+
+    async def member(self, *, snowflake: int) -> discord.Member | None:
+        """The member with *snowflake* in the league guild, or ``None`` when they aren't there."""
+        guild = self.bot.get_guild(self.bot.config.guild_id)
+
+        if guild is None:
+            logger.warning("Could not fetch member %d: guild %d not found", snowflake, self.bot.config.guild_id)
+            return None
+
+        member = guild.get_member(snowflake)
+
+        if member is not None:
+            return member
+
+        # The member cache keeps only members seen joining, so ask Discord.
+        try:
+            return await guild.fetch_member(snowflake)
+        except (discord.NotFound, discord.Forbidden, discord.HTTPException) as e:
+            logger.warning("Could not fetch member %d: %s", snowflake, e)
+            return None
+
+    async def set_nickname(self, member: discord.Member, nick: str | None) -> None:
+        """Set *member*'s nickname to *nick*, never raising."""
+        try:
+            await member.edit(nick=nick)
+        except discord.HTTPException as e:
+            logger.warning("Could not set nickname for %d: %s", member.id, e)

@@ -1,30 +1,48 @@
 from typing import TYPE_CHECKING
 
+import discord
+
 from ...core.database import RecordNotFoundError
+from ...core.logging import get_logger
 from ...core.profile import Profile
-from ...core.roblox import RobloxUser
+from ...core.roblox import RobloxError, RobloxUser
 from .models import PlayerRow
 
 if TYPE_CHECKING:
     from .service import PlayerService
 
-__all__ = ("PlayerProfile",)
+__all__ = (
+    "PlayerProfile",
+    "RobloxProfile",
+)
+
+logger = get_logger("player_profile")
 
 
 class PlayerProfile(Profile["PlayerService"]):
     """One player, filled in on demand.
 
-    Open it through :meth:`PlayerService.profile` (or
+    Open it through :meth:`PlayerService.profile` or
     :meth:`PlayerService.profile_from_roblox_id`, which reads the row once up
-    front) and ask for the parts you render - each is fetched once and kept.
-    The Roblox parts read the row first and raise ``RecordNotFoundError`` when
-    there is no such player, and a profile never reaches for a client itself.
+    front.  Each part is fetched once and kept.  The Roblox parts live on
+    :attr:`roblox` and read the row first, raising ``RecordNotFoundError``
+    when there is no such player, and a profile never reaches for a client
+    itself.
     """
 
     def __init__(self, service: "PlayerService", snowflake: int) -> None:
         super().__init__(service=service)
 
         self.snowflake = snowflake
+        self._roblox: RobloxProfile | None = None
+
+    @property
+    def roblox(self) -> RobloxProfile:
+        """The player's Roblox view: the linked account, its headshot, and the helpers around them."""
+        if self._roblox is None:
+            self._roblox = RobloxProfile(self)
+
+        return self._roblox
 
     async def player(self) -> PlayerRow | None:
         """The player's full row, or ``None`` if there's no such player."""
@@ -51,35 +69,51 @@ class PlayerProfile(Profile["PlayerService"]):
 
         return player
 
-    async def roblox_user(self) -> RobloxUser | None:
-        """The player's Roblox account, or ``None`` when none is linked.
+    async def member(self) -> discord.Member | None:
+        """The player's guild member, or ``None`` when they aren't in the guild."""
+        return await self.ensure_part(discord.Member, self.service.member, snowflake=self.snowflake)
 
-        Raises ``RecordNotFoundError`` when there is no such player.
+    async def set_nickname_from_roblox(self) -> None:
+        """Set the player's nickname to Bloxlink's format from the linked Roblox account.
+
+        Does nothing when no account is linked, and skips with a warning when
+        the player is no longer in the guild.  Raises ``RecordNotFoundError``
+        when there is no such player.
         """
-        player = await self.player()
+        rblx = await self.roblox.user()
 
-        if player is None:
-            raise RecordNotFoundError("players", "snowflake", self.snowflake)
+        if rblx is None:
+            return
 
-        if player.roblox_id is None:
-            return None
+        member = await self.member()
 
-        return await self.ensure_part(RobloxUser, self.service.roblox_user, roblox_id=player.roblox_id)
+        if member is None:
+            logger.warning("Could not set nickname for player %s: not in the guild", self.snowflake)
+            return
 
-    async def headshot_url(self) -> str | None:
-        """The player's Roblox headshot, or ``None`` when none is available.
+        if rblx.display_name == rblx.username:
+            nickname = f"{rblx.username} ✓"
+        else:
+            # Discord caps nicknames at 32 characters, so trim the display name
+            # to keep the username and check mark intact.
+            suffix = f" (@{rblx.username}) ✓"
+            limit = 32 - len(suffix)
+            nickname = f"{rblx.display_name[:limit]}{suffix}"
 
-        Raises ``RecordNotFoundError`` when there is no such player.
+        await self.service.set_nickname(member, nickname)
+
+    async def reset_nickname(self) -> None:
+        """Reset the player's nickname, undoing :meth:`set_nickname_from_roblox`.
+
+        Skips with a warning when the player is no longer in the guild.
         """
-        player = await self.player()
+        member = await self.member()
 
-        if player is None:
-            raise RecordNotFoundError("players", "snowflake", self.snowflake)
+        if member is None:
+            logger.warning("Could not reset nickname for player %s: not in the guild", self.snowflake)
+            return
 
-        if player.roblox_id is None:
-            return None
-
-        return await self.ensure_part("headshot_url", self.service.headshot_url, roblox_id=player.roblox_id)
+        await self.service.set_nickname(member, None)
 
     async def link_roblox(self, roblox_id: int) -> PlayerRow:
         """Link a Roblox account to this player, or raise ``RecordNotFoundError``.
@@ -87,7 +121,8 @@ class PlayerProfile(Profile["PlayerService"]):
         The raise covers both no such player and the row going between the read
         and the write.  The write is keyed by the row :meth:`player` kept, or
         fetched here if this is the first part anyone wanted, and the row it
-        returns is kept.  Every other part is dropped.
+        returns is kept.  The Roblox parts are dropped; the member survives,
+        since the write can't have changed it.
         """
 
         player = await self.player()
@@ -103,7 +138,7 @@ class PlayerProfile(Profile["PlayerService"]):
             self.invalidate_parts()
             raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
-        self.invalidate_parts()
+        self.invalidate_parts(RobloxUser, "headshot_url")
         self.set_part(PlayerRow, linked)
 
         return linked
@@ -112,7 +147,7 @@ class PlayerProfile(Profile["PlayerService"]):
         """Drop the player's linked Roblox account, or raise ``RecordNotFoundError``.
 
         Mirrors :meth:`link_roblox` - the raise covers both no such player and
-        the row going between the read and the write, and every other part is
+        the row going between the read and the write, and the Roblox parts are
         dropped.
         """
 
@@ -129,7 +164,60 @@ class PlayerProfile(Profile["PlayerService"]):
             self.invalidate_parts()
             raise RecordNotFoundError("players", "snowflake", self.snowflake)
 
-        self.invalidate_parts()
+        self.invalidate_parts(RobloxUser, "headshot_url")
         self.set_part(PlayerRow, unlinked)
 
         return unlinked
+
+
+class RobloxProfile:
+    """The Roblox view of a player.
+
+    Open it through :attr:`PlayerProfile.roblox`.  Each part is fetched once
+    and kept with the rest of the profile's parts, and the view never reaches
+    for a client itself.
+    """
+
+    def __init__(self, player: PlayerProfile) -> None:
+        self.player = player
+
+    async def roblox_id(self) -> int | None:
+        """The linked account's id, or raise ``RecordNotFoundError`` when there is no such player."""
+        player = await self.player.player()
+
+        if player is None:
+            raise RecordNotFoundError("players", "snowflake", self.player.snowflake)
+
+        return player.roblox_id
+
+    async def user(self) -> RobloxUser | None:
+        """The player's Roblox account, or ``None`` when none is linked.
+
+        Raises ``RecordNotFoundError`` when there is no such player.
+        """
+        roblox_id = await self.roblox_id()
+
+        if roblox_id is None:
+            return None
+
+        return await self.player.ensure_part(RobloxUser, self.player.service.roblox_user, roblox_id=roblox_id)
+
+    async def headshot(self) -> str | None:
+        """The player's Roblox headshot, or ``None`` when none is available.
+
+        Raises ``RecordNotFoundError`` when there is no such player.
+        """
+        roblox_id = await self.roblox_id()
+
+        if roblox_id is None:
+            return None
+
+        return await self.player.ensure_part("headshot_url", self.player.service.headshot_url, roblox_id=roblox_id)
+
+    async def headshot_or_none(self) -> str | None:
+        """The player's headshot, or ``None`` when it can't be fetched."""
+        try:
+            return await self.headshot()
+        except RobloxError as e:
+            logger.warning("Could not fetch Roblox headshot for player %s: %s", self.player.snowflake, e)
+            return None

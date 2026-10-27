@@ -5,11 +5,7 @@ import discord
 from discord.ext import commands
 
 from ..core import CircuitBot, Color, RobloxError, get_logger
-from ..modules import (
-    PlayerService,
-    add_roblox_field,
-    send_roblox_log,
-)
+from ..modules import PlayerService, roblox
 
 logger = get_logger("on_member_join")
 
@@ -27,7 +23,7 @@ class OnMemberJoin(commands.Cog):
 
         service = self.bot.get_service(PlayerService)
 
-        profile = service.profile(member.id)
+        profile = service.profile(member)
         await profile.ensure_player()
 
         verified_role_id = self.bot.config.league.verified_role_id
@@ -111,35 +107,37 @@ class OnMemberJoin(commands.Cog):
             embed = discord.Embed(
                 description=(
                     "# Duplicate Roblox Link Blocked\n"
-                    f"-# New member: {member.name} · {member.id}\n"
+                    f"-# New member: {member.name} • {member.id}\n"
                     f"-# Existing member: "
-                    f"{owner.name} · {owner.id}"
+                    f"{owner.name} • {owner.id}"
                     if owner is not None
                     else f"{existing.snowflake}"
                 ),
                 color=Color.brand_red(),
             )
-            add_roblox_field(embed, rblx, roblox_id, None)
+            roblox.add_field(embed, rblx, roblox_id, None)
 
-            await send_roblox_log(self.bot, member.guild, embed)
+            await roblox.send_log(self.bot, member.guild, embed)
             return
 
         await profile.link_roblox(roblox_id)
         logger.debug(f"Linked {member.id} to Roblox ID {roblox_id}")
 
-        hs_url = await profile.headshot_url()
+        hs_url = await profile.roblox.headshot()
 
         if not hs_url:
             logger.debug(f"Could not fetch roblox headshot for roblox id {roblox_id}")
             return
 
-        embed = discord.Embed(
-            description=f"# New Member Verified & Linked\n-# {member.name} · {member.id}\n",
-            color=Color.brand_green(),
+        embed = roblox.build_embed(
+            "New Member Verified & Linked",
+            member,
+            Color.brand_green(),
+            rblx,
+            roblox_id,
+            hs_url,
         )
-        add_roblox_field(embed, rblx, roblox_id, hs_url)
-
-        await send_roblox_log(self.bot, member.guild, embed)
+        await roblox.send_log(self.bot, member.guild, embed)
 
 
 async def setup(bot: CircuitBot):

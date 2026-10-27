@@ -17,15 +17,7 @@ from ..core import (
     get_logger,
     shared_cooldown,
 )
-from ..modules import (
-    PlayerService,
-    add_roblox_field,
-    headshot_or_none,
-    reset_roblox_nickname,
-    send_roblox_log,
-    set_enforcer_footer,
-    set_roblox_nickname,
-)
+from ..modules import PlayerService, roblox
 
 logger = get_logger("force")
 
@@ -37,7 +29,8 @@ class Force(commands.Cog):
         self.bot = bot
 
     force = CircuitGroup(name="force", description="Developer-only utilities.", guild_only=True)
-    roblox = CircuitGroup(
+    # roblox_group, not roblox, so the roblox toolkit imported above keeps the plain name.
+    roblox_group = CircuitGroup(
         parent=force, name="roblox", description="Force changes to a player's linked Roblox account.", guild_only=True
     )
     bloxlink = CircuitGroup(
@@ -47,19 +40,19 @@ class Force(commands.Cog):
         guild_only=True,
     )
 
-    @roblox.command(name="update", description="Set a player's linked Roblox account.", extras=DEFER)
+    @roblox_group.command(name="update", description="Set a player's linked Roblox account.", extras=DEFER)
     @describe(member="The member to update", roblox_id="The Roblox ID to link")
     @developer_only()
     @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     async def roblox_update(self, interaction: Interaction, member: discord.Member, roblox_id: int):
         await self.link_roblox(interaction, member, roblox_id)
 
-    @roblox.command(name="unlink", description="Drop a player's linked Roblox account.", extras=DEFER)
+    @roblox_group.command(name="unlink", description="Drop a player's linked Roblox account.", extras=DEFER)
     @describe(member="The member to update")
     @developer_only()
     async def roblox_unlink(self, interaction: Interaction, member: discord.Member):
         service = self.bot.get_service(PlayerService)
-        profile = service.profile(member.id)
+        profile = service.profile(member)
         player = await profile.player()
 
         if player is None:
@@ -75,29 +68,31 @@ class Force(commands.Cog):
         # The removed account's profile, for the audit embed - a failure only
         # leaves the embed thinner, it can't fail the command.
         try:
-            rblx = await profile.roblox_user()
+            rblx = await profile.roblox.user()
         except RobloxError as e:
             logger.warning("Could not fetch Roblox user %d before unlinking: %s", previous_roblox_id, e)
             rblx = None
 
-        headshot = await headshot_or_none(profile, previous_roblox_id)
+        headshot = await profile.roblox.headshot_or_none()
 
         await profile.unlink_roblox()
 
         # The unlink is written; nothing below may fail the command.
-        await reset_roblox_nickname(member)
+        await profile.reset_nickname()
 
         invoker = interaction.require_member()
 
-        embed = discord.Embed(
-            description=f"# Member Forcibly Unlinked\n-# {member.name} · {member.id}\n",
-            color=Color.brand_red(),
+        embed = roblox.build_embed(
+            "Member Forcibly Unlinked",
+            member,
+            Color.brand_red(),
+            rblx,
+            previous_roblox_id,
+            headshot,
+            field_title="Removed Roblox",
+            enforcer=invoker,
         )
-
-        add_roblox_field(embed, rblx, previous_roblox_id, headshot, title="Removed Roblox")
-        set_enforcer_footer(embed, invoker)
-
-        await send_roblox_log(self.bot, member.guild, embed)
+        await roblox.send_log(self.bot, member.guild, embed)
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unlinked {member.mention} from `{previous_roblox_id}`.**")
 
     @bloxlink.command(
@@ -153,27 +148,29 @@ class Force(commands.Cog):
                 f"{CommonEmojis.FAIL} **Roblox account `{roblox_id}` is already linked to {owner_text}.**"
             )
 
-        profile = service.profile(member.id)
+        profile = service.profile(member)
         player = await profile.ensure_player()
         previous_roblox_id = player.roblox_id
 
         await profile.link_roblox(roblox_id)
 
         # The link is written; nothing below may fail the command.
-        headshot = await headshot_or_none(profile, roblox_id)
-
-        await set_roblox_nickname(member, rblx)
+        headshot = await profile.roblox.headshot_or_none()
+        await profile.set_nickname_from_roblox()
 
         invoker = interaction.require_member()
 
-        embed = discord.Embed(
-            description=f"# Member Force-Linked\n-# {member.name} · {member.id}\n",
-            color=Color.brand_green(),
+        embed = roblox.build_embed(
+            "Member Force-Linked",
+            member,
+            Color.brand_green(),
+            rblx,
+            roblox_id,
+            headshot,
+            previous_roblox_id=previous_roblox_id,
+            enforcer=invoker,
         )
-        add_roblox_field(embed, rblx, roblox_id, headshot, previous_roblox_id=previous_roblox_id)
-        set_enforcer_footer(embed, invoker)
-
-        await send_roblox_log(self.bot, member.guild, embed)
+        await roblox.send_log(self.bot, member.guild, embed)
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Linked {member.mention} to `{rblx.username}` (`{roblox_id}`).**"

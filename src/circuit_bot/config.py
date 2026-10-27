@@ -51,7 +51,7 @@ def get_league_settings() -> LeagueSettings:
 
     with path.open("rb") as file:
         data = tomllib.load(file)
-        
+
     def section(name: str) -> dict[str, Any]:
         raw = data.get(name)
 
