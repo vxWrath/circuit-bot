@@ -1,13 +1,13 @@
 # FF Circuit - Team System
 
-Teams are the league's core entity - every other system (pods, schedules, ratings, rosters, tournaments) hangs off them. This document plans the first team pass: the `teams`, `roster`, and `roster_log` tables, the `modules/teams` package, the create-and-approve flow, team lifecycle, lineage, and the approver role that gates it.
+Teams are the league's core entity - every other system (pods, schedules, ratings, rosters, tournaments) hangs off them. This document plans the first team pass: the `teams`, `roster`, and `transaction_log` tables, the `modules/teams` package, the create-and-approve flow, team lifecycle, lineage, and the approver role that gates it.
 
 ## Scope
 
 In this pass:
 
 - An **approver** staff role in config, an `approver_only` check, and a new-teams channel
-- Migrations `0002_teams.sql`, `0003_roster.sql`, and `0004_roster_log.sql`, plus the `modules/teams` package (models, service, errors)
+- Migrations `0002_teams.sql`, `0003_roster.sql`, and `0004_transaction_log.sql`, plus the `modules/teams` package (models, service, errors)
 - The command flow: `/create team` (with autocomplete), `/pending teams`, `/approve team`, `/deny team`, `/promote`, `/demote`, `/deactivate team`
 - Team lineage: the `previous_team_id` chain, gated on coaching history from the transaction log
 - A bot-managed Discord role and emoji per team (both created at approval) and an optional uploaded team logo
@@ -65,10 +65,11 @@ CREATE TABLE teams (
     updated_at       timestamptz NOT NULL DEFAULT now()
 );
 
--- A name is claimed by a team that is pending or active; everything else frees it.
+-- A name is claimed while its team is pending, or approved and active; a
+-- denied or deactivated team frees it.
 CREATE UNIQUE INDEX teams_lower_name_key
     ON teams (lower(name))
-    WHERE status IN ('pending', 'approved') AND active;
+    WHERE status = 'pending' OR (status = 'approved' AND active);
 ```
 
 ### `roster`
@@ -89,12 +90,12 @@ CREATE UNIQUE INDEX roster_one_owner_per_team ON roster (team_id) WHERE role = '
 CREATE UNIQUE INDEX roster_one_team_per_owner ON roster (player) WHERE role = 'owner';
 ```
 
-### `roster_log`
+### `transaction_log`
 
 The transaction log: append-only, one row per roster transaction. Nothing here is ever updated or deleted - it is the record of who was what, when. Lineage checks and the autocomplete read it.
 
 ```sql
-CREATE TABLE roster_log (
+CREATE TABLE transaction_log (
     id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     team_id bigint NOT NULL REFERENCES teams(id),
     player  bigint NOT NULL REFERENCES players(snowflake),
@@ -107,7 +108,7 @@ CREATE TABLE roster_log (
 Decisions, and why:
 
 - **No `owner` column on `teams`.** Ownership is a roster row with `role = 'owner'`, created in the same transaction as the team. The partial unique indexes enforce the docs' "one owner per team, one team per owner". Ownership transfer (allowed until Window 3 closes) becomes a roster-row swap plus a log entry, with no schema change. Coaches are roster rows with `role = 'coach'` - and the docs allow a player to coach multiple teams, so no cap index on coaches. A plain player is a roster row with `role = NULL`.
-- **Every roster mutation writes a `roster_log` row in the same transaction.** The log is what makes "were a coach at some point" answerable after demotions and departures, and it serves the league's transparency promise - all roster movement recorded by the bot.
+- **Every roster mutation writes a `transaction_log` row in the same transaction.** The log is what makes "were a coach at some point" answerable after demotions and departures, and it serves the league's transparency promise - all roster movement recorded by the bot.
 - **`role_snowflake` and `emoji_snowflake` are both created at approval.** The bot creates the team's Discord role when the team is approved and stores the snowflake on the row - pending teams have `NULL`, every approved team has one. If a logo was uploaded, the bot also creates a guild emoji from the image and stores `emoji_snowflake`. Discord owns both: if either is deleted on Discord, the database is not out of sync - nothing repairs or re-syncs. Code that uses them fetches first and falls back. The bot deletes both as cleanup on deactivate.
 - **`logo_url` is the team logo** - an image uploaded by the owner during the pending phase (optional). The bot re-uploads the image to the pending-teams channel and stores the durable CDN URL there, so the logo survives the uploader's own message and doubles as the request embed's image for approvers. The URL stays on the row after approval as the source of the emoji. Plain `NULL` when the team has none.
 - **`active` is the lifecycle flag.** A team that leaves is never removed or deleted - `active` flips to `false` and the row stays. Teams cannot rejoin: reactivation is impossible by design, and the team that carries on is always a new row (see Lineage).
@@ -124,7 +125,7 @@ A team that leaves is inactive forever and can never rejoin - there must always 
 - **Eligibility comes from the transaction log**: the creator may link only a team where the log shows them as an **owner or coach at some point**. A plain player who never coached cannot claim a team's history; a former coach can, even after demotion or departure - the log remembers.
 - **Service-enforced rules:**
   - The previous team must be `active = false` - you cannot fork the history of a live team.
-  - The creator must have a `roster_log` row on that team with `role IN ('owner', 'coach')`.
+  - The creator must have a `transaction_log` row on that team with `role IN ('owner', 'coach')`.
   - `previous_team_id` is `UNIQUE` - the lineage is a chain, not a tree; a team has at most one successor.
 - **Why a column, not an array or a table**: the chain is strictly one-to-one backward. A column plus `UNIQUE` enforces the chain shape in the schema itself; an array would need maintenance on every link and a table adds nothing a self-referencing FK doesn't give. Full ancestry is one recursive query (`WITH RECURSIVE`) or a short service walk.
 - **Display**: a team's profile shows its chain - "continuing Falcons, continuing Comets" - and the linked teams keep their own histories on their own rows.
@@ -133,7 +134,7 @@ A team that leaves is inactive forever and can never rejoin - there must always 
 
 Mirrors `modules/players/`:
 
-- **`models.py`** - `TeamTable` (abstract; `table = "teams"`, `primary_key = "id"`, `generated = ("id", "created_at", "updated_at")`), `TeamRow`, `CreateTeam` (`kw_only=True`; `name`, `previous_team_id`); `RosterTable` (abstract; `table = "roster"`), `RosterRow`, `CreateRosterEntry` (`kw_only=True`; `team_id`, `player`, `role`); `RosterLogTable` (abstract; `table = "roster_log"`), `RosterLogRow`, `CreateRosterLog` (`kw_only=True`; `team_id`, `player`, `role`, `action`).
+- **`models.py`** - `TeamTable` (abstract; `table = "teams"`, `primary_key = "id"`, `generated = ("id", "created_at", "updated_at")`), `TeamRow`, `CreateTeam` (`kw_only=True`; `name`, `previous_team_id`); `RosterTable` (abstract; `table = "roster"`), `RosterRow`, `CreateRosterEntry` (`kw_only=True`; `team_id`, `player`, `role`); `TransactionLogTable` (abstract; `table = "transaction_log"`), `TransactionLogRow`, `CreateTransactionLog` (`kw_only=True`; `team_id`, `player`, `role`, `action`).
 - **`service.py`** - `TeamService`: repositories via `get_repository`, one surface for commands. Methods: `create_pending(name, owner, previous_team_id)` (opens its own transaction - team row, the owner roster row, and the owner's `join` log row, the "several statements" pattern from the players service), `attach_logo(team, url)`, `approve(team)` (creates the Discord role, creates the guild emoji from the logo if one was uploaded, then updates the row to `approved` + `active = true` + both snowflakes), `deny(team)`, `deactivate(team)`, `promote(owner, player)` (infers the owner's active owned team, upserts the player's roster row to `role = 'coach'`, appends the log row), `demote(owner, player)` (same inference, returns a coach to a plain roster row, `role = NULL`, appends the log row), `find_by_name(name)`, `find_by_owner(snowflake)`, `owners(team)`, `pending()`, `lineage(team)`, `previous_teams_for(player)` (the inactive teams the log shows them owning or coaching - feeds the autocomplete). Name and lineage validation lives in the service; commands layer pre-checks on top for UX.
 - **`errors.py`** - `TeamUniqueViolationFormatter`, mirroring `PlayerUniqueViolationFormatter`: keyed on constraint names, `report = True` (a constraint hit means a pre-check lost a race):
 
