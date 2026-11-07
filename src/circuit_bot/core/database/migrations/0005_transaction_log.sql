@@ -1,3 +1,4 @@
+-- The transaction log: append-only, one row per roster transaction.
 CREATE TABLE transaction_log (
     id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     player       bigint NOT NULL REFERENCES players(snowflake),
@@ -7,7 +8,7 @@ CREATE TABLE transaction_log (
                      'offer', 'release', 'demand',
                      'promote', 'demote'
                  )),
-    role         text CHECK (role IN ('owner', 'coach')),
+    role         text CHECK (role IN ('coach')),
     actor        bigint REFERENCES players(snowflake),
     details      jsonb,
     at           timestamptz NOT NULL DEFAULT now(),

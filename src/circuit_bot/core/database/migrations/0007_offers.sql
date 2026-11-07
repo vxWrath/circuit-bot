@@ -1,3 +1,5 @@
+-- An offer is a team's invitation to a player.  It expires and is accepted
+-- or declined; a player may hold offers from several teams.
 CREATE TABLE offers (
     id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     team_id      bigint NOT NULL REFERENCES teams(id),

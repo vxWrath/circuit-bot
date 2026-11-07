@@ -1,9 +1,15 @@
 -- Current membership: the latest membership event per player per team.
--- The owner's creation promote attaches them to `to_team_id`; an accepted
--- offer attaches a player; a promotion or demotion updates the role on it;
--- a release or demand detaches them from `from_team_id`.
+-- The owner comes from the team_ownership row still open; an accepted
+-- offer attaches a player, a promotion or demotion updates a coach's role,
+-- and a release or demand detaches them.
 CREATE VIEW roster AS
 WITH events AS (
+    SELECT player, team_id, 'owner'::text AS role, 'appoint' AS action, appointed_at AS at, id
+    FROM team_ownership
+    WHERE ended_at IS NULL
+
+    UNION ALL
+
     SELECT player, to_team_id AS team_id, role, action, at, id
     FROM transaction_log
     WHERE action = 'offer'
