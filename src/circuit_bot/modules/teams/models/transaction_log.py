@@ -9,7 +9,7 @@ __all__ = ("CreateTransactionLog", "TransactionLogRow", "TransactionLogTable")
 class TransactionLogTable(Row):
     """The ``transaction_log`` table: one append-only row per roster transaction.
 
-    Nothing here is ever updated or deleted; the ``roster`` view derives
+    Nothing here is ever updated or deleted.  The ``roster`` view derives
     membership from it.  Ownership lives in ``team_ownership``, so ``role``
     is ``'coach'`` or ``NULL`` - held after ``promote``/``demote`` or before
     ``release``/``demand``.  ``details`` carries the offer id and status.

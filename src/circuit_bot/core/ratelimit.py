@@ -76,8 +76,8 @@ def retry_delay(headers: Mapping[str, str], attempt: int, policy: RetryPolicy) -
     """Return how long to wait before retrying, and what the server asked for.
 
     The delay is what *headers* asked for when usable, :func:`backoff_delay`
-    otherwise; the second element is that server-asked value or ``None``, kept
-    apart because a backoff guess is no promise.
+    otherwise.  The second element is that server-asked value or ``None``,
+    kept apart because a backoff guess is no promise.
     """
 
     requested = retry_after(headers)

@@ -84,7 +84,7 @@ class RecordNotFoundFormatter(ErrorFormatter):
 class ErrorHandler:
     """Routes every failure to a user-facing reply or to a webhook report.
 
-    Each formatter owns one kind of failure; the first that returns a reply
+    Each formatter owns one kind of failure.  The first that returns a reply
     wins, and a formatter that sets ``report`` is also posted to the error
     webhook as a handled failure.  Anything none of them own is reported as
     an unhandled error.
@@ -92,7 +92,7 @@ class ErrorHandler:
 
     def __init__(self, bot: "CircuitBot") -> None:
         self.bot = bot
-        self._formatters: tuple[ErrorFormatter, ...] | None = None
+        self.cached_formatters: tuple[ErrorFormatter, ...] | None = None
 
     @property
     def formatters(self) -> tuple[ErrorFormatter, ...]:
@@ -101,11 +101,11 @@ class ErrorHandler:
         Formatters register by existing - they are never imported here - so a
         formatter defined in any module the bot has loaded joins the chain.
         """
-        if self._formatters is not None:
-            return self._formatters
+        if self.cached_formatters is not None:
+            return self.cached_formatters
 
-        self._formatters = tuple(cls() for cls in ErrorFormatter.__subclasses__())
-        return self._formatters
+        self.cached_formatters = tuple(cls() for cls in ErrorFormatter.__subclasses__())
+        return self.cached_formatters
 
     async def handle(self, interaction: Interaction | None, error: Exception, *, source: str | None = None) -> None:
         """Respond to *error* on *interaction*, or report it when no formatter owns it.

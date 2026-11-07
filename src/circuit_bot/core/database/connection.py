@@ -19,12 +19,12 @@ class DatabaseConnection(Database):
     """
 
     def __init__(self, connection: asyncpg.Connection) -> None:
-        self._connection = connection
+        self.connection = connection
 
     @property
     def raw(self) -> asyncpg.Connection:
         """The ``asyncpg`` connection underneath."""
-        return self._connection
+        return self.connection
 
     @asynccontextmanager
     async def acquire(self) -> AsyncGenerator["DatabaseConnection"]:
@@ -51,7 +51,7 @@ class DatabaseConnection(Database):
         a savepoint of the outer one, not a second transaction.
         """
 
-        async with self._connection.transaction(isolation=isolation, readonly=readonly, deferrable=deferrable):
+        async with self.connection.transaction(isolation=isolation, readonly=readonly, deferrable=deferrable):
             yield self
 
     def get_repository[R: Row](self, row: type[R]) -> Repository[R]:

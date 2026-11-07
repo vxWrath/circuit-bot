@@ -16,10 +16,10 @@ class ServiceNotFound(CircuitException):
 class Service:
     """Base for a module's service: the one thing that module's commands talk to.
 
-    Holds the bot and nothing else; no method here takes a connection.
-    Repositories come from :meth:`get_repository`, built on the pool; a method
-    spanning several statements opens its own transaction and builds on that
-    instead, and a service never reaches into another module's tables or
+    Holds the bot and nothing else, no method here takes a connection.
+    Repositories come from :meth:`get_repository`, built on the pool.  A
+    method spanning several statements opens its own transaction and builds on
+    that instead, and a service never reaches into another module's tables or
     service.
     """
 

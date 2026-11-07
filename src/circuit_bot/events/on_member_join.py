@@ -47,8 +47,8 @@ class OnMemberJoin(commands.Cog):
         # new member's roles, so listen long enough for it to get around to it.
         verified = asyncio.create_task(self.bot.wait_for("member_update", check=check_for_verified_role, timeout=120))
 
-        # the off chance that this event fired late and bloxlink already
-        # updated the member's roles
+        # Covers the off chance this event fired late, after Bloxlink already
+        # updated the member's roles.
         after = (
             (member.joined_at - timedelta(seconds=3))
             if member.joined_at

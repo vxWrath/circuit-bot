@@ -13,7 +13,7 @@ logger = get_logger("main")
 
 
 def shutdown(task: asyncio.Task[None] | None, sig: signal.Signals) -> None:
-    """Cancel run(); the bot's context manager runs bot.close() on the way out."""
+    """Cancel run().  The bot's context manager runs bot.close() on the way out."""
 
     logger.warning("Received %s, shutting down...", sig.name)
 

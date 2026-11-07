@@ -88,8 +88,8 @@ class BotConfig(NamedTuple):
     """What :class:`~circuit_bot.core.bluerobot.CircuitBot` reads to log in, find
     its guild, announce itself, load extensions and call the APIs it depends on.
 
-    The credentials here come from the environment; the league's settings come
-    from ``config.toml`` through :attr:`league`."""
+    The credentials here come from the environment.  The league's settings
+    come from ``config.toml`` through :attr:`league`."""
 
     token: str
     guild_id: int
@@ -130,8 +130,8 @@ class RedisSettings(NamedTuple):
 def get_bot_config() -> BotConfig:
     """Read the Discord credentials, the webhook URLs and the API keys.
 
-    ``SYNC_SENTINEL`` overrides where the one-time command-sync marker is kept;
-    it defaults to a file in the system temp directory.
+    ``SYNC_SENTINEL`` overrides where the one-time command-sync marker is kept.
+    It defaults to a file in the system temp directory.
     """
 
     return BotConfig(
@@ -148,8 +148,9 @@ def get_bot_config() -> BotConfig:
 def get_postgres_settings() -> PostgresSettings:
     """Read the ``POSTGRES_*`` environment variables.
 
-    Host and port default to a local server; the credentials and database name do
-    not.  A missing variable raises ``OSError``, a non-numeric port ``ValueError``.
+    Host and port default to a local server.  The credentials and database
+    name do not.  A missing variable raises ``OSError``, a non-numeric port
+    ``ValueError``.
     """
 
     return PostgresSettings(
@@ -164,7 +165,7 @@ def get_postgres_settings() -> PostgresSettings:
 def get_redis_settings() -> RedisSettings:
     """Read the ``REDIS_*`` environment variables.
 
-    Host, port and database index default; the password does not.
+    Host, port and database index default.  The password does not.
     """
 
     return RedisSettings(

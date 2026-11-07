@@ -37,7 +37,7 @@ class APIClient:
     """Base for the clients that talk to a third-party HTTP API.
 
     A subclass declares :attr:`name` and :attr:`errors`, then builds its own
-    methods on :meth:`request` and :meth:`lookup`; the hooks default to doing
+    methods on :meth:`request` and :meth:`lookup`.  The hooks default to doing
     nothing, so a client overrides only the ones it has an answer for.
     """
 
@@ -148,7 +148,7 @@ class APIClient:
     async def request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any] | None:
         """Send one HTTP request and parse the JSON response.
 
-        A short 429 wait is retried in place up to :attr:`retry_policy`; a
+        A short 429 wait is retried in place up to :attr:`retry_policy`.  A
         longer one or a 5xx arms a fail-fast window that refuses later calls.
         Returns ``None`` for a 404 and raises the matching error from
         :attr:`errors` for anything else.
@@ -210,7 +210,7 @@ class APIClient:
     ) -> T | None:
         """Serve *path* from the cache, falling back to *fetch*.
 
-        A ``None`` from *fetch* is remembered as an absent marker; a cache
+        A ``None`` from *fetch* is remembered as an absent marker.  A cache
         failure is logged and skipped.  Concurrent callers asking for the same
         thing share one call to *fetch*.
         """

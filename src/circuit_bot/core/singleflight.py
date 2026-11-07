@@ -11,7 +11,7 @@ class SingleFlight:
     """Run one coroutine for every caller asking the same thing at once.
 
     Later callers wait on the call already running and get its result or its
-    exception; a failure is not remembered, and nothing is kept once the call
+    exception.  A failure is not remembered, and nothing is kept once the call
     finishes.  Callers wait *on* the call's own task, so cancelling one never
     cancels what the others are waiting on, and *func* sees the first caller's
     arguments.  Keys must be hashable and equal for two requests that mean the
@@ -19,7 +19,7 @@ class SingleFlight:
     """
 
     def __init__(self) -> None:
-        self._in_flight: dict[Any, asyncio.Task[Any]] = {}
+        self.in_flight: dict[Any, asyncio.Task[Any]] = {}
 
     async def run[T](self, key: Any, func: Callable[..., Coroutine[Any, Any, T]], *args: Any, **kwargs: Any) -> T:
         """Call ``func(*args, **kwargs)`` once per *key*, sharing what it returns.
@@ -29,11 +29,11 @@ class SingleFlight:
         mean the same thing.
         """
 
-        task = self._in_flight.get(key)
+        task = self.in_flight.get(key)
 
         if task is None:
             task = asyncio.create_task(func(*args, **kwargs))
-            self._in_flight[key] = task
+            self.in_flight[key] = task
             task.add_done_callback(lambda done: self.forget(key, done))
 
         # Wait *on* the call, not by awaiting it: awaiting a task cancels through
@@ -53,7 +53,7 @@ class SingleFlight:
         exception is what stops asyncio warning about one nobody waited for.
         """
 
-        self._in_flight.pop(key, None)
+        self.in_flight.pop(key, None)
 
         if not task.cancelled():
             task.exception()

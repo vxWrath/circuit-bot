@@ -33,14 +33,15 @@ class Update(commands.Cog):
         service = self.bot.get_service(PlayerService)
         cooldowns = interaction.cooldowns
 
-        # Resolve through Bloxlink
+        # Resolve the account through Bloxlink, which also spends its quota.
         roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
         await cooldowns.bloxlink.spend()
 
         if roblox_id is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **You aren't verified through Bloxlink.**")
 
-        # Validate the account exists
+        # The embed needs the profile anyway, and refusing a deleted account
+        # before the write beats linking one.
         rblx = await service.roblox_user(roblox_id=roblox_id)
         await cooldowns.roblox.spend()
 

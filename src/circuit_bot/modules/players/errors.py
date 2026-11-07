@@ -15,11 +15,10 @@ __all__ = ("PlayerUniqueViolationFormatter",)
 class PlayerUniqueViolationFormatter(ErrorFormatter):
     """The reply for a link write that lost a race over the unique constraint.
 
-    The commands' pre-checks catch the usual case; this owns the race itself,
-    where the database refuses a write that already went to another member.
     The reply comes from the constraint's name, so an unknown constraint
     stays unhandled and reported rather than guessed at.  The race is also
-    posted to the error webhook - the pre-check failed to stop two writers.
+    posted to the error webhook - two writers slipped past the service's
+    own checks.
     """
 
     report = True

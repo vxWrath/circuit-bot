@@ -20,7 +20,7 @@ class BloxlinkClient(APIClient):
     """Client for the Bloxlink API, available on the bot as ``bot.bloxlink``.
 
     Resolves and caches the accounts Bloxlink has linked, scoped to a Discord
-    guild.  ``None`` means nothing is linked; an API failure raises
+    guild.  ``None`` means nothing is linked.  An API failure raises
     :class:`BloxlinkError`.  Each request spends one of :attr:`DAILY_LIMIT` per
     UTC day, refused with :class:`BloxlinkRateLimitError` once the budget is
     gone.  Requires ``BLOXLINK_API_KEY``.
@@ -62,8 +62,8 @@ class BloxlinkClient(APIClient):
         Runs once per attempt, so a request that is rate limited and retried
         spends a second unit.  Raises :class:`BloxlinkRateLimitError` with
         ``retry_after`` set to the seconds left until the UTC-date counter
-        resets, arming the fail-fast window so later calls refuse until then;
-        a cache failure lets the request through uncounted.
+        resets, arming the fail-fast window so later calls refuse until then.
+        A cache failure lets the request through uncounted.
         """
 
         now = datetime.datetime.now(tz=datetime.UTC)

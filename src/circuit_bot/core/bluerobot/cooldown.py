@@ -107,15 +107,14 @@ class Cooldown(Model):
 
 
 class CooldownManager:
-    """A cooldown bucket stored in Redis under the manager's id and key.
+    """A cooldown bucket in Redis, under the manager's id and key.
 
-    The decorator fixes the key and may set default *limit* and *duration*; a
-    spend overrides either, re-shaping the bucket, so one manager can enforce
-    different windows from different paths.  Checked pre-invoke through
-    :meth:`predicate`, which runs before every command run;
-    :meth:`InteractionCooldownHandler.spend` reserves a token once the command
-    succeeds.  A *shared* manager's id hashes its name alone, so every command
-    decorated with the same name checks and spends the same bucket.
+    The decorator fixes the key and default *limit*/*duration*, a spend
+    overrides either, so one manager can enforce different windows from
+    different paths.  Checked pre-invoke by :meth:`predicate`, the spend
+    reserves a token once the command succeeds.  A shared manager's id
+    hashes its name alone, so every command with that name spends one
+    bucket.
     """
 
     def __init__(
@@ -134,16 +133,15 @@ class CooldownManager:
         self.duration = duration
         self.shared = shared  # set by shared_cooldown; buckets the id by name alone
 
-    async def _key(self, interaction: Interaction) -> str:
+    async def resolve_key(self, interaction: Interaction) -> str:
         return str(await discord.utils.maybe_coroutine(self.key, interaction))
 
     async def predicate(self, interaction: Interaction) -> Literal[True]:
         """The pre-invoke check - refuse when the bucket allows no attempts.
 
-        Called before every command run; side-effect free, the command spends
-        after it succeeds.
+        Side-effect free, the command spends after it succeeds.
         """
-        return await self.predicate_check(interaction, await self._key(interaction))
+        return await self.predicate_check(interaction, await self.resolve_key(interaction))
 
     async def predicate_check(self, interaction: Interaction, key: str) -> Literal[True]:
         """Pass when the bucket at *key* allows another attempt, raise otherwise."""
@@ -164,11 +162,10 @@ class CooldownManager:
     async def spend(self, interaction: Interaction, *, limit: int | None = None, duration: int | None = None) -> None:
         """Spend a token at the manager's key, under *limit* per *duration*.
 
-        Each falls back to the decorator's default when omitted; a bucket whose
-        stored limit or duration differ is reset to these.  A spend with neither
-        set and no decorator default raises.  The predicate already refuses
-        exhausted buckets pre-invoke; this is the reservation and the guard for
-        a call that slips past it.
+        Each falls back to the decorator's default when omitted, and a bucket
+        whose stored shape differs is reset to these.  The predicate already
+        refuses exhausted buckets pre-invoke, this is the reservation and the
+        guard for a call that slips past it.
         """
         limit = self.limit if limit is None else limit
         duration = self.duration if duration is None else duration
@@ -178,7 +175,7 @@ class CooldownManager:
                 f"Spending cooldown {self.name!r} needs a limit and duration: set decorator defaults or pass them to spend()"
             )
 
-        await self.spend_token(interaction, await self._key(interaction), limit=limit, duration=duration)
+        await self.spend_token(interaction, await self.resolve_key(interaction), limit=limit, duration=duration)
 
     async def spend_token(
         self, interaction: Interaction, key: str, *, limit: int | None = None, duration: int | None = None
@@ -210,7 +207,7 @@ class InteractionCooldownHandler:
     async def spend(self, *, limit: int | None = None, duration: int | timedelta | None = None) -> None:
         """Spend a token at the manager's key, under *limit* per *duration*.
 
-        Each falls back to the decorator's default when omitted; a
+        Each falls back to the decorator's default when omitted.  A
         ``timedelta`` *duration* is converted to seconds.
         """
         if isinstance(duration, timedelta):
@@ -222,7 +219,7 @@ class InteractionCooldownHandler:
 class InteractionCooldowns:
     """Named access to the cooldown managers on a command.
 
-    Every cooldown is decorated with a name; the command body reaches each
+    Every cooldown is decorated with a name.  The command body reaches each
     through this accessor, ``interaction.cooldowns["<name>"]``.
     """
 
@@ -253,7 +250,7 @@ def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
         else:
             manager.id = hashlib.md5(f"{target.__qualname__}:{manager.name}".encode()).hexdigest()
 
-        # The predicate runs before every command run; the command spends a
+        # The predicate runs before every command run, the command spends a
         # token once it succeeds.
         if isinstance(func, (Command, ContextMenu)):
             func.checks.append(manager.predicate)  # type: ignore
@@ -277,7 +274,7 @@ def cooldown_check(manager: CooldownManager) -> Callable[[T], T]:
     return decorator  # type: ignore
 
 
-def _make_manager(
+def make_manager(
     key: CooldownKey[Hashable] | None,
     *,
     name: str,
@@ -309,13 +306,13 @@ def cooldown(
 ) -> Callable[[T], T]:
     """A cooldown whose limit and duration default here, decided at spend time when left out.
 
-    *name* names the manager among the command's cooldowns; the command body
-    reaches it through ``interaction.cooldowns[name]``.  *key* is the bucket's
-    key, fixed at decoration time - the invoker by default.  The bucket is
-    checked pre-invoke; the spend reserves the token under its limit and
-    duration, overriding either default.
+    *name* names the manager among the command's cooldowns, and the command
+    body reaches it through ``interaction.cooldowns[name]``.  *key* is the
+    bucket's key, fixed at decoration time - the invoker by default.  The
+    bucket is checked pre-invoke, the spend reserves the token under its
+    limit and duration, overriding either default.
     """
-    return cooldown_check(_make_manager(key, name=name, limit=limit, duration=duration, shared=False))
+    return cooldown_check(make_manager(key, name=name, limit=limit, duration=duration, shared=False))
 
 
 def shared_cooldown(
@@ -328,9 +325,9 @@ def shared_cooldown(
 ) -> Callable[[T], T]:
     """A cooldown shared by every command decorated with the same *name*.
 
-    Takes the same arguments as :func:`cooldown`; each decoration is its own
-    manager, but all of them hash the name alone for the bucket id, so they
-    check and spend one bucket.  Keep the defaults consistent per name - a
-    spend falls back to the decorator of the command running it.
+    Takes the same arguments as :func:`cooldown`.  Each decoration is its
+    own manager, but all of them hash the name alone for the bucket id, so
+    they check and spend one bucket.  Keep the defaults consistent per name
+    - a spend falls back to the decorator of the command running it.
     """
-    return cooldown_check(_make_manager(key, name=name, limit=limit, duration=duration, shared=True))
+    return cooldown_check(make_manager(key, name=name, limit=limit, duration=duration, shared=True))

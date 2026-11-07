@@ -19,8 +19,8 @@ class Row(Model):
     whose fields mirror table columns by Postgres name.
 
     A table is described once by a field-less base whose ``Meta`` names it
-    (``table``, ``primary_key``, ``generated``); shapes inherit that and can only
-    add fields.  ``abstract`` is read from the declaring class, never inherited.
-    With no ``Meta`` above it a shape names its table from its class name, keys
-    on ``id`` and has no generated columns.
+    (``table``, ``primary_key``, ``generated``).  Shapes inherit that and can
+    only add fields.  ``abstract`` is read from the declaring class, never
+    inherited.  With no ``Meta`` above it a shape names its table from its
+    class name, keys on ``id`` and has no generated columns.
     """

@@ -74,7 +74,7 @@ async def postgres_init(connection: asyncpg.Connection) -> None:
 class DatabasePool(Database):
     """Async PostgreSQL pool, available on the bot as ``bot.database``.
 
-    Statements check a connection out of the pool for the call; :meth:`acquire`
+    Statements check a connection out of the pool for the call.  :meth:`acquire`
     and :meth:`transaction` pin one for a block.  Anything called before
     :meth:`connect` raises :class:`DatabaseNotConnected`.
     """
@@ -83,7 +83,7 @@ class DatabasePool(Database):
         self.bot = bot
 
         self._pool: asyncpg.Pool | None = None
-        self._repositories: dict[type[Row], Repository[Any]] = {}
+        self.repositories: dict[type[Row], Repository[Any]] = {}
 
     async def connect(self) -> None:
         """Create the pool, opening its minimum connections to Postgres.
@@ -141,7 +141,7 @@ class DatabasePool(Database):
     async def migrate(self) -> list[str]:
         """Apply every migration file that hasn't been applied, in filename order.
 
-        Each file runs in its own transaction and so must be transaction-safe; a
+        Each file runs in its own transaction and so must be transaction-safe.  A
         failure leaves the files before it applied.  A name applies once ever, so
         editing or renaming an applied file is a new migration.  Each statement is
         bounded by the pool's ``command_timeout``.  Returns the names applied.
@@ -186,9 +186,9 @@ class DatabasePool(Database):
         """Check a connection out of the pool for the duration of the block.
 
         It goes back when the block exits, including on an exception.  With no
-        transaction open each statement still takes its own snapshot; call
-        :meth:`transaction` with ``isolation="repeatable_read"`` when several reads
-        have to agree.
+        transaction open each statement still takes its own snapshot.  Call
+        :meth:`transaction` with ``isolation="repeatable_read"`` when several
+        reads have to agree.
         """
 
         async with self.pool.acquire(timeout=timeout) as connection:
@@ -222,10 +222,10 @@ class DatabasePool(Database):
         Two shapes over one table get a repository each.
         """
 
-        repository = self._repositories.get(row)
+        repository = self.repositories.get(row)
 
         if repository is None:
             repository = Repository(self, row_cls=row)
-            self._repositories[row] = repository
+            self.repositories[row] = repository
 
         return cast(Repository[R], repository)

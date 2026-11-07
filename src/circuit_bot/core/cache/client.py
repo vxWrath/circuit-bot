@@ -23,8 +23,8 @@ class CacheClient:
     """Async Redis cache, available on the bot as ``bot.cache``.
 
     Keys come from *path* segments, in the layout :meth:`key_from_path` defines.
-    Entries live ~300 seconds; pass ``ex`` for a fixed TTL, or ``ex=None`` to keep
-    one until it's deleted.  A miss reads back as ``None`` - call
+    Entries live ~300 seconds.  Pass ``ex`` for a fixed TTL, or ``ex=None`` to
+    keep one until it's deleted.  A miss reads back as ``None`` - call
     :meth:`get_or_absent` to tell one apart from a :meth:`set_absent` marker.
     """
 
@@ -41,7 +41,7 @@ class CacheClient:
         self.bot = bot
 
         self._redis: AsyncRedis | None = None
-        self._codec = CacheCodec()
+        self.codec = CacheCodec()
 
     async def connect(self) -> None:
         """Create the client, opening a connection to Redis from the ``REDIS_*`` settings.
@@ -116,8 +116,8 @@ class CacheClient:
     def resolve_ttl(cls, redis_kwargs: dict[str, Any]) -> int | None:
         """Pop ``ex`` from *redis_kwargs* and return the TTL, falling back to a jittered default.
 
-        An explicit ``ex`` is used as-is and ``ex=None`` means no expiry; only
-        the default is jittered.
+        An explicit ``ex`` is used as-is and ``ex=None`` means no expiry.
+        Only the default is jittered.
         """
 
         if "ex" in redis_kwargs:
@@ -157,12 +157,12 @@ class CacheClient:
 
         A miss returns ``None``.  ``bytes`` come back as-is, ``int`` is parsed,
         everything else is JSON-decoded.  A cached payload that no longer decodes
-        into *cls* raises :class:`CacheValidationError`; a stale entry never reads
-        as a miss.  An unsupported *cls* raises ``TypeError`` before Redis is
-        touched, and a Redis failure raises :class:`CacheError`.
+        into *cls* raises :class:`CacheValidationError` - a stale entry never
+        reads as a miss.  An unsupported *cls* raises ``TypeError`` before Redis
+        is touched, and a Redis failure raises :class:`CacheError`.
         """
 
-        self._codec.validate_cls(cls, scalars=(int, str, float, bool), containers=(dict, list))
+        self.codec.validate_cls(cls, scalars=(int, str, float, bool), containers=(dict, list))
         key = self.key_from_path(*path)
 
         try:
@@ -173,7 +173,7 @@ class CacheClient:
         if data is None:
             return None
 
-        return self._codec.decode(data, cls, key=key)
+        return self.codec.decode(data, cls, key=key)
 
     async def set(
         self,
@@ -188,7 +188,7 @@ class CacheClient:
         type raises ``TypeError``, and a Redis failure raises :class:`CacheError`.
         """
         key = self.key_from_path(*path)
-        data = self._codec.encode(value)
+        data = self.codec.encode(value)
 
         if data == self.ABSENT:
             raise TypeError(f"{self.ABSENT!r} is this cache's own marker for an absent entry - see set_absent()")
@@ -204,7 +204,7 @@ class CacheClient:
         """Remember at *path* that the source was asked and had nothing.
 
         Writes the one-byte :attr:`ABSENT` marker under the same key a value would
-        take.  It expires like any other entry; pass ``ex`` or ``ex=None`` to
+        take.  It expires like any other entry.  Pass ``ex`` or ``ex=None`` to
         choose.  A Redis failure raises :class:`CacheError`.
         """
 
@@ -251,7 +251,7 @@ class CacheClient:
         and a Redis failure raises :class:`CacheError`.
         """
 
-        self._codec.validate_cls(cls, scalars=(int, str, float, bool), containers=(dict, list))
+        self.codec.validate_cls(cls, scalars=(int, str, float, bool), containers=(dict, list))
         key = self.key_from_path(*path)
 
         try:
@@ -265,7 +265,7 @@ class CacheClient:
         if data == self.ABSENT:
             return None, True
 
-        return self._codec.decode(data, cls, key=key), False
+        return self.codec.decode(data, cls, key=key), False
 
     async def exists(self, *path: Any) -> bool:
         """Return whether a key exists at *path*, raising :class:`CacheError` if Redis fails."""
@@ -313,12 +313,12 @@ class CacheClient:
         """Read the value at *path*, apply *change*, and write it back atomically.
 
         *change* receives the current value or ``None`` and returns the value to
-        store with its TTL; a ``None`` value leaves the entry untouched.  Returns
-        the stored value, or ``None`` if *change* stored nothing.  A Redis failure
-        raises :class:`CacheError`.
+        store with its TTL.  A ``None`` value leaves the entry untouched.
+        Returns the stored value, or ``None`` if *change* stored nothing.  A
+        Redis failure raises :class:`CacheError`.
         """
 
-        self._codec.validate_cls(cls)
+        self.codec.validate_cls(cls)
         key = self.key_from_path(*path)
 
         while True:
@@ -329,7 +329,7 @@ class CacheClient:
                         data: bytes | None = await pipe.get(key)  # type: ignore
 
                         if data is not None:
-                            current = self._codec.decode(data, cls, key=key)
+                            current = self.codec.decode(data, cls, key=key)
                         else:
                             current = None
 
@@ -339,7 +339,7 @@ class CacheClient:
                             return None
 
                         pipe.multi()
-                        pipe.set(key, self._codec.encode(value), ex=ex)
+                        pipe.set(key, self.codec.encode(value), ex=ex)
 
                         await pipe.execute()
                         return value
@@ -372,14 +372,14 @@ class CacheClient:
         didn't hold, so a caller can refill those, and *value* is ``None`` when the
         hash held none of them, whatever *cls* is.  A field that no longer decodes,
         or a set of fields that can't be assembled into *cls*, raises
-        :class:`CacheValidationError`; only genuinely absent fields land in
+        :class:`CacheValidationError`.  Only genuinely absent fields land in
         *missing*.
 
         Empty *fields* raises ``TypeError``, and a Redis failure raises
         :class:`CacheError`.
         """
 
-        self._codec.validate_cls(cls, containers=(dict,))
+        self.codec.validate_cls(cls, containers=(dict,))
 
         ordered_fields = sorted(fields)
 
@@ -407,7 +407,7 @@ class CacheClient:
             else:
                 mapping[field] = value
 
-        return (self._codec.decode_hash(mapping, cls, key=key), missing)
+        return (self.codec.decode_hash(mapping, cls, key=key), missing)
 
     @overload
     async def hash_getall(self, *path: Any, cls: type[bytes]) -> dict[str, bytes] | None: ...
@@ -427,7 +427,7 @@ class CacheClient:
         :class:`CacheError`.
         """
 
-        self._codec.validate_cls(cls, containers=(dict,))
+        self.codec.validate_cls(cls, containers=(dict,))
 
         key = self.key_from_path(*path)
 
@@ -439,7 +439,7 @@ class CacheClient:
         if not hgetall:
             return None
 
-        return self._codec.decode_hash(hgetall, cls, key=key)
+        return self.codec.decode_hash(hgetall, cls, key=key)
 
     async def hash_set(
         self,
@@ -449,11 +449,12 @@ class CacheClient:
     ) -> int:
         """Write all fields of *instance* to the hash at *path*, returning how many were added.
 
-        Fields are JSON-encoded.  The hash expires after ~300 seconds by default;
-        pass ``ex`` for a fixed TTL, or ``ex=None`` to keep it.  Alongside ``ex``,
-        only the options ``EXPIRE`` takes (``nx``, ``xx``, ``gt``, ``lt``) are
-        allowed; any other expiry option, or one passed with ``ex=None``, raises
-        ``TypeError``.  A Redis failure raises :class:`CacheError`.
+        Fields are JSON-encoded.  The hash expires after ~300 seconds by
+        default.  Pass ``ex`` for a fixed TTL, or ``ex=None`` to keep it.
+        Alongside ``ex``, only the options ``EXPIRE`` takes (``nx``, ``xx``,
+        ``gt``, ``lt``) are allowed.  Any other expiry option, or one passed
+        with ``ex=None``, raises ``TypeError``.  A Redis failure raises
+        :class:`CacheError`.
         """
 
         key = self.key_from_path(*path)
@@ -468,7 +469,7 @@ class CacheClient:
         if unknown:
             raise TypeError(f"hash_set() takes ex, and {sorted(self.EXPIRE_OPTIONS)} alongside it - not {unknown}")
 
-        encoded = self._codec.encode_hash(instance)
+        encoded = self.codec.encode_hash(instance)
 
         if not encoded:
             return 0
@@ -549,8 +550,9 @@ class CacheClient:
     async def delete_pattern(self, pattern: str) -> int:
         """Delete every key matching *pattern*.  Returns the count deleted.
 
-        Shorthand for :meth:`keys` followed by :meth:`delete`; the same warning
-        about broad patterns applies.  A Redis failure raises :class:`CacheError`.
+        Shorthand for :meth:`keys` followed by :meth:`delete`.  The same
+        warning about broad patterns applies.  A Redis failure raises
+        :class:`CacheError`.
         """
 
         keys = await self.keys(pattern)

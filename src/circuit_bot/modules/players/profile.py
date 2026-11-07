@@ -34,15 +34,15 @@ class PlayerProfile(Profile["PlayerService"]):
         super().__init__(service=service)
 
         self.snowflake = snowflake
-        self._roblox: RobloxProfile | None = None
+        self.roblox_profile: RobloxProfile | None = None
 
     @property
     def roblox(self) -> RobloxProfile:
         """The player's Roblox view: the linked account, its headshot, and the helpers around them."""
-        if self._roblox is None:
-            self._roblox = RobloxProfile(self)
+        if self.roblox_profile is None:
+            self.roblox_profile = RobloxProfile(self)
 
-        return self._roblox
+        return self.roblox_profile
 
     async def player(self) -> PlayerRow | None:
         """The player's full row, or ``None`` if there's no such player."""
@@ -121,7 +121,7 @@ class PlayerProfile(Profile["PlayerService"]):
         The raise covers both no such player and the row going between the read
         and the write.  The write is keyed by the row :meth:`player` kept, or
         fetched here if this is the first part anyone wanted, and the row it
-        returns is kept.  The Roblox parts are dropped; the member survives,
+        returns is kept.  The Roblox parts are dropped.  The member survives,
         since the write can't have changed it.
         """
 

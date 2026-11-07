@@ -33,7 +33,7 @@ def add_field(
 ) -> None:
     """Append the Roblox card to the link log *embed*.
 
-    *rblx* is the account's profile when one could be fetched; without it the
+    *rblx* is the account's profile when one could be fetched.  Without it the
     card shows just the id.  *headshot* falls back to a plain headshot URL so
     the embed always has a thumbnail.
     """

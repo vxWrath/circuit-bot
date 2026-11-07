@@ -159,7 +159,6 @@ class CircuitBot(commands.Bot):
         return ".".join(relative_path.parts)
 
     async def load_commands_and_events(self) -> list[str]:
-        """Load all commands and events from the command and event paths."""
         self.extension_names = []
 
         for file_path in self.config.command_path.glob("*.py"):
@@ -198,8 +197,6 @@ class CircuitBot(commands.Bot):
         return self.extension_names
 
     async def unload_commands_and_events(self) -> None:
-        """Unload all commands and events from the command and event paths."""
-
         for cog_name in self.extension_names:
             try:
                 await self.unload_extension(cog_name)
@@ -308,7 +305,6 @@ class CircuitBot(commands.Bot):
         )
 
     def retrieve_command(self, name: str) -> CachedAppCommand:
-        """Retrieve a command from the cache."""
         try:
             return self.app_commands_cache[name]
         except KeyError:
@@ -321,8 +317,6 @@ class CircuitBot(commands.Bot):
             self.services[cls] = cls(bot=self)
 
     def get_service[T: Service](self, cls: type[T]) -> T:
-        """Get a service by its class."""
-
         try:
             # fill_services keys each service by its own class, so the value is the caller's T.
             return cast(T, self.services[cls])
@@ -331,8 +325,6 @@ class CircuitBot(commands.Bot):
 
 
 async def send_connection_webhook(bot: CircuitBot, embed: discord.Embed) -> None:
-    """Send a webhook to the bot's connection channel."""
-
     try:
         await bot.stored_webhooks["connection"].send(embed=embed)
     except Exception as e:

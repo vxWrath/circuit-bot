@@ -39,7 +39,7 @@ def configure_root_logger(*, force: bool = False) -> None:
     """Configure structlog and the root logger for the bot process.
 
     Coloured in dev (:func:`~circuit_bot.core.env.is_dev`), JSON everywhere
-    else.  Called on demand by :func:`get_logger`, which does it once; *force*
+    else.  Called on demand by :func:`get_logger`, which does it once.  *force*
     rebuilds the pipeline, swapping the installed handler so only one is ever
     attached.
     """

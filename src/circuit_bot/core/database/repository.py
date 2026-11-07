@@ -53,19 +53,19 @@ class Repository[R: Row]:
         self.table_name: str = getattr(meta, "table", None) or to_table_name(row_cls)
         self.primary_key_name: str = getattr(meta, "primary_key", "id")
 
-        self._fields = fields
-        self._generated: tuple[str, ...] = getattr(meta, "generated", ())
+        self.fields = fields
+        self.generated: tuple[str, ...] = getattr(meta, "generated", ())
 
     # -- statement building -------------------------------------------------
 
     def check_columns(self, columns: Iterable[str]) -> None:
         """Reject columns the shape doesn't declare, before they reach the SQL."""
 
-        unknown = [column for column in columns if column not in self._fields]
+        unknown = [column for column in columns if column not in self.fields]
 
         if unknown:
             raise RepositoryError(
-                f"{unknown[0]!r} is not a field of {self.row_cls.__name__} ({', '.join(self._fields)})"
+                f"{unknown[0]!r} is not a field of {self.row_cls.__name__} ({', '.join(self.fields)})"
             )
 
     def where_clause(self, filters: dict[str, Any]) -> str:
@@ -91,7 +91,7 @@ class Repository[R: Row]:
         if missing:
             raise RepositoryError(
                 f"{type(obj).__name__} has no {missing[0]!r} - "
-                f"{self.row_cls.__name__} writes ({', '.join(self._fields)})"
+                f"{self.row_cls.__name__} writes ({', '.join(self.fields)})"
             )
 
         return [values[column] for column in columns]
@@ -160,7 +160,7 @@ class Repository[R: Row]:
         this raises :class:`RepositoryError`.
         """
 
-        columns = [field for field in self._fields if field not in self._generated]
+        columns = [field for field in self.fields if field not in self.generated]
         values = self.column_values(obj, columns)
 
         placeholders = ", ".join(f"${i}" for i in range(1, len(columns) + 1))
@@ -180,10 +180,9 @@ class Repository[R: Row]:
         """Partial update - only touches the fields you pass, and only reads back those.
 
         A shape that declares an ``updated_at`` field has it written on every
-        update.  The row is *obj*'s, looked up by the primary key its table's
-        ``Meta`` declares, and the model returned is *obj* with the written columns
-        replaced by whatever the database made of them.  ``None`` means no row
-        matched.
+        update.  The row is *obj*'s, looked up by its table's primary key, and
+        the row returned is *obj* with the written columns replaced by what
+        the database sent back.  ``None`` means no row matched.
         """
 
         if not changes:
@@ -192,7 +191,7 @@ class Repository[R: Row]:
         self.check_columns(changes)
 
         # Written after the caller's columns are checked, so this needs no checking of its own.
-        if "updated_at" in self._fields:
+        if "updated_at" in self.fields:
             changes["updated_at"] = datetime.datetime.now(datetime.UTC)
 
         try:
@@ -230,7 +229,7 @@ class Repository[R: Row]:
         if not objs:
             return
 
-        columns = [field for field in self._fields if field not in self._generated]
+        columns = [field for field in self.fields if field not in self.generated]
         records = [self.column_values(obj, columns) for obj in objs]
 
         async with self.database.acquire() as conn:

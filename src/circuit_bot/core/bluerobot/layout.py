@@ -20,11 +20,11 @@ type MediaSource = str | discord.File | UnfurledMediaItem
 class ContentMixin:
     """Content component helpers (text, separator, gallery, file)."""
 
-    def _add(self, item: ui.Item) -> None:
+    def add(self, item: ui.Item) -> None:
         raise NotImplementedError
 
     def text(self, content: str) -> Self:
-        self._add(ui.TextDisplay(content))
+        self.add(ui.TextDisplay(content))
         return self
 
     def separator(
@@ -33,7 +33,7 @@ class ContentMixin:
         visible: bool = True,
         spacing: SeparatorSpacing = SeparatorSpacing.small,
     ) -> Self:
-        self._add(ui.Separator(visible=visible, spacing=spacing))
+        self.add(ui.Separator(visible=visible, spacing=spacing))
         return self
 
     def gallery(
@@ -44,11 +44,11 @@ class ContentMixin:
         gallery_items: list[MediaGalleryItem] = [
             item if isinstance(item, MediaGalleryItem) else MediaGalleryItem(item, spoiler=spoiler) for item in items
         ]
-        self._add(ui.MediaGallery(*gallery_items))
+        self.add(ui.MediaGallery(*gallery_items))
         return self
 
     def file(self, url: MediaSource, *, spoiler: bool = False) -> Self:
-        self._add(ui.File(url, spoiler=spoiler))
+        self.add(ui.File(url, spoiler=spoiler))
         return self
 
 
@@ -87,16 +87,16 @@ class ActionRowBuilder[ParentT: LayoutMixin]:
     """
 
     def __init__(self, parent: ParentT) -> None:
-        self._parent = parent
-        self._items: list[ui.Item] = []
+        self.parent = parent
+        self.items: list[ui.Item] = []
 
     def add(self, item: ui.Item) -> Self:
-        self._items.append(item)
+        self.items.append(item)
         return self
 
     def done(self) -> ParentT:
-        self._parent._add(ui.ActionRow(*self._items))
-        return self._parent
+        self.parent.add(ui.ActionRow(*self.items))
+        return self.parent
 
 
 class SectionBuilder[ParentT: LayoutMixin]:
@@ -116,24 +116,24 @@ class SectionBuilder[ParentT: LayoutMixin]:
     """
 
     def __init__(self, parent: ParentT) -> None:
-        self._parent = parent
-        self._children: list[ui.TextDisplay] = []
-        self._accessory: ui.Item | None = None
+        self.parent = parent
+        self.children: list[ui.TextDisplay] = []
+        self.accessory_item: ui.Item | None = None
 
     def text(self, content: str) -> Self:
-        self._children.append(ui.TextDisplay(content))
+        self.children.append(ui.TextDisplay(content))
         return self
 
     def accessory(self, item: ui.Item) -> Self:
         """Set the section accessory - must be a Button or Thumbnail."""
-        self._accessory = item
+        self.accessory_item = item
         return self
 
     def done(self) -> ParentT:
-        if self._accessory is None:
+        if self.accessory_item is None:
             raise ValueError("Section requires an accessory (Button or Thumbnail)")
-        self._parent._add(ui.Section(*self._children, accessory=self._accessory))
-        return self._parent
+        self.parent.add(ui.Section(*self.children, accessory=self.accessory_item))
+        return self.parent
 
 
 class ContainerBuilder[ParentT: LayoutMixin](LayoutMixin):
@@ -162,23 +162,23 @@ class ContainerBuilder[ParentT: LayoutMixin](LayoutMixin):
         accent_color: discord.Color | int | None = None,
         spoiler: bool = False,
     ) -> None:
-        self._parent = parent
-        self._children: list[ui.Item] = []
-        self._accent_color = accent_color
-        self._spoiler = spoiler
+        self.parent = parent
+        self.children: list[ui.Item] = []
+        self.accent_color = accent_color
+        self.spoiler = spoiler
 
-    def _add(self, item: ui.Item) -> None:
-        self._children.append(item)
+    def add(self, item: ui.Item) -> None:
+        self.children.append(item)
 
     def done(self) -> ParentT:
-        self._parent._add(
+        self.parent.add(
             ui.Container(
-                *self._children,
-                accent_color=self._accent_color,
-                spoiler=self._spoiler,
+                *self.children,
+                accent_color=self.accent_color,
+                spoiler=self.spoiler,
             )
         )
-        return self._parent
+        return self.parent
 
 
 # ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ class ContainerBuilder[ParentT: LayoutMixin](LayoutMixin):
 class LayoutBuilder(LayoutMixin, BaseLayoutView):
     """Fluent builder for Components V2 (IS_COMPONENTS_V2) messages.
 
-    Flat components are added inline; layout components that support nesting
+    Flat components are added inline.  Layout components that support nesting
     (:meth:`action_row`, :meth:`section`, :meth:`container`) return a child
     builder - call :meth:`done` on it to close the nesting and return this
     view.
@@ -210,5 +210,5 @@ class LayoutBuilder(LayoutMixin, BaseLayoutView):
         await interaction.response.send_message(**layout.to_send_kwargs())
     """
 
-    def _add(self, item: ui.Item) -> None:
+    def add(self, item: ui.Item) -> None:
         self.add_item(item)

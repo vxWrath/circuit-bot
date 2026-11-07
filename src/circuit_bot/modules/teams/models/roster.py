@@ -8,7 +8,7 @@ class RosterRow(Row):
 
     Read-only, with no single primary key - read it with
     ``find_by(team_id=...)``, never by primary key.  A plain player is
-    ``role IS NULL``; a coach is ``role = 'coach'``; the owner is
+    ``role IS NULL``, a coach is ``role = 'coach'``, and the owner is
     ``role = 'owner'``.
     """
 

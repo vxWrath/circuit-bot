@@ -84,8 +84,6 @@ class InteractionOptions(Model):
     is_modal_response: bool = field(default=False)
 
     def to_custom_id(self) -> str:
-        """Convert the options to a custom ID."""
-
         value = self.defer.to_bits()
         value |= self.is_modal_response << 3
 
@@ -93,7 +91,6 @@ class InteractionOptions(Model):
 
     @classmethod
     def from_custom_id(cls, custom_id: str) -> Self:
-        """Parse the custom ID into the options."""
         try:
             value = int(custom_id, 16)
         except ValueError, TypeError:
@@ -114,17 +111,15 @@ class Interaction(discord.Interaction["CircuitBot"]):
     """The interaction the tree hands to a callback, with the bot's own methods.
 
     :meth:`~circuit_bot.core.bluerobot.tree.CircuitTree.interaction_check`
-    relabels discord.py's object as this class - legal only while the two have
-    the same layout, hence ``__slots__``; without it the relabelling raises
-    ``TypeError``.  Nothing can be attached to one, so state an interaction
-    carries goes in :attr:`discord.Interaction.extras`.
+    relabels discord.py's object as this class.  Legal only while the two
+    have the same layout, hence ``__slots__`` - without it the relabelling
+    raises ``TypeError``.  Nothing can be attached to one, so state an
+    interaction carries goes in :attr:`discord.Interaction.extras`.
     """
 
     __slots__ = ()
 
     def get_options(self) -> InteractionOptions:
-        """Get the interaction's options."""
-
         if self.command is not None:
             options = self.command.extras.get("options")
         else:
@@ -218,7 +213,7 @@ class Interaction(discord.Interaction["CircuitBot"]):
     def cooldowns(self) -> "InteractionCooldowns":
         """Named access to every cooldown on this command.
 
-        Cooldowns are decorated with a name; the command body reaches each
+        Cooldowns are decorated with a name.  The command body reaches each
         through ``interaction.cooldowns["<name>"]``.
         """
         if not self.command:
