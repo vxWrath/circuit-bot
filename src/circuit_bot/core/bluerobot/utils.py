@@ -8,6 +8,7 @@ from .interaction import Interaction
 __all__ = (
     "DEV_IDS",
     "MINIMUM_PERMISSIONS",
+    "approver_only",
     "developer_only",
     "guild_owner_only",
     "is_developer",
@@ -47,6 +48,24 @@ def guild_owner_only():
 
         if interaction.user.id != interaction.guild.owner_id:
             raise CheckFailure(CheckType.GUILD_OWNER)
+
+        return True
+
+    return check(pred)
+
+
+def approver_only():
+    def pred(interaction: Interaction) -> Literal[True]:
+        # Developers are individuals, not holders of the approver role, so the
+        # role check would wrongly refuse them.
+        if is_developer(interaction.user):
+            return True
+
+        if not isinstance(interaction.user, discord.Member):
+            raise CheckFailure(CheckType.APPROVER)
+
+        if interaction.user.get_role(interaction.client.config.league.approver_role_id) is None:
+            raise CheckFailure(CheckType.APPROVER)
 
         return True
 
