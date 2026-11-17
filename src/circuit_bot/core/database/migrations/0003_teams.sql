@@ -6,6 +6,7 @@ CREATE TABLE teams (
     role_snowflake   bigint NOT NULL,
     emoji_snowflake  bigint,
     logo_url         text,
+    color            integer CHECK (color BETWEEN 0 AND 16777215),
     status           text NOT NULL DEFAULT 'active'
                      CHECK (status IN ('active', 'inactive')),
     approved_at      timestamptz NOT NULL DEFAULT now(),

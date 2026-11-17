@@ -62,6 +62,7 @@ CREATE TABLE team_applications (
     name                      text NOT NULL,
     owner                     bigint NOT NULL REFERENCES players(snowflake),
     logo_url                  text,
+    color                     integer CHECK (color BETWEEN 0 AND 16777215),
     request_message_snowflake bigint,
     previous_team_id          bigint REFERENCES teams(id),
     status                    text NOT NULL DEFAULT 'pending'
@@ -91,6 +92,7 @@ Decisions, and why:
 - **`previous_team_id` is what the creator chose**, validated at create (see Lineage) and copied to the team at approval. The chain itself lives on `teams` - the link is a fact of the team, not of the request.
 - **`request_message_snowflake` is the approver queue handle.** Every pending request is an embed in the pending-teams channel; the message snowflake is stored when it is posted, so `/approve` and `/deny` can edit the embed after a restart. A pending row with no message (the post failed or never ran) still appears in `/pending teams`; approval skips the embed edit.
 - **`logo_url` is the pending-phase upload** - an image uploaded by the owner during the pending phase (optional). The bot re-uploads the image to the pending-teams channel and posts it on the request message. Treat it as a display cache - Discord attachment URLs are signed and expire - and the team gets its own refreshed copy at approval. Plain `NULL` when the team has none.
+- **`color` is the role color the owner asked for**, validated at create and copied to the team at approval. Plain `NULL` means Discord's default role color.
 - **`decided_at` is when an approver decided**, whichever way. It is separate from `updated_at`, which tracks any write.
 - **A denied application leaves nothing behind.** No team, no ownership row, no log rows - the name and owner slot are freed by the index, and the row is pure history.
 - **`status = 'released'` is the team's deactivation mirrored here.** The row stays as provenance, but it drops out of both claim indexes, so the name and the owner slot free when the team leaves.
@@ -105,6 +107,7 @@ CREATE TABLE teams (
     role_snowflake   bigint NOT NULL,
     emoji_snowflake  bigint,
     logo_url         text,
+    color            integer CHECK (color BETWEEN 0 AND 16777215),
     status           text NOT NULL DEFAULT 'active'
                      CHECK (status IN ('active', 'inactive')),
     approved_at      timestamptz NOT NULL DEFAULT now(),
@@ -122,8 +125,9 @@ Decisions, and why:
 - **`name` is a copy of the application's**, taken at approval. The claims live on `team_applications`; this copy is what every team query displays without joining. A rename feature later would have to move claims around - out of scope.
 - **`application_id` is the provenance link, and it is `UNIQUE`**: one team per application, so the application's one-per-owner index guarantees one live team per owner transitively. The request embed can always find its team, and the team its request.
 - **`previous_team_id` is the lineage chain, and it is `UNIQUE`** - a team has at most one successor, forever. The constraint lives here, not on the application: two pending applications may link the same inactive predecessor, and the race is settled at approval, where the second `teams` insert hits the constraint.
-- **`role_snowflake` and `emoji_snowflake` are both created at approval.** The bot creates the team's Discord role when the team is approved and stores the snowflake on the row - every team row has one. If a logo was uploaded, the bot also creates a guild emoji from the image and stores `emoji_snowflake`. Discord owns both: if either is deleted on Discord, the database is not out of sync - nothing repairs or re-syncs. Code that uses them fetches first and falls back. The bot deletes both as cleanup on deactivate.
+- **`role_snowflake` and `emoji_snowflake` are both ensured at approval.** The bot ensures the team's Discord role exists - reusing one a crashed approval already created - and stores the snowflake on the row - every team row has one. If a logo was uploaded, the bot also ensures a guild emoji from the image and stores `emoji_snowflake`. Discord owns both: if either is deleted on Discord, the database is not out of sync - nothing repairs or re-syncs. Code that uses them fetches first and falls back. The bot deletes both as cleanup on deactivate.
 - **`logo_url` is the team logo** - the application's upload, refetched from the request message at approval so the signed URL is fresh. Treat it as a display cache; the attachment is the source.
+- **`color` is the role's color**, copied from the application at approval so history keeps it after the role is gone.
 - **A team that leaves is never removed or deleted.** `status = 'inactive'` and the row stays. Teams cannot rejoin: reactivation is impossible by design, and the team that carries on is always a new row (see Lineage).
 - **Identity is database-generated** (`GENERATED ALWAYS AS IDENTITY`), not a Discord snowflake. A team has no natural snowflake at creation - pod channels and game threads arrive later and get their own columns. `id` joins `created_at`/`updated_at` in `Meta.generated`; `Repository.insert` excludes them, and `RETURNING *` fills the defaulted `id` on `CreateTeam`.
 - **No rating columns.** The window-close batch will own a `team_ratings` table (current values plus window snapshots) when the model ports - ratings are written by the batch, not by team commands, and the history matters for overturns and backtesting.
@@ -339,9 +343,9 @@ The `offers` table is in place; its model and service land with the offer, relea
 
 ## The Command Flow
 
-1. **`/create team <name> [previous_team]`** - any verified member. A normal command, not a modal, so `previous_team` gets autocomplete: the inactive teams the invoker owned or coached. Pre-checks: name format/length, no live team already owned, name not claimed. The command ensures the invoker's `players` row, then the service inserts the pending application - and nothing else. The bot then opens a modal for the optional logo - a file upload (modals support file inputs now), dismiss to skip. Once uploaded or skipped, the request embed (logo included) is posted to the pending-teams channel and its message snowflake is stored on the row - the queue the approvers work from.
+1. **`/create team <name> [color] [previous_team]`** - any verified member. A normal command, not a modal, so `previous_team` gets autocomplete: the inactive teams the invoker owned or coached. `color` is the optional hex color for the team's role. Pre-checks: name format/length, color range, no live team already owned, name not claimed. The command ensures the invoker's `players` row, then the service inserts the pending application - and nothing else. The bot then opens a modal for the optional logo - a file upload (modals support file inputs now), dismiss to skip. Once uploaded or skipped, the request embed (logo included) is posted to the pending-teams channel and its message snowflake is stored on the row - the queue the approvers work from.
 2. **`/pending teams`** - approver. Lists every pending request.
-3. **`/approve team <name>`** - approver. Fetches the request message, creates the team's Discord role and, if a logo was uploaded, the guild emoji from the message's attachment; then flips the application to `approved` and creates the team row and the owner's ownership row in one transaction; DMs the owner; updates the request embed in the pending-teams channel to show the decision, and posts an announcement to the new-teams channel - the public list of approved teams.
+3. **`/approve team <name>`** - approver. Fetches the request message, ensures the team's Discord role (with the requested color) and, if a logo was uploaded, the guild emoji from the message's attachment; then flips the application to `approved` and creates the team row and the owner's ownership row in one transaction; DMs the owner; updates the request embed in the pending-teams channel to show the decision, and posts an announcement to the new-teams channel - the public list of approved teams.
 4. **`/deny team <name> [reason]`** - approver. Flips to `denied`, DMs the owner with the reason, and updates the request embed to show the decision. The name and the owner slot are freed; the owner may re-submit. Nothing else was ever written for this request.
 5. **`/promote <player>`** - the owner only. The bot infers the team from the invoker's current ownership row - no team argument, an owner has exactly one. The command ensures the target's `players` row, then appends a `promote` log row (`to_team_id`, `role='coach'`, `actor` = the owner); the view adds the player if they were not already on the roster.
 6. **`/demote <player>`** - the owner only, same inference. Appends `demote` (`to_team_id`, `role=NULL`, `actor` = the owner); they stay on the roster, and the log still shows they once coached.
@@ -355,6 +359,7 @@ Edge cases:
 - **Two applications link the same predecessor** - both pass the create-time checks; the first approval takes the chain link, and the second hits `teams_previous_team_id_key` at approval.
 - **`/promote` or `/demote` with no active owned team** - the ownership lookup finds nothing and the command fails with a plain message; no partial writes.
 - **A deleted Discord role or emoji** - the snowflakes stay in the database, and nothing syncs. Consumers fetch first and fall back; the values are historical, not live handles.
+- **Approval crashes after the role was created** - the application is still pending (the team row was never written), so a retry finds and reuses the role and emoji instead of duplicating them.
 - **Approval before the owner is verified** - the create pre-check requires the verified role, so this can't happen; approval adds no new checks.
 - **Logo never uploaded** - the flow proceeds without one after the modal is dismissed; `logo_url` stays `NULL` and no emoji is created. The logo is optional by design.
 - **Logo URL expired or request message gone** - approval refetches the attachment from the request message; if the message or attachment is unavailable, it skips the emoji and proceeds. `logo_url` is a cache, not the source.
