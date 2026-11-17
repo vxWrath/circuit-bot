@@ -23,13 +23,18 @@ class ApplicationRow(ApplicationTable):
     """An application, whole.  What reads return."""
 
     id: int
+
     name: str
     owner: int
-    logo_url: str | None
-    request_message_snowflake: int | None
     previous_team_id: int | None
+
+    logo_url: str | None
+    color: int | None
+    request_message_snowflake: int | None
+
     status: str
     decided_at: datetime.datetime | None
+
     created_at: datetime.datetime
     updated_at: datetime.datetime
 
@@ -43,5 +48,8 @@ class CreateApplication(ApplicationTable, kw_only=True):
 
     name: str
     owner: int
+
     previous_team_id: int | None = None
+    color: int | None = None
+
     id: int | None = None

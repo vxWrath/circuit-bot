@@ -25,15 +25,20 @@ class TeamRow(TeamTable):
     """A team, whole.  What reads return."""
 
     id: int
+
     name: str
     application_id: int
+    previous_team_id: int | None
+
     role_snowflake: int
     emoji_snowflake: int | None
     logo_url: str | None
+    color: int | None
+
     status: str
     approved_at: datetime.datetime
     inactivated_at: datetime.datetime | None
-    previous_team_id: int | None
+
     created_at: datetime.datetime
     updated_at: datetime.datetime
 
@@ -49,8 +54,11 @@ class CreateTeam(TeamTable, kw_only=True):
     name: str
     application_id: int
     role_snowflake: int
+
     emoji_snowflake: int | None = None
     logo_url: str | None = None
+    color: int | None = None
     previous_team_id: int | None = None
+
     approved_at: datetime.datetime | None = None
     id: int | None = None

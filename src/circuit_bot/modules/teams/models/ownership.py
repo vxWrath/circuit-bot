@@ -24,9 +24,12 @@ class OwnershipRow(OwnershipTable):
     """An ownership, whole.  What reads return."""
 
     id: int
+
     team_id: int
     player: int
+
     appointed_at: datetime.datetime
+
     ended_at: datetime.datetime | None
     end_reason: str | None
 
@@ -41,5 +44,6 @@ class CreateOwnership(OwnershipTable, kw_only=True):
 
     team_id: int
     player: int
+
     appointed_at: datetime.datetime | None = None
     id: int | None = None

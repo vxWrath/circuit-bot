@@ -1,12 +1,13 @@
 from collections.abc import Callable, Coroutine
 from typing import Any
 
+from .service import Service
 from .singleflight import SingleFlight
 
 __all__ = ("Profile",)
 
 
-class Profile[S]:
+class Profile[S: Service]:
     """A view over several sources that fills itself in on demand.
 
     Each part is fetched once on first ask and kept, ``None`` included.  A

@@ -26,13 +26,16 @@ class TransactionLogRow(TransactionLogTable):
     """A transaction, whole.  What reads return."""
 
     id: int
+
     player: int
+    action: str
     from_team_id: int | None
     to_team_id: int | None
-    action: str
+
     role: str | None
     actor: int | None
     details: dict[str, Any] | None
+
     at: datetime.datetime
 
 
@@ -44,10 +47,12 @@ class CreateTransactionLog(TransactionLogTable, kw_only=True):
     """
 
     player: int
+    action: str
     from_team_id: int | None = None
     to_team_id: int | None = None
-    action: str
+
     role: str | None = None
     actor: int | None = None
     details: dict[str, Any] | None = None
+
     id: int | None = None
