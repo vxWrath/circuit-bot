@@ -12,6 +12,7 @@ __all__ = (
     "developer_only",
     "guild_owner_only",
     "is_developer",
+    "verified_only",
 )
 
 DEV_IDS = [
@@ -66,6 +67,22 @@ def approver_only():
 
         if interaction.user.get_role(interaction.client.config.league.approver_role_id) is None:
             raise CheckFailure(CheckType.APPROVER)
+
+        return True
+
+    return check(pred)
+
+
+def verified_only():
+    def pred(interaction: Interaction) -> Literal[True]:
+        if is_developer(interaction.user):
+            return True
+
+        if not isinstance(interaction.user, discord.Member):
+            raise CheckFailure(CheckType.VERIFIED)
+
+        if interaction.user.get_role(interaction.client.config.league.verified_role_id) is None:
+            raise CheckFailure(CheckType.VERIFIED)
 
         return True
 

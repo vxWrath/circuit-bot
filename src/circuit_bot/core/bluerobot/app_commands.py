@@ -47,6 +47,7 @@ class CheckType(Enum):
     DEVELOPER = "developer_only"
     GUILD_OWNER = "guild_owner_only"
     APPROVER = "approver_only"
+    VERIFIED = "verified_only"
 
 
 class CheckFailure(app_commands.CheckFailure):
@@ -60,6 +61,7 @@ CHECK_FAILURE_MESSAGES = {
     CheckType.DEVELOPER: "This command can only be used by developers.",
     CheckType.GUILD_OWNER: "This command can only be used by the guild owner.",
     CheckType.APPROVER: "This command can only be used by approvers.",
+    CheckType.VERIFIED: "This command can only be used by verified members.",
 }
 
 
