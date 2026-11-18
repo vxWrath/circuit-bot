@@ -16,8 +16,8 @@ class TeamProfile(Profile["TeamService"]):
     """One team, filled in on demand.
 
     Each part is fetched once and kept.  ``role`` and ``emoji`` self-heal: a
-    Discord object deleted by hand is unlinked from the row instead of
-    repaired.
+    Discord object deleted by hand or owned by Discord is unlinked from the
+    row instead of repaired.
     """
 
     def __init__(self, service: "TeamService", team_id: int) -> None:
