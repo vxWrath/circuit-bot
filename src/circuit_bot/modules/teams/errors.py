@@ -32,15 +32,13 @@ class TeamErrorFormatter(ErrorFormatter):
 
 
 class TeamUniqueViolationFormatter(ErrorFormatter):
-    """The reply for a team write that lost a race over a unique constraint.
+    """The reply for a team write that hit a unique constraint.
 
     The reply comes from the constraint's name, so an unknown constraint
-    stays unhandled and reported rather than guessed at.  The race is also
-    posted to the error webhook - two writers slipped past the service's
-    own checks.
+    stays unhandled and reported rather than guessed at.  The command
+    pre-checks the common case, so a violation here means two submissions
+    raced - the reply is neutral, and nothing is reported.
     """
-
-    report = True
 
     def format(self, _: "Interaction", error: Exception) -> str | None:
         if not isinstance(error, asyncpg.UniqueViolationError):
@@ -51,7 +49,7 @@ class TeamUniqueViolationFormatter(ErrorFormatter):
         constraint = as_dict["constraint_name"]
 
         if constraint == "team_applications_one_per_owner":
-            return format_fail("You already own a team.")
+            return format_fail("You already have a pending team application.")
 
         if constraint == "team_applications_lower_name_key":
             return format_fail("That team name is already taken.")

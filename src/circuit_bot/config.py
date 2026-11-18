@@ -58,7 +58,6 @@ def get_league_settings() -> LeagueSettings:
         if not isinstance(raw, dict):
             raise OSError(f"Config file '{path}' is missing the [{name}] section.")
 
-        sections[name] = raw
         return raw
 
     sections: dict[str, dict[str, Any]] = {

@@ -30,7 +30,7 @@ class TeamRow(TeamTable):
     application_id: int
     previous_team_id: int | None
 
-    role_snowflake: int
+    role_snowflake: int | None
     emoji_snowflake: int | None
     logo_url: str | None
     color: int | None

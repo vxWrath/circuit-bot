@@ -29,7 +29,7 @@ class ApplicationRow(ApplicationTable):
     previous_team_id: int | None
 
     logo_url: str | None
-    color: int | None
+    color: int
     request_message_snowflake: int | None
 
     status: str
@@ -48,8 +48,8 @@ class CreateApplication(ApplicationTable, kw_only=True):
 
     name: str
     owner: int
+    color: int
 
     previous_team_id: int | None = None
-    color: int | None = None
 
     id: int | None = None

@@ -27,6 +27,20 @@ Deferred - each gets its own pass later:
 | Pod channels and game threads | Need ratings and windows to seed from |
 | Hiatus, tournament eligibility fields | Status/columns that only mean something once circuits exist |
 
+## Remaining in this pass
+
+In build order - each command lands with the service methods it needs:
+
+1. **`/pending teams`** - approver. Service `pending()`. The command posts the queue embed.
+2. **`/approve team <name>`** - approver. Service `approve`: ensure the role (with the requested color) and the emoji (from the logo), then flip the application and insert the team and its ownership in one transaction, conditional on the application still being pending. Command: DM the owner, update the request embed, announce in the new-teams channel.
+3. **`/deny team <name> [reason]`** - approver. Service `deny` (conditional flip). Command: DM the owner with the reason, update the request embed.
+4. **`/promote <player>` and `/demote <player>`** - owner only, inferred from the invoker's current ownership. Service `promote` and `demote` log inserts. Command: ensure the target's `players` row.
+5. **`/deactivate team <name> [reason]`** - approver. Service `deactivate`: team `inactive`, application `released` (frees the name and owner slot), delete the role and emoji.
+6. **`TeamProfile` parts** - role and emoji fetch with self-heal unlink, `format_name`, and `format_mention` are in; the rest fills in as commands and embeds need them. Not blocking.
+7. **Real-DB migration test** - migrations 0002-0007 apply cleanly, and the register flow passes 12/12 checks against real Postgres (claim indexes, similarity rule, all lineage rules, roster view, update door). Approve, promote, demote, and deactivate get exercised against the DB as their commands land.
+
+Done in this pass: schema and migrations 0002-0009, the models, errors and formatters (auto-registered), the approver and verified checks, the command stubs with their four entry points, the `color` column, the `/register team` flow (service `register_application`, `previous_teams_for`, `get_team`, `live_application_for`, `update_application`, plus the command body with the hex parser, request embed, and queue handle), and the TeamProfile formatting parts (`role`, `emoji`, `format_name`, `format_mention`).
+
 ## Staff Roles
 
 The first staff role is the **approver**: it runs team creation (approve/deny) and deactivation. Roles are named by their job - more (moderator for disputes, and so on) slot in beside it later.
@@ -62,7 +76,7 @@ CREATE TABLE team_applications (
     name                      text NOT NULL,
     owner                     bigint NOT NULL REFERENCES players(snowflake),
     logo_url                  text,
-    color                     integer CHECK (color BETWEEN 0 AND 16777215),
+    color                     integer NOT NULL CHECK (color BETWEEN 0 AND 16777215),
     request_message_snowflake bigint,
     previous_team_id          bigint REFERENCES teams(id),
     status                    text NOT NULL DEFAULT 'pending'
@@ -89,10 +103,11 @@ CREATE UNIQUE INDEX team_applications_one_per_owner
 Decisions, and why:
 
 - **The claims live here, on one table, over the whole lifecycle.** A pending application holds the name and the owner slot; an approved one keeps holding them while its team lives; denied and released free them. Because the teams table claims nothing, the two cross-table problems - "no live team or pending application with this name" and "no live team or pending application from this owner" - never arise: every claim is a row in this one table, settled atomically by a partial unique index. This is why the application and the team are separate tables rather than one table with a status: the split is possible exactly because the claims don't need to span tables.
+- **Exact matches are the index's; near matches are the service's.** `create_application` also refuses a name too similar to a claimed one (difflib ratio at least 0.85, lowercase, whitespace collapsed), so two teams can never read as the same name to a member. A service rule, not a constraint - the index stays the backstop for the exact case.
 - **`previous_team_id` is what the creator chose**, validated at create (see Lineage) and copied to the team at approval. The chain itself lives on `teams` - the link is a fact of the team, not of the request.
 - **`request_message_snowflake` is the approver queue handle.** Every pending request is an embed in the pending-teams channel; the message snowflake is stored when it is posted, so `/approve` and `/deny` can edit the embed after a restart. A pending row with no message (the post failed or never ran) still appears in `/pending teams`; approval skips the embed edit.
 - **`logo_url` is the pending-phase upload** - an image uploaded by the owner during the pending phase (optional). The bot re-uploads the image to the pending-teams channel and posts it on the request message. Treat it as a display cache - Discord attachment URLs are signed and expire - and the team gets its own refreshed copy at approval. Plain `NULL` when the team has none.
-- **`color` is the role color the owner asked for**, validated at create and copied to the team at approval. Plain `NULL` means Discord's default role color.
+- **`color` is the role color the owner chose**, required at the command and in the schema (migration 0009 makes the column `NOT NULL`), validated at create, and copied to the team at approval.
 - **`decided_at` is when an approver decided**, whichever way. It is separate from `updated_at`, which tracks any write.
 - **A denied application leaves nothing behind.** No team, no ownership row, no log rows - the name and owner slot are freed by the index, and the row is pure history.
 - **`status = 'released'` is the team's deactivation mirrored here.** The row stays as provenance, but it drops out of both claim indexes, so the name and the owner slot free when the team leaves.
@@ -104,7 +119,7 @@ CREATE TABLE teams (
     id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name             text NOT NULL,
     application_id   bigint NOT NULL UNIQUE REFERENCES team_applications(id),
-    role_snowflake   bigint NOT NULL,
+    role_snowflake   bigint,
     emoji_snowflake  bigint,
     logo_url         text,
     color            integer CHECK (color BETWEEN 0 AND 16777215),
@@ -120,12 +135,12 @@ CREATE TABLE teams (
 
 Decisions, and why:
 
-- **Teams are only created at approval, so every column is honest.** There is no pending state here - the pending half of the lifecycle moved to `team_applications`. `role_snowflake` and `approved_at` are `NOT NULL` because every team row was born approved with a Discord role already created. The statuses are just `active` and `inactive`.
+- **Teams are only created at approval, so every column is honest.** There is no pending state here - the pending half of the lifecycle moved to `team_applications`. `role_snowflake` and `approved_at` are always set at birth because every team row was born approved with a Discord role already created; migration 0008 relaxes `role_snowflake` so a role deleted on Discord by hand can be unlinked later. The statuses are just `active` and `inactive`.
 - **No owner column.** Ownership lives in `team_ownership` (below): the current owner is the row still open, one owner per team and one live ownership per player are both partial unique indexes there. Every owner lookup is an indexed query instead of a column read, and ownership history is a first-class table when transfers land.
 - **`name` is a copy of the application's**, taken at approval. The claims live on `team_applications`; this copy is what every team query displays without joining. A rename feature later would have to move claims around - out of scope.
 - **`application_id` is the provenance link, and it is `UNIQUE`**: one team per application, so the application's one-per-owner index guarantees one live team per owner transitively. The request embed can always find its team, and the team its request.
 - **`previous_team_id` is the lineage chain, and it is `UNIQUE`** - a team has at most one successor, forever. The constraint lives here, not on the application: two pending applications may link the same inactive predecessor, and the race is settled at approval, where the second `teams` insert hits the constraint.
-- **`role_snowflake` and `emoji_snowflake` are both ensured at approval.** The bot ensures the team's Discord role exists - reusing one a crashed approval already created - and stores the snowflake on the row - every team row has one. If a logo was uploaded, the bot also ensures a guild emoji from the image and stores `emoji_snowflake`. Discord owns both: if either is deleted on Discord, the database is not out of sync - nothing repairs or re-syncs. Code that uses them fetches first and falls back. The bot deletes both as cleanup on deactivate.
+- **`role_snowflake` and `emoji_snowflake` are both ensured at approval.** The bot ensures the team's Discord role exists - reusing one a crashed approval already created - and stores the snowflake on the row - every team row has one. If a logo was uploaded, the bot also ensures a guild emoji from the image and stores `emoji_snowflake`. Discord owns both, and the profile self-heals: `TeamProfile.role()` and `TeamProfile.emoji()` fetch through the cache and then the API, and one deleted on Discord is unlinked from the row (`NULL`) instead of repaired - a fetch failure leaves the snowflake alone, since the deletion isn't confirmed. A role managed by another integration is unlinked too. The bot deletes both as cleanup on deactivate.
 - **`logo_url` is the team logo** - the application's upload, refetched from the request message at approval so the signed URL is fresh. Treat it as a display cache; the attachment is the source.
 - **`color` is the role's color**, copied from the application at approval so history keeps it after the role is gone.
 - **A team that leaves is never removed or deleted.** `status = 'inactive'` and the row stays. Teams cannot rejoin: reactivation is impossible by design, and the team that carries on is always a new row (see Lineage).
@@ -316,6 +331,7 @@ A team that leaves is inactive forever and can never rejoin - there must always 
 - **Eligibility comes from the log and the ownership table**: the creator may link only a team where they were an **owner or coach at some point**. A coaching log row is that record; an ownership row is the owner's. A plain player who never coached cannot claim a team's history, and a former owner or coach can, even after demotion or departure - the tables remember.
 - **Service-enforced rules:**
   - The previous team must be `status = 'inactive'` - you cannot fork the history of a live team.
+  - The previous team must have no successor yet - a history is continued once. The check refuses the link at create; the `teams` unique index stays the backstop.
   - The creator must have a `transaction_log` row with `role = 'coach'` and that team as `from_team_id` or `to_team_id`, or a `team_ownership` row for that team.
   - `teams.previous_team_id` is `UNIQUE` - the lineage is a chain, not a tree; a team has at most one successor. Two pending applications can link the same predecessor, and the race is settled at approval by the constraint.
 - **Why a column, not an array or a table**: the chain is strictly one-to-one backward. A column plus `UNIQUE` enforces the chain shape in the schema itself; an array would need maintenance on every link and a table adds nothing a self-referencing FK doesn't give. Full ancestry is one recursive query (`WITH RECURSIVE`) or a short service walk.
@@ -331,11 +347,11 @@ Mirrors `modules/players/`, with the models split one file per table:
 - **`models/transaction_log.py`** - `TransactionLogTable` (abstract; `table = "transaction_log"`, `primary_key = "id"`, `generated = ("id", "at")`), `TransactionLogRow`, `CreateTransactionLog` (`kw_only=True`; `player`, `from_team_id`, `to_team_id`, `action`, `role`, `actor`, `details`).
 - **`models/roster.py`** - `RosterRow` (the read model over the `roster` view: `team_id`, `player`, `role`; no writes).
 - **`service.py`** - `TeamService`: repositories via `get_repository`, one surface for commands. Methods: `create_pending(name, owner, previous_team_id)` (inserts the application - and nothing else: no team, no ownership, no log rows until approval), `attach_logo(application, url)`, `attach_request_message(application, snowflake)`, `approve(application)` (creates the Discord role and, if a logo was uploaded, the guild emoji, then flips the application and inserts the team row and the ownership row in one transaction), `deny(application)`, `deactivate(team)` (team `inactive` + `inactivated_at`, application `released` - freeing the name and owner slot - and deletes the role and emoji), `promote(owner, player)` (infers the owner's active team from their current ownership row, appends a `promote` log row with `to_team_id`, `role='coach'`, `actor` = the owner), `demote(owner, player)` (same inference, appends `demote` with `to_team_id`, `role=NULL`), `find_by_name(name)` (active teams), `find_application_by_name(name)` (pending applications - the approve/deny lookup), `find_by_owner(snowflake)` (the active team their current ownership names), `owner(team)`, `pending()`, `lineage(team)`, `previous_teams_for(player)` (the inactive teams where the log shows them coaching or the ownership table shows them owning - feeds the autocomplete), `roster(team)` (the view). Name and lineage validation lives in the service; commands layer pre-checks on top for UX.
-- **`errors.py`** - `TeamError` (a rule the service refused, the reply as the message) with `TeamErrorFormatter`, and `TeamUniqueViolationFormatter`, mirroring `PlayerUniqueViolationFormatter`: keyed on constraint names, `report = True` (a constraint hit means a pre-check lost a race):
+- **`errors.py`** - `TeamError` (a rule the service refused, the reply as the message) with `TeamErrorFormatter`, and `TeamUniqueViolationFormatter`, keyed on constraint names. Unlike the players formatter it does not report - a racing duplicate resolves into a polite reply, nothing to act on:
 
 | Constraint | Reply |
 | --- | --- |
-| `team_applications_one_per_owner` | "You already own a team." |
+| `team_applications_one_per_owner` | "You already have a pending team application." |
 | `team_applications_lower_name_key` | "That team name is already taken." |
 | `teams_previous_team_id_key` | "That team already has a successor." |
 
@@ -345,7 +361,7 @@ The `offers` table is in place; its model and service land with the offer, relea
 
 One flow, four names: `/register team` is the canonical one, and `/create team`, `/apply for owner`, and `/start team` are aliases that point at it - the extra names answer "how do I become a team owner?" from the angles a new member searches. Discord command names can't contain spaces, so `/apply for owner` is a top-level `apply` group whose `for` subcommand group nests `owner` (Discord allows command -> subcommand group -> subcommand, one level).
 
-1. **`/register team <name> [logo] [color] [previous-team]`** - any verified member; `/create team`, `/apply for owner`, and `/start team` run the same flow. A normal command, not a modal, so `previous_team` gets autocomplete: the inactive teams the invoker owned or coached. `logo` is an optional image attachment on the command itself - Discord handles the upload, and approval converts it into the team's emoji. `color` is the optional hex color for the team's role. Pre-checks: name format/length, color range, no live team already owned, name not claimed. The command ensures the invoker's `players` row, then the service inserts the pending application - and nothing else. The request embed (logo included) is posted to the pending-teams channel and its message snowflake is stored on the row - the queue the approvers work from.
+1. **`/register team <name> <color> [logo] [previous-team]`** - any verified member; `/create team`, `/apply for owner`, and `/start team` run the same flow. A normal command, not a modal, so `previous_team` gets autocomplete: the inactive teams the invoker owned or coached. `color` is the required hex color for the team's role, also the request embed's accent. `logo` is an optional image attachment on the command itself - Discord handles the upload, and approval converts it into the team's emoji. Pre-checks: name format/length, color range, and one live application per owner (the command reads it up front so the reply can say pending versus owned). Exact claims still hit the unique indexes (the formatter replies, as the race backstop); near-duplicate names are refused by the service. The command ensures the invoker's `players` row, then the service inserts the pending application - and nothing else. The request embed (logo as thumbnail) is posted to the pending-teams channel and its message snowflake is stored on the row - the queue the approvers work from.
 2. **`/pending teams`** - approver. Lists every pending request.
 3. **`/approve team <name>`** - approver. Fetches the request message, ensures the team's Discord role (with the requested color) and, if a logo was uploaded, the guild emoji from the message's attachment; then flips the application to `approved` and creates the team row and the owner's ownership row in one transaction; DMs the owner; updates the request embed in the pending-teams channel to show the decision, and posts an announcement to the new-teams channel - the public list of approved teams.
 4. **`/deny team <name> [reason]`** - approver. Flips to `denied`, DMs the owner with the reason, and updates the request embed to show the decision. The name and the owner slot are freed; the owner may re-submit. Nothing else was ever written for this request.
