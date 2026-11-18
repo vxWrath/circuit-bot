@@ -22,7 +22,7 @@ Deferred - each gets its own pass later:
 | Roster rules (shared-player cap, Window 4 selections, the 8-player minimum) | Membership lives in the log from day one; the caps and locks need windows and ratings to gate on |
 | Offer, release, and demand commands | The `offers` table is in place; the commands need the roster rules and window locks |
 | Rating columns and the rating batch | Ratings are written by the window-close batch, not by team commands; the calibrated model ports as a `team_ratings` table with window snapshots |
-| Window admission timing (teams join between windows) | Needs the window/circuit entity first |
+| Window admission timing (teams join between windows) | Needs the window/circuit entity first; admission is derived from the current window's pod membership, not a `teams.status` value |
 | Ownership transfer | Allowed until Window 3 closes per the docs - it closes the current `team_ownership` row and opens the next, no schema change, but it needs windows to gate on |
 | Pod channels and game threads | Need ratings and windows to seed from |
 | Hiatus, tournament eligibility fields | Status/columns that only mean something once circuits exist |
@@ -387,6 +387,6 @@ Edge cases:
 - **Roster rules** - the log already holds players and coaches and the ownership table the owners; the shared-player cap, Window 4 selections, and the 8-player minimum are constraints that need windows and ratings to gate on. Releases and demands are transaction rows on the existing log, and the `offers` table is defined above.
 - **Ownership transfer** - closes the current `team_ownership` row (`ended_at`, `end_reason = 'transferred'`) and opens the next, no schema change; it needs windows to gate on.
 - **Ratings** - `team_ratings` (team, window, overall, offense, defense, confidence, snapshot data for overturns) written by the window-close batch once the model ports from `tools/`.
-- **Admission windows** - joining/leaving transitions that need the window entity to time them.
+- **Admission windows** - joining/leaving transitions that need the window entity to time them. "Admitted" means holding a pod membership for the current window: an active team with none is waiting for admission, and the membership row is the admission - no `teams.status` value for it. Hiatus differs: an intentionally pod-less team is a real state, so it joins `status` beside `active` and `inactive` when circuits land.
 - **Pod channels, hiatus, tournament fields** - columns and channels that need windows and ratings to mean anything.
 - **Offer, release, and demand commands** - the `offers` table and the log actions are in place; the commands need the roster rules and window locks.
