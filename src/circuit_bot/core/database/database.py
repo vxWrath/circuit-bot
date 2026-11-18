@@ -23,7 +23,6 @@ IsolationLevel = Literal[
 class Database(ABC):
     """A scope statements run in: the pool, or a connection checked out of it.
 
-    What a :class:`Repository` was built on decides where its statements land.
     The scope members are abstract, so a subclass that drops one fails at
     construction.
     """

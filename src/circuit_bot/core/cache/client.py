@@ -452,9 +452,8 @@ class CacheClient:
         Fields are JSON-encoded.  The hash expires after ~300 seconds by
         default.  Pass ``ex`` for a fixed TTL, or ``ex=None`` to keep it.
         Alongside ``ex``, only the options ``EXPIRE`` takes (``nx``, ``xx``,
-        ``gt``, ``lt``) are allowed.  Any other expiry option, or one passed
-        with ``ex=None``, raises ``TypeError``.  A Redis failure raises
-        :class:`CacheError`.
+        ``gt``, ``lt``) are allowed - anything else raises ``TypeError``.  A
+        Redis failure raises :class:`CacheError`.
         """
 
         key = self.key_from_path(*path)

@@ -22,12 +22,7 @@ class SingleFlight:
         self.in_flight: dict[Any, asyncio.Task[Any]] = {}
 
     async def run[T](self, key: Any, func: Callable[..., Coroutine[Any, Any, T]], *args: Any, **kwargs: Any) -> T:
-        """Call ``func(*args, **kwargs)`` once per *key*, sharing what it returns.
-
-        Every caller arriving while the call is in flight gets the same result, or
-        the same exception.  *key* must be hashable and equal for two requests that
-        mean the same thing.
-        """
+        """Call ``func(*args, **kwargs)`` once per *key*, sharing what it returns."""
 
         task = self.in_flight.get(key)
 

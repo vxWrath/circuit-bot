@@ -21,6 +21,7 @@ from .models import (
     RosterRow,
     TeamRow,
 )
+from .profile import TeamProfile
 
 if TYPE_CHECKING:
     from ...core.bluerobot import CircuitBot
@@ -94,7 +95,20 @@ class TeamService(Service):
         self.create_log = self.get_repository(CreateTransactionLog)
         self.roster_view = self.get_repository(RosterRow)
 
-    async def register_application(
+    def profile(self, team_id: int) -> TeamProfile:
+        """Open *team_id*'s profile, touching nothing until a part is asked for."""
+        return TeamProfile(self, team_id)
+
+    async def get_team(self, team_id: int) -> TeamRow | None:
+        """The team with *team_id*, or ``None`` if there's no such team."""
+        return await self.team.get_by_pk(team_id)
+
+    async def team_from_application(self, application_id: int) -> TeamRow | None:
+        """The team approved from *application_id*, or ``None``."""
+        teams = await self.team.find_by(application_id=application_id)
+        return teams[0] if teams else None
+
+    async def new_application(
         self,
         *,
         name: str,
@@ -137,11 +151,15 @@ class TeamService(Service):
 
             return row
 
-    async def get_team(self, team_id: int) -> TeamRow | None:
-        """The team with *team_id*, or ``None`` if there's no such team."""
-        return await self.team.get_by_pk(team_id)
+    async def pending_applications(self) -> list[ApplicationRow]:
+        """Every pending application, oldest first - the approver's queue."""
+        return self.application.from_records(
+            await self.bot.database.fetch(
+                "SELECT * FROM team_applications WHERE status = 'pending' ORDER BY created_at, id"
+            )
+        )
 
-    async def live_application_for(self, owner: int) -> ApplicationRow | None:
+    async def find_application_by_owner(self, owner: int) -> ApplicationRow | None:
         """*owner*'s live application - pending or approved - or ``None``.
 
         One live application per owner is the schema's rule, so this answers
@@ -154,14 +172,6 @@ class TeamService(Service):
         )
 
         return rows[0] if rows else None
-
-    async def pending(self) -> list[ApplicationRow]:
-        """Every pending application, oldest first - the approver's queue."""
-        return self.application.from_records(
-            await self.bot.database.fetch(
-                "SELECT * FROM team_applications WHERE status = 'pending' ORDER BY created_at, id"
-            )
-        )
 
     async def find_application_by_name(self, name: str) -> ApplicationRow | None:
         """The pending application named *name*, case-insensitively, or ``None``."""

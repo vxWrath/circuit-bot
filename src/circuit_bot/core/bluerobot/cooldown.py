@@ -164,8 +164,8 @@ class CooldownManager:
 
         Each falls back to the decorator's default when omitted, and a bucket
         whose stored shape differs is reset to these.  The predicate already
-        refuses exhausted buckets pre-invoke, this is the reservation and the
-        guard for a call that slips past it.
+        refuses exhausted buckets pre-invoke - this is the reservation and
+        the guard for a call that slips past it.
         """
         limit = self.limit if limit is None else limit
         duration = self.duration if duration is None else duration

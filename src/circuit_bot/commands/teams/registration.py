@@ -99,7 +99,7 @@ class Teams(commands.Cog):
 
         # The pre-check names the reply precisely; the unique index still
         # owns the race between two simultaneous submissions.
-        existing = await team_service.live_application_for(member.id)
+        existing = await team_service.find_application_by_owner(member.id)
 
         if existing is not None:
             if existing.status == "pending":
@@ -107,13 +107,22 @@ class Teams(commands.Cog):
                     f"{CommonEmojis.FAIL} **You already have a pending application with the team name `{existing.name}`.**"
                 )
 
+            team = await team_service.team_from_application(existing.id)
+
+            if team is not None:
+                profile = team_service.profile(team.id)
+                profile.set_part(TeamRow, team)
+
+                mention = await profile.format_mention()
+                return await interaction.failure(f"{CommonEmojis.FAIL} **You already own the {mention}.**")
+
             return await interaction.failure(f"{CommonEmojis.FAIL} **You already own `{existing.name}`.**")
 
         player_service = self.bot.get_service(PlayerService)
         profile = player_service.profile(member)
         await profile.ensure_player()
 
-        application = await team_service.register_application(
+        application = await team_service.new_application(
             name=name, owner=member.id, previous_team_id=previous_team, color=color_value
         )
 

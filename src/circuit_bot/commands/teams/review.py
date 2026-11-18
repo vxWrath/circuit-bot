@@ -28,7 +28,7 @@ async def pending_names_autocomplete(interaction: Interaction, current: str) -> 
     current = current.lower()
 
     service = interaction.client.get_service(TeamService)
-    applications = await service.pending()
+    applications = await service.pending_applications()
 
     return [Choice(name=a.name, value=a.name) for a in applications if current in a.name.lower()][:25]
 
@@ -46,7 +46,7 @@ class TeamReview(commands.Cog):
     async def pending_teams(self, interaction: Interaction):
         """The approver's queue: every pending application, oldest first."""
         team_service = self.bot.get_service(TeamService)
-        applications = await team_service.pending()
+        applications = await team_service.pending_applications()
 
         if not applications:
             return await interaction.success(

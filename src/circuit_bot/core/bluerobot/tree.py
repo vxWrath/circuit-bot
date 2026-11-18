@@ -23,7 +23,6 @@ class CircuitTree(CommandTree["CircuitBot"]):
         Every command goes through here first, making it the place to relabel
         discord.py's object as :class:`~.interaction.Interaction` - legal only
         while the two have the same layout, see that class for why it is slotted.
-        Anything a command needs *on* it goes in ``extras``.
         """
 
         # interaction is actually discord.Interaction[CircuitBot]

@@ -24,10 +24,9 @@ class PlayerProfile(Profile["PlayerService"]):
 
     Open it through :meth:`PlayerService.profile` or
     :meth:`PlayerService.profile_from_roblox_id`, which reads the row once up
-    front.  Each part is fetched once and kept.  The Roblox parts live on
-    :attr:`roblox` and read the row first, raising ``RecordNotFoundError``
-    when there is no such player, and a profile never reaches for a client
-    itself.
+    front.  The Roblox parts live on :attr:`roblox` and read the row first,
+    raising ``RecordNotFoundError`` when there is no such player, and a
+    profile never reaches for a client itself.
     """
 
     def __init__(self, service: "PlayerService", snowflake: int) -> None:
@@ -119,8 +118,8 @@ class PlayerProfile(Profile["PlayerService"]):
         """Link a Roblox account to this player, or raise ``RecordNotFoundError``.
 
         The raise covers both no such player and the row going between the read
-        and the write.  The write is keyed by the row :meth:`player` kept, or
-        fetched here if this is the first part anyone wanted, and the row it
+        and the write.  The write is keyed by the row :meth:`player` returns,
+        fetched here if nothing asked for it sooner, and the row the write
         returns is kept.  The Roblox parts are dropped.  The member survives,
         since the write can't have changed it.
         """

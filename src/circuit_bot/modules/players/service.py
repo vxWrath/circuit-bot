@@ -91,11 +91,11 @@ class PlayerService(Service):
         return await self.player.update(player, roblox_id=None)
 
     async def roblox_user(self, *, roblox_id: int) -> RobloxUser | None:
-        """The Roblox user info of *roblox_id*, or ``None`` when roblox id doesn't exist."""
+        """The Roblox user info of *roblox_id*, or ``None`` when there's no such user."""
         return await self.bot.roblox.get_user(roblox_id)
 
     async def headshot_url(self, *, roblox_id: int) -> str | None:
-        """The headshot of *roblox_id*, or ``None`` when roblox id doesn't exist."""
+        """The headshot of *roblox_id*, or ``None`` when there's no such user."""
         return await self.bot.roblox.get_headshot(roblox_id)
 
     async def member(self, *, snowflake: int) -> discord.Member | None:

@@ -268,7 +268,7 @@ class BaseItem(ABC, DynamicItem[BaseT], template=BASE_TEMPLATE):
 
     @property
     def template(self) -> re.Pattern[str]:
-        """``re.Pattern``: The compiled regular expression that is used to parse the ``custom_id``."""
+        """``re.Pattern``: the compiled regex that parses the ``custom_id``."""
         return self.__class__.__original_template__
 
     @classmethod

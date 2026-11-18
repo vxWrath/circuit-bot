@@ -1,4 +1,5 @@
 import datetime
+from typing import Literal
 
 from ....core.database import Row
 
@@ -32,7 +33,7 @@ class ApplicationRow(ApplicationTable):
     color: int
     request_message_snowflake: int | None
 
-    status: str
+    status: Literal["pending", "approved", "denied", "released"]
     decided_at: datetime.datetime | None
 
     created_at: datetime.datetime
