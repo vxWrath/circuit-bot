@@ -161,7 +161,7 @@ class CircuitBot(commands.Bot):
     async def load_commands_and_events(self) -> list[str]:
         self.extension_names = []
 
-        for file_path in self.config.command_path.glob("*.py"):
+        for file_path in self.config.command_path.rglob("*.py"):
             if file_path.name == "__init__.py":
                 continue
 
