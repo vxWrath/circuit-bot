@@ -180,9 +180,10 @@ class Repository[R: Row]:
         """Partial update - only touches the fields you pass, and only reads back those.
 
         A shape that declares an ``updated_at`` field has it written on every
-        update.  The row is *obj*'s, looked up by its table's primary key, and
-        the row returned is *obj* with the written columns replaced by what
-        the database sent back.  ``None`` means no row matched.
+        update, from the database's clock.  The row is *obj*'s, looked up by
+        its table's primary key, and the row returned is *obj* with the
+        written columns replaced by what the database sent back.  ``None``
+        means no row matched.
         """
 
         if not changes:
@@ -191,8 +192,9 @@ class Repository[R: Row]:
         self.check_columns(changes)
 
         # Written after the caller's columns are checked, so this needs no checking of its own.
+        # A caller's updated_at is dropped exactly as before - the value always comes from now().
         if "updated_at" in self.fields:
-            changes["updated_at"] = datetime.datetime.now(datetime.UTC)
+            changes.pop("updated_at", None)
 
         try:
             primary_key = getattr(obj, self.primary_key_name)
@@ -201,8 +203,15 @@ class Repository[R: Row]:
                 f"{type(obj).__name__} has no {self.primary_key_name!r} to look the row up by"
             ) from None
 
-        set_clause = ", ".join(f"{column} = ${i}" for i, column in enumerate(changes, start=2))
-        query = f"UPDATE {self.table_name} SET {set_clause} WHERE {self.primary_key_name} = $1 RETURNING {', '.join(changes)}"
+        pieces = [f"{column} = ${i}" for i, column in enumerate(changes, start=2)]
+
+        if "updated_at" in self.fields:
+            # The database's clock owns the value, matching the conditional updates the teams queries write.
+            pieces.append("updated_at = now()")
+
+        set_clause = ", ".join(pieces)
+        returning = list(changes) + (["updated_at"] if "updated_at" in self.fields else [])
+        query = f"UPDATE {self.table_name} SET {set_clause} WHERE {self.primary_key_name} = $1 RETURNING {', '.join(returning)}"
 
         async with self.database.acquire() as conn:
             record = await conn.fetchrow(query, primary_key, *changes.values())

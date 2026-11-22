@@ -26,7 +26,13 @@ from .profile import TeamProfile
 if TYPE_CHECKING:
     from ...core.bluerobot import CircuitBot
 
-__all__ = ("TeamService", "validate_team_color", "validate_team_name")
+__all__ = (
+    "TeamService",
+    "normalize_for_similarity",
+    "similarity_length_bounds",
+    "validate_team_color",
+    "validate_team_name",
+)
 
 logger = get_logger("team_service")
 
@@ -53,19 +59,38 @@ def validate_team_color(color: int) -> None:
         raise TeamError("Team colors must be a whole number between 0 and 16777215 (#FFFFFF).")
 
 
+def normalize_for_similarity(name: str) -> str:
+    """*name* in the shape similarity compares: lowercase, whitespace collapsed, accents folded."""
+    return re.sub(r"\s+", " ", normalize(name).lower())
+
+
+def similarity_length_bounds(name: str) -> tuple[int, int]:
+    """The raw stored lengths that could still compare at the threshold.
+
+    A ratio of at least 0.85 bounds the two compared lengths within a
+    factor of 1.353, and normalization can shrink a stored name to about
+    half its raw length, so a raw stored name up to 2.7 times the
+    normalized length can still match.  The bound only narrows the scan,
+    never decides similarity - the Python check still decides.
+    """
+
+    length = len(normalize_for_similarity(name))
+    return int(length / 1.353), int(length * 2.706) + 1
+
+
 def names_too_similar(new_name: str, claimed_name: str) -> bool:
     """Whether a member would read *claimed_name* and *new_name* as the same team.
 
-    Names are compared lowercase, whitespace-collapsed, and accent-folded, so
-    accents or spacing alone never make two teams read differently.  Identical
-    raw names return False - the unique index owns the exact-match reply, and
-    its key is the raw lowercased name.
+    Names are compared through :func:`normalize_for_similarity`, so
+    accents or spacing alone never make two teams read differently.
+    Identical raw names return False - the unique index owns the
+    exact-match reply, and its key is the raw lowercased name.
     """
     if new_name.lower() == claimed_name.lower():
         return False
 
-    new = re.sub(r"\s+", " ", normalize(new_name).lower())
-    claimed = re.sub(r"\s+", " ", normalize(claimed_name).lower())
+    new = normalize_for_similarity(new_name)
+    claimed = normalize_for_similarity(claimed_name)
 
     return difflib.SequenceMatcher(None, new, claimed).ratio() >= SIMILARITY_THRESHOLD
 
@@ -130,7 +155,13 @@ class TeamService(Service):
                 await validate_lineage(conn, creator=owner, previous_team_id=previous_team_id)
 
             # The unique index owns exact matches; this refuses the near ones.
-            claimed = await conn.fetch("SELECT name FROM team_applications WHERE status IN ('pending', 'approved')")
+            min_length, max_length = similarity_length_bounds(name)
+            claimed = await conn.fetch(
+                "SELECT name FROM team_applications "
+                "WHERE status IN ('pending', 'approved') AND length(name) BETWEEN $1 AND $2",
+                min_length,
+                max_length,
+            )
 
             for record in claimed:
                 if names_too_similar(name, record["name"]):

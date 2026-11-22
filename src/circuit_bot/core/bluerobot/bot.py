@@ -23,7 +23,7 @@ from ..database import DatabasePool
 from ..env import is_dev
 from ..logging import get_logger
 from ..roblox import RobloxClient
-from ..service import Service, ServiceNotFound
+from ..service import SERVICES, Service, ServiceNotFound
 from .app_commands import CachedAppCommand, CommandNotFound
 from .color import Color
 from .cooldown import CooldownManager, CooldownManagerNotFound
@@ -313,7 +313,7 @@ class CircuitBot(commands.Bot):
     def fill_services(self) -> None:
         self.services = {}
 
-        for cls in Service.__subclasses__():
+        for cls in SERVICES:
             self.services[cls] = cls(bot=self)
 
     def get_service[T: Service](self, cls: type[T]) -> T:
