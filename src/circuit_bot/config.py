@@ -103,6 +103,7 @@ class BotConfig(NamedTuple):
     sync_sentinel: Path = Path(tempfile.gettempdir()) / "circuit-bot.sync"
     command_path: Path = PACKAGE_PATH / "commands"
     event_path: Path = PACKAGE_PATH / "events"
+    task_path: Path = PACKAGE_PATH / "tasks"
 
 
 class PostgresSettings(NamedTuple):

@@ -1,10 +1,13 @@
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 import discord
 
+from ...core import Color
 from ...core.logging import get_logger
-from ...core.roblox import RobloxUser
+from ...core.roblox import RobloxError, RobloxUser
 from ...core.service import Service
+from . import roblox
 from .models import CreatePlayer, PlayerRow
 from .profile import PlayerProfile
 
@@ -124,3 +127,103 @@ class PlayerService(Service):
             await member.edit(nick=nick)
         except discord.HTTPException as e:
             logger.warning("Could not set nickname for %d: %s", member.id, e)
+
+    async def link_roblox_from_bloxlink(self, member: discord.Member) -> bool:
+        """Resolve *member*'s Bloxlink account and link it, guarded like the force command.
+
+        A member with no Bloxlink account, an account that doesn't exist on
+        Roblox, or one another player already owns is left unlinked.  The
+        member must have a players row - callers ensure it.  Returns whether
+        the member was linked.
+        """
+        roblox_id = await self.bot.bloxlink.resolve_roblox_id(member.guild.id, member.id)
+
+        if roblox_id is None:
+            logger.debug(f"Could not resolve Roblox ID for {member.id}. Likely not verified through Bloxlink.")
+            return False
+
+        # The same guards the force command runs: don't link an account that
+        # doesn't exist, or one another player already owns - the table's unique
+        # constraint would fail the write anyway, this just skips it cleanly.
+        try:
+            rblx = await self.roblox_user(roblox_id=roblox_id)
+        except RobloxError as e:
+            logger.warning("Could not validate Roblox id %d for %d: %s", roblox_id, member.id, e)
+            return False
+
+        if rblx is None:
+            logger.debug(f"Roblox id {roblox_id} for {member.id} doesn't exist; skipping link.")
+            return False
+
+        existing = await self.profile_from_roblox_id(roblox_id)
+
+        if existing is not None and existing.snowflake != member.id:
+            logger.debug(
+                f"Roblox id {roblox_id} for {member.id} is already linked to {existing.snowflake}; skipping link."
+            )
+
+            owner = member.guild.get_member(existing.snowflake)
+
+            embed = discord.Embed(
+                description=(
+                    "# Duplicate Roblox Link Blocked\n"
+                    f"-# New member: {member.name} • {member.id}\n"
+                    f"-# Existing member: "
+                    f"{owner.name} • {owner.id}"
+                    if owner is not None
+                    else f"{existing.snowflake}"
+                ),
+                color=Color.brand_red(),
+            )
+            roblox.add_field(embed, rblx, roblox_id, None)
+
+            await roblox.send_log(self.bot, member.guild, embed)
+            return False
+
+        profile = self.profile(member)
+        await profile.link_roblox(roblox_id)
+        logger.debug(f"Linked {member.id} to Roblox ID {roblox_id}")
+
+        hs_url = await profile.roblox.headshot_or_none()
+
+        if not hs_url:
+            logger.debug(f"Could not fetch roblox headshot for roblox id {roblox_id}")
+            return True
+
+        embed = roblox.build_embed(
+            "New Member Verified & Linked",
+            member,
+            Color.brand_green(),
+            rblx,
+            roblox_id,
+            hs_url,
+        )
+        await roblox.send_log(self.bot, member.guild, embed)
+        return True
+
+    async def all_players(self) -> list[PlayerRow]:
+        """Every player row in one read - the startup sweep builds its marker map from this."""
+        return self.player.from_records(await self.bot.database.fetch("SELECT * FROM players"))
+
+    async def create_many(self, snowflakes: Sequence[int]) -> None:
+        """Create a row for every listed snowflake, skipping ones a concurrent join created.
+
+        The startup sweep's batch path: one call instead of a write per member.
+        """
+        if not snowflakes:
+            return
+
+        await self.bot.database.executemany(
+            "INSERT INTO players (snowflake) VALUES ($1) ON CONFLICT (snowflake) DO NOTHING",
+            [(snowflake,) for snowflake in snowflakes],
+        )
+
+    async def mark_many_verified_checked(self, snowflakes: Sequence[int]) -> None:
+        """Stamp every listed player as checked by the startup sweep, in one statement."""
+        if not snowflakes:
+            return
+
+        await self.bot.database.execute(
+            "UPDATE players SET verified_checked_at = now(), updated_at = now() WHERE snowflake = ANY($1)",
+            list(snowflakes),
+        )

@@ -192,6 +192,21 @@ class CircuitBot(commands.Bot):
 
             self.extension_names.append(cog_path)
 
+        for file_path in self.config.task_path.glob("*.py"):
+            if file_path.name == "__init__.py":
+                continue
+
+            cog_path = self.extension_name(file_path)
+
+            try:
+                await self.reload_extension(cog_path)
+                logger.info("Reloaded task extension %s", cog_path)
+            except commands.ExtensionNotLoaded:
+                await self.load_extension(cog_path)
+                logger.info("Loaded task extension %s", cog_path)
+
+            self.extension_names.append(cog_path)
+
         self.fill_services()
 
         return self.extension_names

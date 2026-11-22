@@ -24,6 +24,7 @@ class PlayerRow(PlayerTable):
 
     snowflake: int
     roblox_id: int | None
+    verified_checked_at: datetime.datetime | None
     created_at: datetime.datetime
     updated_at: datetime.datetime
 
