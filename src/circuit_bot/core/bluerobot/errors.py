@@ -50,6 +50,24 @@ class ApiErrorFormatter(ErrorFormatter):
         return None
 
 
+class DiscordErrorFormatter(ErrorFormatter):
+    """The reply for a Discord call that failed inside a command.
+
+    Owning the whole ``HTTPException`` family here means a command never
+    wraps a send or fetch in a try/except just to say this.  It is reported
+    too, since a ``Forbidden`` usually means the bot lost a permission the
+    operator must restore.
+    """
+
+    report = True
+
+    def format(self, _: Interaction, error: Exception) -> str | None:
+        if not isinstance(error, discord.HTTPException):
+            return None
+
+        return format_fail("The bot had trouble talking to Discord. Try again later.")
+
+
 class InternalErrorFormatter(ErrorFormatter):
     """The reply for a failure in the bot's own storage - Redis or Postgres.
 
@@ -169,9 +187,11 @@ class ErrorHandler:
         *,
         interaction: Interaction | None = None,
     ) -> None:
-        """Log *error*, post it to the error webhook, and reply to *interaction* with the traceback.
+        """Log *error*, post it to the error webhook, and reply to *interaction* with a generic failure.
 
-        The reply goes out first, so a slow webhook never delays it.
+        The reply goes out first, so a slow webhook never delays it.  The
+        traceback goes to the webhook and the log, where it can be acted on,
+        never to the user who can't act on it.
         """
 
         logger.error("Unhandled error in %s", source, exc_info=error)
@@ -179,10 +199,8 @@ class ErrorHandler:
         trace = "".join(traceback.format_exception(error))
 
         if interaction is not None:
-            file = discord.File(io.BytesIO(trace.encode()), filename="traceback.txt")
-
             try:
-                await interaction.respond(file=file, ephemeral=True)
+                await interaction.failure("Something went wrong. The developers have been notified.")
             except discord.HTTPException:
                 pass
 
