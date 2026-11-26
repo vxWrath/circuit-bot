@@ -2,7 +2,7 @@ import inspect
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, cast, overload
 
 import aiohttp
 import discord
@@ -318,6 +318,26 @@ class CircuitBot(commands.Bot):
             return cast(T, self.services[cls])
         except KeyError:
             raise ServiceNotFound(cls) from None
+
+    @overload
+    def retrieve_cog[C: commands.Cog](self, cog: type[C]) -> C:
+        ...
+
+    @overload
+    def retrieve_cog(self, cog: str) -> Any:
+        ...
+
+    def retrieve_cog(self, cog: type[commands.Cog] | str) -> Any:
+        if isinstance(cog, type):
+            cog_name = cog.__cog_name__
+        else:
+            cog_name = cog
+
+        cog_instance = self.get_cog(cog_name)
+
+        if cog_instance is None:
+            raise ValueError(f"Cog {cog_name!r} is not loaded.")
+        return cog_instance
 
 
 async def send_connection_webhook(bot: CircuitBot, embed: discord.Embed) -> None:

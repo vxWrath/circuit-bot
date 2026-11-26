@@ -159,17 +159,6 @@ class DecisionCheck:
         return True
 
 
-def team_review_of(interaction: Interaction) -> "TeamReview | None":
-    """The review cog behind *interaction*'s bot, or ``None`` if the extension isn't loaded.
-
-    The decision flow lives on the cog so nothing here threads the bot
-    through function arguments.  A ``None`` only shows on a stale button
-    press, after the extension was unloaded underneath the card.
-    """
-    review = interaction.client.get_cog(TeamReview.__cog_name__)
-    return review if isinstance(review, TeamReview) else None
-
-
 class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:approve:(\d+)"):
     """The card's approve button: run the approval and mark the card."""
 
@@ -188,29 +177,29 @@ class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:appr
         return cls(int(match.group(1)))
 
     async def callback(self, interaction: Interaction) -> None:
-        review = team_review_of(interaction)
-
-        if review is None:
-            return await interaction.failure(f"{CommonEmojis.FAIL} **The review commands aren't loaded right now.**")
-
+        review_cog = interaction.client.retrieve_cog(TeamReview)
         application = await interaction.client.get_service(TeamService).find_application_by_id(self.application_id)
 
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **This application was already decided.**")
 
-        team = await review.run_approval(application, interaction.user)
+        team = await review_cog.run_approval(application, interaction.user)
 
         if team is None:
             return await interaction.failure(
                 f"{CommonEmojis.FAIL} **`{application.name}` was already decided by another approver.**"
             )
 
+        team_profile = interaction.client.get_service(TeamService).profile(team.id)
+        team_profile.set_part(TeamRow, team)
+        emoji = await team_profile.emoji()
+
         await interaction.respond(
             view=decision_layout(
                 application,
                 interaction.user.id,
                 team=team,
-                emoji=review.guild_emoji_for(team),
+                emoji=emoji,
             ),
             ephemeral=True,
         )
@@ -252,18 +241,14 @@ class DenyReasonModal(BaseModal, title="Deny application"):
         self.application_id = application_id
 
     async def handle_submit(self, interaction: Interaction) -> None:
-        review = team_review_of(interaction)
-
-        if review is None:
-            return await interaction.failure(f"{CommonEmojis.FAIL} **The review commands aren't loaded right now.**")
-
+        review_cog = interaction.client.retrieve_cog(TeamReview)
         application = await interaction.client.get_service(TeamService).find_application_by_id(self.application_id)
 
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **This application was already decided.**")
 
         reason = self.reason.value.strip() or None
-        decided = await review.run_denial(application, interaction.user.display_name, reason)
+        decided = await review_cog.run_denial(application, interaction.user.display_name, reason)
 
         if decided is None:
             return await interaction.failure(
@@ -339,18 +324,6 @@ class TeamReview(commands.Cog):
 
         return decided
 
-    def guild_emoji_for(self, team: TeamRow) -> discord.Emoji | None:
-        """The team's guild emoji, resolved for display, or ``None`` when it has none or the guild is gone."""
-        if team.emoji_snowflake is None:
-            return None
-
-        guild = self.bot.get_guild(self.bot.config.guild_id)
-
-        if guild is None:
-            return None
-
-        return discord.utils.get(guild.emojis, id=team.emoji_snowflake)
-
     async def announce(self, team: TeamRow, application: ApplicationRow) -> None:
         """Post the approval announcement to the new-teams channel - the public record."""
         channel = self.bot.get_channel(self.bot.config.league.new_teams_channel_id)
@@ -363,7 +336,9 @@ class TeamReview(commands.Cog):
             )
             return
 
-        emoji = self.guild_emoji_for(team)
+        team_profile = self.bot.get_service(TeamService).profile(team.id)
+        team_profile.set_part(TeamRow, team)
+        emoji = await team_profile.emoji()
 
         embed = discord.Embed(
             title=f"{emoji} {team.name}" if emoji is not None else team.name,
@@ -500,8 +475,8 @@ class TeamReview(commands.Cog):
         applications = await team_service.pending_applications()
 
         if not applications:
-            return await interaction.success(
-                f"{CommonEmojis.SUCCESS} **The queue is clear - no pending team applications.**"
+            return await interaction.failure(
+                f"{CommonEmojis.FAIL} **There are no pending team applications.**"
             )
 
         # One lookup per distinct predecessor, so a shared history costs nothing extra.
@@ -576,12 +551,16 @@ class TeamReview(commands.Cog):
                 f"{CommonEmojis.FAIL} **`{application.name}` was already decided by another approver.**"
             )
 
+        team_profile = self.bot.get_service(TeamService).profile(team.id)
+        team_profile.set_part(TeamRow, team)
+        emoji = await team_profile.emoji()
+
         await interaction.respond(
             view=decision_layout(
                 application,
                 interaction.user.id,
                 team=team,
-                emoji=self.guild_emoji_for(team),
+                emoji=emoji,
             ),
             ephemeral=True,
         )
