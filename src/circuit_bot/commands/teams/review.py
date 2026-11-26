@@ -10,6 +10,7 @@ from discord.ext import commands
 
 from ...core import (
     BaseItem,
+    BaseModal,
     CircuitBot,
     CircuitGroup,
     Color,
@@ -222,7 +223,9 @@ class DenyTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:deny:(\
         await interaction.response.send_modal(DenyReasonModal(self.application_id))
 
 
-class DenyReasonModal(ui.Modal, title="Deny application"):
+class DenyReasonModal(BaseModal, title="Deny application"):
+    modal_source = "team-denial"
+
     reason = ui.TextInput(
         label="Reason (optional)",
         style=discord.TextStyle.paragraph,
@@ -235,11 +238,7 @@ class DenyReasonModal(ui.Modal, title="Deny application"):
         super().__init__()
         self.application_id = application_id
 
-    async def on_submit(self, interaction: Interaction) -> None:
-        # Modal submits bypass the tree, so relabel the interaction like the
-        # tree would before using the bot's helpers.
-        interaction.__class__ = Interaction
-
+    async def handle_submit(self, interaction: Interaction) -> None:
         application = await interaction.client.get_service(TeamService).find_application_by_id(self.application_id)
 
         if application is None:
@@ -254,10 +253,6 @@ class DenyReasonModal(ui.Modal, title="Deny application"):
             )
 
         await interaction.respond(view=decision_layout(application, interaction.user.id, reason=reason), ephemeral=True)
-
-    async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        interaction.__class__ = Interaction
-        await interaction.client.error_handler.handle(interaction, error, source="modal:team-denial")
 
 
 async def run_approval(bot: CircuitBot, application: ApplicationRow, approver: str) -> TeamRow | None:

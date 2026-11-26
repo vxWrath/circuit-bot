@@ -10,6 +10,7 @@ from discord.ui import (
     File,
     Item,
     MediaGallery,
+    Modal,
     Section,
     Separator,
     TextDisplay,
@@ -30,6 +31,7 @@ if TYPE_CHECKING:
 __all__ = (
     "BaseItem",
     "BaseLayoutView",
+    "BaseModal",
     "BaseView",
     "DeferOptions",
     "GuildOnly",
@@ -356,6 +358,30 @@ class BaseLayoutView(discord.ui.LayoutView):
 
     async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any]) -> None:
         source = f"item:{getattr(item, 'custom_id', None) or type(item).__name__}"
+        await interaction.client.error_handler.handle(interaction, error, source=source)
+
+
+class BaseModal(ABC, Modal):
+    """A modal that runs its body with one of the bot's interactions.
+
+    Modal submits bypass the tree, so the interaction is relabelled here
+    before :meth:`handle_submit` sees it, and errors go to the bot's handler.
+    """
+
+    modal_source: ClassVar[str] = ""
+
+    @final
+    async def on_submit(self, interaction: Interaction) -> None:
+        interaction.__class__ = Interaction
+        await self.handle_submit(interaction)
+
+    @abstractmethod
+    async def handle_submit(self, interaction: Interaction) -> None:
+        ...
+
+    async def on_error(self, interaction: Interaction, error: Exception) -> None:
+        interaction.__class__ = Interaction
+        source = f"modal:{self.modal_source or type(self).__name__}"
         await interaction.client.error_handler.handle(interaction, error, source=source)
 
 
