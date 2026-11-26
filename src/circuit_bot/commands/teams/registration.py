@@ -17,10 +17,11 @@ from ...core import (
     InteractionOptions,
     LayoutBuilder,
     autocomplete,
+    create_logged_task,
     get_logger,
     verified_only,
 )
-from ...modules import PlayerService, TeamRow, TeamService
+from ...modules import ApplicationRow, PlayerService, TeamRow, TeamService
 from .review import request_layout
 
 logger = get_logger("teams_commands")
@@ -145,38 +146,13 @@ class Teams(commands.Cog):
             else None
         )
 
-        # The request message and the logo are best-effort - a failed post
-        # leaves the application in /pending teams without a queue handle.
-        request_message: discord.Message | None = None
-
-        try:
-            channel = self.bot.get_channel(self.bot.config.league.pending_teams_channel_id)
-
-            if isinstance(channel, discord.TextChannel):
-                # A controlled filename, so a user-supplied name never leaks through.
-                file = await logo.to_file(filename=f"logo{Path(logo.filename).suffix}") if logo is not None else None
-                layout = request_layout(application, member.id, previous, logo.url if logo is not None else None)
-
-                if file is not None:
-                    request_message = await channel.send(view=layout, file=file)
-                else:
-                    request_message = await channel.send(view=layout)
-
-            else:
-                logger.warning(
-                    "Could not post application %d: channel %d not found",
-                    application.id,
-                    self.bot.config.league.pending_teams_channel_id,
-                )
-        except (discord.HTTPException, ValueError) as e:
-            logger.warning("Could not post application %d: %s", application.id, e)
-
-        if request_message is not None:
-            await team_service.update_application(
-                application,
-                request_message_snowflake=request_message.id,
-                logo_url=request_message.attachments[0].url if request_message.attachments else None,
-            )
+        # The card and the logo are follow-ups: the application is already
+        # written, so a Discord failure here must not read as a failed
+        # registration.  The task logs its own failure.
+        create_logged_task(
+            self.post_request_card(application, member.id, previous, logo),
+            name=f"request-card-{application.id}",
+        )
 
         details = (
             f"**Name:** `{application.name}`\n"
@@ -208,6 +184,45 @@ class Teams(commands.Cog):
         )
 
         await interaction.respond(view=layout.done(), ephemeral=True)
+
+    async def post_request_card(
+        self,
+        application: ApplicationRow,
+        owner_snowflake: int,
+        previous: TeamRow | None,
+        logo: discord.Attachment | None,
+    ) -> None:
+        """Post *application*'s queue card and remember the message on the row.
+
+        Runs detached from the command, so a missing channel or a failed
+        send leaves the application without a queue handle instead of
+        failing the registration that already wrote it.
+        """
+        channel = self.bot.get_channel(self.bot.config.league.pending_teams_channel_id)
+
+        if not isinstance(channel, discord.TextChannel):
+            logger.warning(
+                "Could not post application %d: channel %d not found",
+                application.id,
+                self.bot.config.league.pending_teams_channel_id,
+            )
+            return
+
+        # A controlled filename, so a user-supplied name never leaks through.
+        file = await logo.to_file(filename=f"logo{Path(logo.filename).suffix}") if logo is not None else None
+        layout = request_layout(application, owner_snowflake, previous, logo.url if logo is not None else None)
+
+        if file is None:
+            request_message = await channel.send(view=layout)
+        else:
+            request_message = await channel.send(view=layout, file=file)
+
+        await self.bot.get_service(TeamService).update_application(
+            application,
+            request_message_snowflake=request_message.id,
+            logo_url=request_message.attachments[0].url if request_message.attachments else None,
+        )
+
 
 async def setup(bot: CircuitBot):
     await bot.add_cog(Teams(bot))

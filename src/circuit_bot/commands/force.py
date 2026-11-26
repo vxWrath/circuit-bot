@@ -13,6 +13,7 @@ from ..core import (
     Interaction,
     InteractionOptions,
     RobloxError,
+    create_logged_task,
     developer_only,
     get_logger,
     shared_cooldown,
@@ -83,8 +84,9 @@ class Force(commands.Cog):
 
         await profile.unlink_roblox()
 
-        # The unlink is written; nothing below may fail the command.
-        await profile.reset_nickname()
+        # The unlink is written; the reset and the log run detached so a
+        # Discord failure there can't read as a failed unlink.
+        create_logged_task(profile.reset_nickname(), name=f"nickname-{member.id}")
 
         invoker = interaction.require_member()
 
@@ -98,7 +100,7 @@ class Force(commands.Cog):
             field_title="Removed Roblox",
             enforcer=invoker,
         )
-        await roblox.send_log(self.bot, member.guild, embed)
+        create_logged_task(roblox.send_log(self.bot, member.guild, embed), name=f"link-log-{member.id}")
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unlinked {member.mention} from `{previous_roblox_id}`.**")
 
     @bloxlink.command(
@@ -162,10 +164,11 @@ class Force(commands.Cog):
 
         await profile.link_roblox(roblox_id)
 
-        # The link is written; nothing below may fail the command.
-        headshot = await profile.roblox.headshot_or_none()
-        await profile.set_nickname_from_roblox()
+        # The link is written; the rename and the log run detached so a
+        # Discord failure there can't read as a failed link.
+        create_logged_task(profile.set_nickname_from_roblox(), name=f"nickname-{member.id}")
 
+        headshot = await profile.roblox.headshot_or_none()
         invoker = interaction.require_member()
 
         embed = roblox.build_embed(
@@ -178,7 +181,7 @@ class Force(commands.Cog):
             previous_roblox_id=previous_roblox_id,
             enforcer=invoker,
         )
-        await roblox.send_log(self.bot, member.guild, embed)
+        create_logged_task(roblox.send_log(self.bot, member.guild, embed), name=f"link-log-{member.id}")
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Linked {member.mention} to `{rblx.username}` (`{roblox_id}`).**"

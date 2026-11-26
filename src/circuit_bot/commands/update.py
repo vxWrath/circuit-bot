@@ -11,6 +11,7 @@ from ..core import (
     Interaction,
     InteractionOptions,
     cooldown,
+    create_logged_task,
     shared_cooldown,
 )
 from ..modules import PlayerService, roblox
@@ -69,9 +70,11 @@ class Update(commands.Cog):
 
         await profile.link_roblox(roblox_id)
 
-        # The link is written; nothing below may fail the command.
+        # The link is written; the rename and the log run detached so a
+        # Discord failure there can't read as a failed link.
+        create_logged_task(profile.set_nickname_from_roblox(), name=f"nickname-{member.id}")
+
         headshot = await profile.roblox.headshot_or_none()
-        await profile.set_nickname_from_roblox()
 
         embed = roblox.build_embed(
             "Member Self-Linked",
@@ -82,7 +85,7 @@ class Update(commands.Cog):
             headshot,
             previous_roblox_id=previous_roblox_id,
         )
-        await roblox.send_log(self.bot, member.guild, embed)
+        create_logged_task(roblox.send_log(self.bot, member.guild, embed), name=f"link-log-{member.id}")
 
         await interaction.success(
             f"{CommonEmojis.SUCCESS} **Successfully updated your linked roblox account to `{rblx.username}` (`{roblox_id}`).**"
