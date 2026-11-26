@@ -242,14 +242,15 @@ class TeamService(Service):
 
         return self.application.from_record(record)
 
-    async def approve(self, application: ApplicationRow) -> TeamRow | None:
+    async def approve(self, application: ApplicationRow, approver_id: int) -> tuple[TeamRow, ApplicationRow] | None:
         """Approve *application*: ensure its Discord role and emoji, then bring the team into existence.
 
         The role is required, so a failure to create it aborts the approval.
         The emoji is best-effort - no logo, or an expired upload, means no
         emoji.  ``None`` means a concurrent decision won.  A role or emoji
         reused from a crashed attempt stays for the retry, while objects this
-        attempt created are deleted again on failure.
+        attempt created are deleted again on failure.  The updated application
+        comes back with the approver recorded on it, for the follow-ups.
         """
         if application.status != "pending":
             raise TeamError("That application is no longer pending.")
@@ -270,15 +271,15 @@ class TeamService(Service):
             if logo_url is not None:
                 emoji, emoji_is_new = await self.ensure_emoji(guild, application, logo_url)
 
-            team = await self.approve_write(application, role, emoji, logo_url)
+            decided = await self.approve_write(application, role, emoji, logo_url, approver_id)
         except Exception:
             await self.cleanup_created(role, role_is_new, emoji, emoji_is_new)
             raise
 
-        if team is None:
+        if decided is None:
             await self.cleanup_created(role, role_is_new, emoji, emoji_is_new)
 
-        return team
+        return decided
 
     async def ensure_role(self, guild: discord.Guild, application: ApplicationRow) -> tuple[discord.Role, bool]:
         """The application's role, created if the guild has none by that name yet.
@@ -362,22 +363,29 @@ class TeamService(Service):
         role: discord.Role,
         emoji: discord.Emoji | None,
         logo_url: str | None,
-    ) -> TeamRow | None:
+        approver_id: int,
+    ) -> tuple[TeamRow, ApplicationRow] | None:
         """The database side of an approval: flip the application, then create the team and its ownership.
 
         All three writes share one transaction, and the flip is conditional
         on the application still being ``pending`` - ``None`` means a
-        concurrent decision won.
+        concurrent decision won.  The updated application comes back, since
+        its ``approved_by`` is what the follow-ups display.
         """
         async with self.bot.database.transaction() as conn:
             record = await conn.fetchrow(
-                "UPDATE team_applications SET status = 'approved', decided_at = now(), updated_at = now() "
+                "UPDATE team_applications SET status = 'approved', decided_at = now(), approved_by = $2, updated_at = now() "
                 "WHERE id = $1 AND status = 'pending' RETURNING *",
                 application.id,
+                approver_id,
             )
 
             if record is None:
                 return None
+
+            decided = conn.get_repository(ApplicationRow).from_record(record)
+            # The UPDATE above produced record, so only a codec bug gets here.
+            assert decided is not None
 
             create_team = conn.get_repository(CreateTeam)
             create_ownership = conn.get_repository(CreateOwnership)
@@ -403,7 +411,7 @@ class TeamService(Service):
 
             await create_ownership.insert(CreateOwnership(team_id=team.id, player=application.owner))
 
-            return team
+            return team, decided
 
     async def cleanup_created(
         self,

@@ -1,1 +1,0 @@
-ALTER TABLE teams ALTER COLUMN role_snowflake DROP NOT NULL;

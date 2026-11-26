@@ -79,6 +79,7 @@ CREATE TABLE team_applications (
     status                    text NOT NULL DEFAULT 'pending'
                               CHECK (status IN ('pending', 'denied', 'approved', 'released')),
     decided_at                timestamptz,
+    approved_by               bigint,
     created_at                timestamptz NOT NULL DEFAULT now(),
     updated_at                timestamptz NOT NULL DEFAULT now()
 );
@@ -104,8 +105,9 @@ Decisions, and why:
 - **`previous_team_id` is what the creator chose**, validated at create (see Lineage) and copied to the team at approval. The chain itself lives on `teams` - the link is a fact of the team, not of the request.
 - **`request_message_snowflake` is the approver queue handle.** Every pending request is an embed in the pending-teams channel; the message snowflake is stored when it is posted, so `/approve` and `/deny` can edit the embed after a restart. A pending row with no message (the post failed or never ran) still appears in `/pending teams`; approval skips the embed edit.
 - **`logo_url` is the pending-phase upload** - an image uploaded by the owner during the pending phase (optional). The bot re-uploads the image to the pending-teams channel and posts it on the request message. Treat it as a display cache - Discord attachment URLs are signed and expire - and the team gets its own refreshed copy at approval. Plain `NULL` when the team has none.
-- **`color` is the role color the owner chose**, required at the command and in the schema (migration 0009 makes the column `NOT NULL`), validated at create, and copied to the team at approval.
+- **`color` is the role color the owner chose**, required at the command and in the schema, validated at create, and copied to the team at approval.
 - **`decided_at` is when an approver decided**, whichever way. It is separate from `updated_at`, which tracks any write.
+- **`approved_by` is the approver who approved**, a user snowflake set together with `status = 'approved'` and `NULL` before then. Denials record no denier.
 - **A denied application leaves nothing behind.** No team, no ownership row, no log rows - the name and owner slot are freed by the index, and the row is pure history.
 - **`status = 'released'` is the team's deactivation mirrored here.** The row stays as provenance, but it drops out of both claim indexes, so the name and the owner slot free when the team leaves.
 

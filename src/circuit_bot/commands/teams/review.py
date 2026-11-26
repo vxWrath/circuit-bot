@@ -185,7 +185,7 @@ class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:appr
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **This application was already decided.**")
 
-        team = await run_approval(interaction.client, application, interaction.user.display_name)
+        team = await run_approval(interaction.client, application, interaction.user)
 
         if team is None:
             return await interaction.failure(
@@ -255,21 +255,25 @@ class DenyReasonModal(BaseModal, title="Deny application"):
         await interaction.respond(view=decision_layout(application, interaction.user.id, reason=reason), ephemeral=True)
 
 
-async def run_approval(bot: CircuitBot, application: ApplicationRow, approver: str) -> TeamRow | None:
+async def run_approval(
+    bot: CircuitBot, application: ApplicationRow, approver: discord.User | discord.Member
+) -> TeamRow | None:
     """Approve *application* and launch the follow-ups.  ``None`` means a concurrent decision won.
 
     The follow-ups run in the background, so a closed DM or a deleted
     message can't undo the approval.
     """
-    team = await bot.get_service(TeamService).approve(application)
+    decided = await bot.get_service(TeamService).approve(application, approver.id)
 
-    if team is None:
+    if decided is None:
         return None
+
+    team, application = decided
 
     create_logged_task(announce(bot, team, application), name=f"announce-team-{team.id}")
     create_logged_task(dm_owner(bot, team, application), name=f"dm-owner-{team.id}")
     create_logged_task(
-        mark_decision(bot, application, approver, decision="Approved", footer_note=f"team #{team.id}"),
+        mark_decision(bot, application, f"<@{application.approved_by}>", decision="Approved", footer_note=f"team #{team.id}"),
         name=f"mark-request-{team.id}",
     )
 
@@ -327,7 +331,11 @@ async def announce(bot: CircuitBot, team: TeamRow, application: ApplicationRow) 
 
     embed = discord.Embed(
         title=f"{emoji} {team.name}" if emoji is not None else team.name,
-        description=f"**Owner:** <@{application.owner}>\n**Color:** `#{application.color:06X}`",
+        description=(
+            f"**Owner:** <@{application.owner}>\n"
+            f"**Approved by:** <@{application.approved_by}>\n"
+            f"**Color:** `#{application.color:06X}`"
+        ),
         color=Color(application.color),
         timestamp=discord.utils.utcnow(),
     )
@@ -527,7 +535,7 @@ class TeamReview(commands.Cog):
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No pending application named `{name}`.**")
 
-        team = await run_approval(self.bot, application, interaction.user.display_name)
+        team = await run_approval(self.bot, application, interaction.user)
 
         if team is None:
             return await interaction.failure(

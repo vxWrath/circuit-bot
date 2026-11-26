@@ -3,7 +3,7 @@ CREATE TABLE teams (
     id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name             text NOT NULL,
     application_id   bigint NOT NULL UNIQUE REFERENCES team_applications(id),
-    role_snowflake   bigint NOT NULL,
+    role_snowflake   bigint,
     emoji_snowflake  bigint,
     logo_url         text,
     color            integer CHECK (color BETWEEN 0 AND 16777215),

@@ -35,6 +35,7 @@ class ApplicationRow(ApplicationTable):
 
     status: Literal["pending", "approved", "denied", "released"]
     decided_at: datetime.datetime | None
+    approved_by: int | None
 
     created_at: datetime.datetime
     updated_at: datetime.datetime

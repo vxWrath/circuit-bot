@@ -4,12 +4,13 @@ CREATE TABLE team_applications (
     name                      text NOT NULL,
     owner                     bigint NOT NULL REFERENCES players(snowflake),
     logo_url                  text,
-    color                     integer CHECK (color BETWEEN 0 AND 16777215),
+    color                     integer NOT NULL CHECK (color BETWEEN 0 AND 16777215),
     request_message_snowflake bigint,
     previous_team_id          bigint,  -- FK to teams added in 0003, once teams exists
     status                    text NOT NULL DEFAULT 'pending'
                               CHECK (status IN ('pending', 'denied', 'approved', 'released')),
     decided_at                timestamptz,
+    approved_by               bigint,  -- the approver's snowflake, set with status = 'approved'
     created_at                timestamptz NOT NULL DEFAULT now(),
     updated_at                timestamptz NOT NULL DEFAULT now()
 );
