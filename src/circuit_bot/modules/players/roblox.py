@@ -45,6 +45,7 @@ def add_field(
     if rblx is not None:
         value += [
             f"> **Username:** {rblx.username}",
+            f"> **Display:** {rblx.display_name}",
             f"> **Created:** {utils.format_dt(rblx.created_at, style='R')}",
         ]
 
@@ -102,7 +103,7 @@ def build_embed(
     card, and the enforcer footer when one forced it.
     """
     embed = discord.Embed(
-        description=f"# {title}\n-# {member.name} • {member.id}\n",
+        description=f"# {title}\n-# {member.mention} • {member.id}\n",
         color=color,
     )
     add_field(embed, rblx, roblox_id, headshot, title=field_title, previous_roblox_id=previous_roblox_id)

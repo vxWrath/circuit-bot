@@ -167,9 +167,9 @@ class PlayerService(Service):
             embed = discord.Embed(
                 description=(
                     "# Duplicate Roblox Link Blocked\n"
-                    f"-# New member: {member.name} • {member.id}\n"
+                    f"-# New member: {member.mention} • {member.id}\n"
                     f"-# Existing member: "
-                    f"{owner.name} • {owner.id}"
+                    f"{owner.mention} • {owner.id}"
                     if owner is not None
                     else f"{existing.snowflake}"
                 ),
