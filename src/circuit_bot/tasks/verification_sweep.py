@@ -1,8 +1,5 @@
 """Catch members who joined while the bot was offline: one sweep per startup."""
 
-import asyncio
-import itertools
-
 import discord
 from discord.ext import commands
 
@@ -10,10 +7,6 @@ from ..core import BloxlinkError, CircuitBot, create_logged_task, get_logger
 from ..modules import PlayerService
 
 logger = get_logger("verification_sweep")
-
-# The batch is the concurrency unit: one gather of BATCH_SIZE checks, so the
-# API sees at most this many requests at a time.
-BATCH_SIZE = 10
 
 # Bloxlink failures that stop the sweep, so an outage doesn't turn into one
 # failed request per unchecked member.
@@ -36,7 +29,7 @@ class VerificationSweep(commands.Cog):
         create_logged_task(self.sweep(), name="verification-sweep")
 
     async def sweep(self) -> None:
-        """Chunk the guild, then check every member the database hasn't marked yet."""
+        """Chunk the guild, then ask Bloxlink about every unlinked, unchecked member."""
         await self.bot.wait_until_ready()
 
         guild = self.bot.get_guild(self.bot.config.guild_id)
@@ -59,12 +52,16 @@ class VerificationSweep(commands.Cog):
         # fine while the table holds one guild's members.
         players = {player.snowflake: player for player in await service.all_players()}
 
-        # The verified role alone doesn't say the member is linked: a member
-        # who verified while the bot was offline holds the role but was never
-        # linked.  The marker decides what to re-ask, not the role.
+        # A linked member already has a roblox_id, so only ask Bloxlink about
+        # members who were never linked.  The marker remembers which of those
+        # were asked before, so an unverified member isn't re-asked every startup.
         unchecked = [
             member for member in guild.members
-            if not member.bot and (member.id not in players or players[member.id].verified_checked_at is None)
+            if not member.bot
+            and (
+                member.id not in players
+                or (players[member.id].roblox_id is None and players[member.id].verified_checked_at is None)
+            )
         ]
 
         missing = [member.id for member in unchecked if member.id not in players]
@@ -77,37 +74,35 @@ class VerificationSweep(commands.Cog):
         checked = 0
         linked = 0
         failures = 0
+        marked: list[int] = []
 
-        for batch in itertools.batched(unchecked, BATCH_SIZE, strict=True):
-            results = await asyncio.gather(
-                *(service.link_roblox_from_bloxlink(member) for member in batch),
-                return_exceptions=True,
-            )
+        for member in unchecked:
+            try:
+                result = await service.link_roblox_from_bloxlink(member)
+            except BloxlinkError as e:
+                failures += 1
+                logger.warning("Startup sweep could not check %d: %s", member.id, e)
+            except BaseException:
+                # A write race, not an API failure - leaving the member
+                # unmarked makes the next startup re-ask, which converges.
+                logger.error("Startup sweep failed for %d", member.id, exc_info=True)
+            else:
+                marked.append(member.id)
+                checked += 1
 
-            marked: list[int] = []
-
-            for member, result in zip(batch, results, strict=True):
-                if isinstance(result, BloxlinkError):
-                    failures += 1
-                    logger.warning("Startup sweep could not check %d: %s", member.id, result)
-                elif isinstance(result, BaseException):
-                    # A write race, not an API failure - leaving the member
-                    # unmarked makes the next startup re-ask, which converges.
-                    logger.error("Startup sweep failed for %d", member.id, exc_info=result)
-                else:
-                    marked.append(member.id)
-                    checked += 1
-
-                    if result:
-                        linked += 1
-
-            if marked:
-                # One statement stamps the whole batch.
-                await service.mark_many_verified_checked(marked)
+                if result:
+                    linked += 1
 
             if failures >= FAILURE_LIMIT:
-                logger.warning("Startup sweep stopped after %d Bloxlink failures", failures)
-                return
+                break
+
+        if marked:
+            # One statement stamps everyone checked, however the loop ended.
+            await service.mark_many_verified_checked(marked)
+
+        if failures >= FAILURE_LIMIT:
+            logger.warning("Startup sweep stopped after %d Bloxlink failures", failures)
+            return
 
         logger.info("Startup sweep finished: %d members checked, %d linked", checked, linked)
 
