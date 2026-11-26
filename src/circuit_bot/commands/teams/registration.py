@@ -20,7 +20,8 @@ from ...core import (
     get_logger,
     verified_only,
 )
-from ...modules import ApplicationRow, PlayerService, TeamRow, TeamService
+from ...modules import PlayerService, TeamRow, TeamService
+from .review import request_layout
 
 logger = get_logger("teams_commands")
 
@@ -87,12 +88,12 @@ class Teams(commands.Cog):
             color_value = parse_hex_color(color)
         except ValueError:
             return await interaction.failure(
-                f"{CommonEmojis.FAIL} **`{color}` isn't a hex color - use one like `#5865F2`.**"
+                f"{CommonEmojis.FAIL} **`{color}` is not a hex color.**"
             )
 
         if not 0 <= color_value <= 0xFFFFFF:
             return await interaction.failure(
-                f"{CommonEmojis.FAIL} **Team colors must be between `#000000` and `#FFFFFF`.**"
+                f"{CommonEmojis.FAIL} **`{color}` is not a proper hex color.**"
             )
 
         team_service = self.bot.get_service(TeamService)
@@ -116,7 +117,7 @@ class Teams(commands.Cog):
                 mention = await profile.format_mention()
                 return await interaction.failure(f"{CommonEmojis.FAIL} **You already own the {mention}.**")
 
-            return await interaction.failure(f"{CommonEmojis.FAIL} **You already own `{existing.name}`.**")
+            return await interaction.failure(f"{CommonEmojis.FAIL} **You already own the `{existing.name}`.**")
 
         player_service = self.bot.get_service(PlayerService)
         profile = player_service.profile(member)
@@ -140,15 +141,14 @@ class Teams(commands.Cog):
             channel = self.bot.get_channel(self.bot.config.league.pending_teams_channel_id)
 
             if isinstance(channel, discord.TextChannel):
-                # A controlled filename, so the attachment:// reference in the
-                # embed always matches what was uploaded.
+                # A controlled filename, so a user-supplied name never leaks through.
                 file = await logo.to_file(filename=f"logo{Path(logo.filename).suffix}") if logo is not None else None
-                embed = self.request_embed(member, application, previous, file)
+                layout = request_layout(application, member.id, previous, logo.url if logo is not None else None)
 
                 if file is not None:
-                    request_message = await channel.send(embed=embed, file=file)
+                    request_message = await channel.send(view=layout, file=file)
                 else:
-                    request_message = await channel.send(embed=embed)
+                    request_message = await channel.send(view=layout)
 
             else:
                 logger.warning(
@@ -165,57 +165,37 @@ class Teams(commands.Cog):
                 request_message_snowflake=request_message.id,
                 logo_url=request_message.attachments[0].url if request_message.attachments else None,
             )
-
-        color_hex = f"#{color_value:06X}"
-
-        header = f"{CommonEmojis.SUCCESS} **Application for `{application.name}` sent**"
-        details = f"**Role color:** `{color_hex}`"
+        
+        details = (
+            f"**Name:** `{application.name}`\n"
+            f"**Color:** `{Color(color_value)}`\n"
+            f"**Logo:** `{'see image on right' if logo is not None else 'no logo'}`\n"
+        )
 
         if previous is not None:
-            details += f"\n**Previous team:** {previous.name}"
-
-        next_steps = (
-            "**What happens next**\n"
-            "An approver will review your application and DM you with the decision. "
-            "Approved teams get their Discord role and logo emoji. A denial comes with the reason, "
-            "and you can apply again."
-        )
+            details += f"**Previous team:** `{previous.name}`\n"
 
         layout = LayoutBuilder().container(accent_color=Color(color_value))
-
+        layout.text(f"## Application {application.id}\n")
+        layout.separator()
+        
         if logo is not None:
-            layout.section().text(header).text(details).accessory(ui.Thumbnail(logo.url)).done()
-            layout.separator()
-            layout.text(next_steps)
+            section = layout.section().text(details)
+            section.accessory(ui.Thumbnail(logo.url))
+            section.done()
         else:
-            layout.text(header).text(details).separator().text(next_steps)
+            layout.text(details)
+            
+        layout.separator()
+        layout.text(
+            "## What next?\n"
+            "Your application is reviewed on the appropriateness of your team name and logo only. "
+            "Your team's skill or competence play no part in the decision.\n\n"
+            "An approver will review your application and DM you with the decision. "
+            "A denial comes with the reason, and you can always apply again."
+        )
 
         await interaction.respond(view=layout.done(), ephemeral=True)
-
-    def request_embed(
-        self, member: discord.Member, application: ApplicationRow, previous: TeamRow | None, file: discord.File | None
-    ) -> discord.Embed:
-        """The pending-teams queue embed for *application*."""
-        description = f"**Owner:** {member.mention}\n**Color:** `#{application.color:06X}`"
-
-        if previous is not None:
-            description += f"\n**Previous team:** {previous.name}"
-
-        embed = discord.Embed(
-            title=application.name,
-            description=description,
-            color=Color(application.color),
-            timestamp=discord.utils.utcnow(),
-        )
-        embed.set_footer(text="Use /approve team or /deny team to decide")
-
-        if file is not None:
-            # Referencing the uploaded attachment renders it as the thumbnail
-            # and keeps it out of the message's attachment list.
-            embed.set_thumbnail(url=f"attachment://{file.filename}")
-
-        return embed
-
 
 async def setup(bot: CircuitBot):
     await bot.add_cog(Teams(bot))

@@ -214,6 +214,20 @@ class TeamService(Service):
 
         return rows[0] if rows else None
 
+    async def find_application_by_id(self, application_id: int) -> ApplicationRow | None:
+        """The pending application with *application_id*, or ``None``.
+
+        A stale button press on a decided card must read as "already
+        decided", so decided rows are filtered out here.
+        """
+        rows = self.application.from_records(
+            await self.bot.database.fetch(
+                "SELECT * FROM team_applications WHERE id = $1 AND status = 'pending'", application_id
+            )
+        )
+
+        return rows[0] if rows else None
+
     async def deny(self, application: ApplicationRow) -> ApplicationRow | None:
         """Refuse *application*, freeing its name and owner slot for a resubmission.
 

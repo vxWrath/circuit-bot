@@ -15,6 +15,7 @@ __all__ = (
     "approver_only",
     "create_logged_task",
     "developer_only",
+    "ensure_approver",
     "guild_owner_only",
     "is_developer",
     "is_managed_role",
@@ -139,22 +140,24 @@ def guild_owner_only():
     return check(pred)
 
 
-def approver_only():
-    def pred(interaction: Interaction) -> Literal[True]:
-        # Developers are individuals, not holders of the approver role, so the
-        # role check would wrongly refuse them.
-        if is_developer(interaction.user):
-            return True
-
-        if not isinstance(interaction.user, discord.Member):
-            raise CheckFailure(CheckType.APPROVER)
-
-        if interaction.user.get_role(interaction.client.config.league.approver_role_id) is None:
-            raise CheckFailure(CheckType.APPROVER)
-
+def ensure_approver(interaction: Interaction) -> Literal[True]:
+    """The approver predicate, shared by the commands and the decision buttons."""
+    # Developers are individuals, not holders of the approver role, so the
+    # role check would wrongly refuse them.
+    if is_developer(interaction.user):
         return True
 
-    return check(pred)
+    if not isinstance(interaction.user, discord.Member):
+        raise CheckFailure(CheckType.APPROVER)
+
+    if interaction.user.get_role(interaction.client.config.league.approver_role_id) is None:
+        raise CheckFailure(CheckType.APPROVER)
+
+    return True
+
+
+def approver_only():
+    return check(ensure_approver)
 
 
 def verified_only():
