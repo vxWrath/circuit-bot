@@ -252,7 +252,15 @@ class TeamService(Service):
         if guild is None:
             raise TeamError("The league guild isn't available right now - try again later.")
 
-        role, role_is_new = await self.ensure_role(guild, application)
+        # Reused by name: team names are claim-locked, so a same-named role is
+        # this approval's own leftover from a crashed attempt, never a stranger's.
+        role = discord.utils.get(guild.roles, name=application.name)
+
+        if role is not None:
+            role_is_new = False
+        else:
+            role = await guild.create_role(name=application.name, color=discord.Color(application.color))
+            role_is_new = True
 
         emoji: discord.Emoji | None = None
         emoji_is_new = False
@@ -261,7 +269,24 @@ class TeamService(Service):
             logo_url = await self.fresh_logo_url(application) or application.logo_url
 
             if logo_url is not None:
-                emoji, emoji_is_new = await self.ensure_emoji(guild, application, logo_url)
+                # Emoji names are unique per guild, so a same-named one is a
+                # crashed attempt's leftover.  Creation is best-effort: a dead
+                # URL means no emoji and no error.
+                emoji_name = emoji_name_for(application.name, application.id)
+                existing = discord.utils.get(guild.emojis, name=emoji_name)
+
+                if existing is not None:
+                    emoji = existing
+                else:
+                    try:
+                        async with self.bot.session.get(logo_url) as response:
+                            response.raise_for_status()
+                            image = await response.read()
+
+                        emoji = await guild.create_custom_emoji(name=emoji_name, image=image)
+                        emoji_is_new = True
+                    except (aiohttp.ClientError, discord.HTTPException) as e:
+                        logger.warning("Could not create emoji for team %r: %s", emoji_name, e)
 
             decided = await self.approve_write(application, role, emoji, logo_url, approver_id)
         except Exception:
@@ -272,20 +297,6 @@ class TeamService(Service):
             await self.cleanup_created(role, role_is_new, emoji, emoji_is_new)
 
         return decided
-
-    async def ensure_role(self, guild: discord.Guild, application: ApplicationRow) -> tuple[discord.Role, bool]:
-        """The application's role, created if the guild has none by that name yet.
-
-        The second return says whether this call created it.  A crashed
-        approval's leftover is found by name - team names are claim-locked,
-        so a same-named role is that leftover, not a stranger's.
-        """
-        existing = discord.utils.get(guild.roles, name=application.name)
-
-        if existing is not None:
-            return existing, False
-
-        return await guild.create_role(name=application.name, color=discord.Color(application.color)), True
 
     async def fresh_logo_url(self, application: ApplicationRow) -> str | None:
         """The request message's first attachment URL, refetched so the signature is fresh.
@@ -313,41 +324,6 @@ class TeamService(Service):
             return None
 
         return message.attachments[0].url if message.attachments else None
-
-    async def ensure_emoji(
-        self, guild: discord.Guild, application: ApplicationRow, logo_url: str
-    ) -> tuple[discord.Emoji | None, bool]:
-        """The application's guild emoji, created from *logo_url* if none exists under its name.
-
-        Emoji names are unique per guild, so a same-named one is the crashed
-        attempt's leftover.  Creation is best-effort: a dead URL means no
-        emoji and no error.
-        """
-        name = emoji_name_for(application.name, application.id)
-
-        existing = discord.utils.get(guild.emojis, name=name)
-
-        if existing is not None:
-            return existing, False
-
-        created = await self.create_emoji(guild, name, logo_url)
-        return created, created is not None
-
-    async def create_emoji(self, guild: discord.Guild, name: str, url: str) -> discord.Emoji | None:
-        """Create the guild emoji *name* from the image at *url*, never raising.
-
-        A failed download or create logs and returns ``None`` - the team is
-        approved without an emoji.
-        """
-        try:
-            async with self.bot.session.get(url) as response:
-                response.raise_for_status()
-                image = await response.read()
-
-            return await guild.create_custom_emoji(name=name, image=image)
-        except (aiohttp.ClientError, discord.HTTPException) as e:
-            logger.warning("Could not create emoji for team %r: %s", name, e)
-            return None
 
     async def approve_write(
         self,
