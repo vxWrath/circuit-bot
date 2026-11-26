@@ -161,51 +161,32 @@ class CircuitBot(commands.Bot):
     async def load_commands_and_events(self) -> list[str]:
         self.extension_names = []
 
-        for file_path in self.config.command_path.rglob("*.py"):
-            if file_path.name == "__init__.py":
-                continue
+        # Only the command directory can hold dynamic items, which each
+        # loaded file is scanned for.
+        directories = (
+            (self.config.command_path, True),
+            (self.config.event_path, False),
+            (self.config.task_path, False),
+        )
 
-            cog_path = self.extension_name(file_path)
+        for directory, scan_for_items in directories:
+            for file_path in directory.rglob("*.py"):
+                if file_path.name == "__init__.py":
+                    continue
 
-            try:
-                await self.reload_extension(cog_path)
-                logger.info("Reloaded command extension %s", cog_path)
-            except commands.ExtensionNotLoaded:
-                await self.load_extension(cog_path)
-                logger.info("Loaded command extension %s", cog_path)
+                cog_path = self.extension_name(file_path)
 
-            self.extension_names.append(cog_path)
-            self.find_dynamic_items(cog_path)
+                try:
+                    await self.reload_extension(cog_path)
+                    logger.info("Reloaded extension %s", cog_path)
+                except commands.ExtensionNotLoaded:
+                    await self.load_extension(cog_path)
+                    logger.info("Loaded extension %s", cog_path)
 
-        for file_path in self.config.event_path.glob("*.py"):
-            if file_path.name == "__init__.py":
-                continue
+                self.extension_names.append(cog_path)
 
-            cog_path = self.extension_name(file_path)
-
-            try:
-                await self.reload_extension(cog_path)
-                logger.info("Reloaded event extension %s", cog_path)
-            except commands.ExtensionNotLoaded:
-                await self.load_extension(cog_path)
-                logger.info("Loaded event extension %s", cog_path)
-
-            self.extension_names.append(cog_path)
-
-        for file_path in self.config.task_path.glob("*.py"):
-            if file_path.name == "__init__.py":
-                continue
-
-            cog_path = self.extension_name(file_path)
-
-            try:
-                await self.reload_extension(cog_path)
-                logger.info("Reloaded task extension %s", cog_path)
-            except commands.ExtensionNotLoaded:
-                await self.load_extension(cog_path)
-                logger.info("Loaded task extension %s", cog_path)
-
-            self.extension_names.append(cog_path)
+                if scan_for_items:
+                    self.find_dynamic_items(cog_path)
 
         self.fill_services()
 

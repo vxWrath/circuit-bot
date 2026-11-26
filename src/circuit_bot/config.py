@@ -34,6 +34,7 @@ class LeagueSettings(NamedTuple):
     approver_role_id: int
     pending_teams_channel_id: int
     new_teams_channel_id: int
+    developer_ids: tuple[int, ...]
 
 
 def get_league_settings() -> LeagueSettings:
@@ -64,6 +65,7 @@ def get_league_settings() -> LeagueSettings:
         "guild": section("guild"),
         "roles": section("roles"),
         "teams": section("teams"),
+        "developers": section("developers"),
     }
 
     def id_of(section: str, key: str) -> int:
@@ -74,12 +76,21 @@ def get_league_settings() -> LeagueSettings:
 
         return value
 
+    def ids_of(section: str, key: str) -> tuple[int, ...]:
+        value = sections[section].get(key)
+
+        if not isinstance(value, list) or not all(isinstance(item, int) for item in value):
+            raise OSError(f"Config file '{path}' is missing a list of integers '{key}' in [{section}].")
+
+        return tuple(value)
+
     return LeagueSettings(
         verified_role_id=id_of("guild", "verified_role"),
         roblox_link_log_channel_id=id_of("guild", "roblox_link_log_channel"),
         approver_role_id=id_of("roles", "approver"),
         pending_teams_channel_id=id_of("teams", "pending_teams_channel"),
         new_teams_channel_id=id_of("teams", "new_teams_channel"),
+        developer_ids=ids_of("developers", "ids"),
     )
 
 

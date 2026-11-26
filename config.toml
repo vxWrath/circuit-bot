@@ -7,6 +7,9 @@ roblox_link_log_channel = 1561244309788037170
 [roles]
 approver = 1564127606536667267
 
+[developers]
+ids = [1104883688279384156, 450136921327271946]
+
 [teams]
 pending_teams_channel = 1564128159950045225
 new_teams_channel = 1564127916776890422

@@ -30,9 +30,6 @@ from ...modules import ApplicationRow, PlayerService, TeamRow, TeamService
 
 logger = get_logger("teams_review_commands")
 
-DEFER_OPTIONS = InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))
-DEFER = {"options": DEFER_OPTIONS}
-
 DECISION_HINT = "-# Use the buttons below to decide, or use /approve team or /deny team"
 
 
@@ -162,6 +159,17 @@ class DecisionCheck:
         return True
 
 
+def team_review_of(interaction: Interaction) -> "TeamReview | None":
+    """The review cog behind *interaction*'s bot, or ``None`` if the extension isn't loaded.
+
+    The decision flow lives on the cog so nothing here threads the bot
+    through function arguments.  A ``None`` only shows on a stale button
+    press, after the extension was unloaded underneath the card.
+    """
+    review = interaction.client.get_cog(TeamReview.__cog_name__)
+    return review if isinstance(review, TeamReview) else None
+
+
 class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:approve:(\d+)"):
     """The card's approve button: run the approval and mark the card."""
 
@@ -172,7 +180,7 @@ class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:appr
             custom_id=f"team:approve:{application_id}",
         )
         # Approval creates roles and emojis, so the reply is deferred.
-        super().__init__(button, options=DEFER_OPTIONS)
+        super().__init__(button, options=InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True)))
         self.application_id = application_id
 
     @classmethod
@@ -180,12 +188,17 @@ class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:appr
         return cls(int(match.group(1)))
 
     async def callback(self, interaction: Interaction) -> None:
+        review = team_review_of(interaction)
+
+        if review is None:
+            return await interaction.failure(f"{CommonEmojis.FAIL} **The review commands aren't loaded right now.**")
+
         application = await interaction.client.get_service(TeamService).find_application_by_id(self.application_id)
 
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **This application was already decided.**")
 
-        team = await run_approval(interaction.client, application, interaction.user)
+        team = await review.run_approval(application, interaction.user)
 
         if team is None:
             return await interaction.failure(
@@ -197,7 +210,7 @@ class ApproveTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:appr
                 application,
                 interaction.user.id,
                 team=team,
-                emoji=guild_emoji_for(interaction.client, team),
+                emoji=review.guild_emoji_for(team),
             ),
             ephemeral=True,
         )
@@ -239,13 +252,18 @@ class DenyReasonModal(BaseModal, title="Deny application"):
         self.application_id = application_id
 
     async def handle_submit(self, interaction: Interaction) -> None:
+        review = team_review_of(interaction)
+
+        if review is None:
+            return await interaction.failure(f"{CommonEmojis.FAIL} **The review commands aren't loaded right now.**")
+
         application = await interaction.client.get_service(TeamService).find_application_by_id(self.application_id)
 
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **This application was already decided.**")
 
         reason = self.reason.value.strip() or None
-        decided = await run_denial(interaction.client, application, interaction.user.display_name, reason)
+        decided = await review.run_denial(application, interaction.user.display_name, reason)
 
         if decided is None:
             return await interaction.failure(
@@ -255,206 +273,13 @@ class DenyReasonModal(BaseModal, title="Deny application"):
         await interaction.respond(view=decision_layout(application, interaction.user.id, reason=reason), ephemeral=True)
 
 
-async def run_approval(
-    bot: CircuitBot, application: ApplicationRow, approver: discord.User | discord.Member
-) -> TeamRow | None:
-    """Approve *application* and launch the follow-ups.  ``None`` means a concurrent decision won.
-
-    The follow-ups run in the background, so a closed DM or a deleted
-    message can't undo the approval.
-    """
-    decided = await bot.get_service(TeamService).approve(application, approver.id)
-
-    if decided is None:
-        return None
-
-    team, application = decided
-
-    create_logged_task(announce(bot, team, application), name=f"announce-team-{team.id}")
-    create_logged_task(dm_owner(bot, team, application), name=f"dm-owner-{team.id}")
-    create_logged_task(
-        mark_decision(bot, application, f"<@{application.approved_by}>", decision="Approved", footer_note=f"team #{team.id}"),
-        name=f"mark-request-{team.id}",
-    )
-
-    return team
-
-
-async def run_denial(
-    bot: CircuitBot, application: ApplicationRow, approver: str, reason: str | None
-) -> ApplicationRow | None:
-    """Deny *application* and launch the follow-ups.  ``None`` means a concurrent decision won.
-
-    The follow-ups run in the background, so a closed DM or a deleted
-    message can't undo the denial.
-    """
-    decided = await bot.get_service(TeamService).deny(application)
-
-    if decided is None:
-        return None
-
-    create_logged_task(dm_denial(bot, application, reason), name=f"dm-denial-{application.id}")
-    create_logged_task(
-        mark_decision(bot, application, approver, decision="Denied"),
-        name=f"mark-denial-{application.id}",
-    )
-
-    return decided
-
-
-def guild_emoji_for(bot: CircuitBot, team: TeamRow) -> discord.Emoji | None:
-    """The team's guild emoji, resolved for display, or ``None`` when it has none or the guild is gone."""
-    if team.emoji_snowflake is None:
-        return None
-
-    guild = bot.get_guild(bot.config.guild_id)
-
-    if guild is None:
-        return None
-
-    return discord.utils.get(guild.emojis, id=team.emoji_snowflake)
-
-
-async def announce(bot: CircuitBot, team: TeamRow, application: ApplicationRow) -> None:
-    """Post the approval announcement to the new-teams channel - the public record."""
-    channel = bot.get_channel(bot.config.league.new_teams_channel_id)
-
-    if not isinstance(channel, discord.TextChannel):
-        logger.warning(
-            "Could not announce team %d: channel %d not found",
-            team.id,
-            bot.config.league.new_teams_channel_id,
-        )
-        return
-
-    emoji = guild_emoji_for(bot, team)
-
-    embed = discord.Embed(
-        title=f"{emoji} {team.name}" if emoji is not None else team.name,
-        description=(
-            f"**Owner:** <@{application.owner}>\n"
-            f"**Approved by:** <@{application.approved_by}>\n"
-            f"**Color:** `#{application.color:06X}`"
-        ),
-        color=Color(application.color),
-        timestamp=discord.utils.utcnow(),
-    )
-    embed.set_footer(text=f"Team #{team.id}")
-
-    if team.logo_url is not None:
-        embed.set_thumbnail(url=team.logo_url)
-
-    await channel.send(embed=embed)
-
-
-async def dm_owner(bot: CircuitBot, team: TeamRow, application: ApplicationRow) -> None:
-    """DM the new owner with the decision and what they gained."""
-    owner = await bot.get_service(PlayerService).member(snowflake=application.owner)
-
-    if owner is None:
-        logger.warning("Could not DM owner %d of team %d: not in guild", application.owner, team.id)
-        return
-
-    description = f"**{team.name}** is now a league team!"
-
-    if team.role_snowflake is not None:
-        description += f"\nYour role: <@&{team.role_snowflake}>"
-
-    description += f"\nYour color: `#{application.color:06X}`"
-
-    embed = discord.Embed(
-        title="Application approved",
-        description=description,
-        color=Color.brand_green(),
-    )
-
-    await owner.send(embed=embed)
-
-
-async def dm_denial(bot: CircuitBot, application: ApplicationRow, reason: str | None) -> None:
-    """DM the owner that their application was denied, with the reason."""
-    owner = await bot.get_service(PlayerService).member(snowflake=application.owner)
-
-    if owner is None:
-        logger.warning("Could not DM owner %d about denial: not in guild", application.owner)
-        return
-
-    description = f"**{application.name}** was denied."
-
-    if reason:
-        description += f"\n**Reason:** {reason}"
-
-    description += "\nYou can apply again with the same or a new name."
-
-    embed = discord.Embed(
-        title="Application denied",
-        description=description,
-        color=Color.brand_red(),
-    )
-
-    await owner.send(embed=embed)
-
-
-async def mark_decision(
-    bot: CircuitBot, application: ApplicationRow, approver: str, *, decision: str, footer_note: str = ""
-) -> None:
-    """Update the request card in the pending-teams channel with the decision.
-
-    *decision* is "Approved" or "Denied".  The card is a layout, so it
-    is rebuilt from the application row with the decision accent and
-    line instead of being mutated in place.
-    """
-    if application.request_message_snowflake is None:
-        return
-
-    channel = bot.get_channel(bot.config.league.pending_teams_channel_id)
-
-    if not isinstance(channel, discord.TextChannel):
-        logger.warning(
-            "Could not update request card for application %d: channel %d not found",
-            application.id,
-            bot.config.league.pending_teams_channel_id,
-        )
-        return
-
-    try:
-        message = await channel.fetch_message(application.request_message_snowflake)
-    except (discord.NotFound, discord.Forbidden, discord.HTTPException) as e:
-        logger.warning("Could not fetch request message for application %d: %s", application.id, e)
-        return
-
-    if decision == "Approved":
-        prefix, color = CommonEmojis.SUCCESS, Color.brand_green()
-    else:
-        prefix, color = CommonEmojis.FAIL, Color.brand_red()
-
-    line = f"{decision} by {approver}"
-
-    if footer_note:
-        line += f" • {footer_note}"
-
-    previous = (
-        await bot.get_service(TeamService).get_team(application.previous_team_id)
-        if application.previous_team_id is not None
-        else None
-    )
-
-    layout = request_layout(
-        application,
-        application.owner,
-        previous,
-        application.logo_url,
-        accent=color,
-        decision_line=f"-# {prefix} {line}",
-    )
-
-    try:
-        await message.edit(view=layout)
-    except discord.HTTPException as e:
-        logger.warning("Could not update request card for application %d: %s", application.id, e)
-
-
 class TeamReview(commands.Cog):
+    """The approver's commands and the decision flow the card buttons share.
+
+    The flow lives here rather than as free functions so it reaches the bot
+    through ``self``, the way the commands do.
+    """
+
     pending = CircuitGroup(name="pending", description="Pending things.", guild_only=True)
     approve = CircuitGroup(name="approve", description="Approve something.", guild_only=True)
     deny = CircuitGroup(name="deny", description="Deny something.", guild_only=True)
@@ -462,7 +287,212 @@ class TeamReview(commands.Cog):
     def __init__(self, bot: CircuitBot):
         self.bot = bot
 
-    @pending.command(name="teams", description="List every pending team application.", extras=DEFER)
+    # -- the decision flow, shared by the commands and the card buttons -----
+
+    async def run_approval(
+        self, application: ApplicationRow, approver: discord.User | discord.Member
+    ) -> TeamRow | None:
+        """Approve *application* and launch the follow-ups.  ``None`` means a concurrent decision won.
+
+        The follow-ups run in the background, so a closed DM or a deleted
+        message can't undo the approval.
+        """
+        decided = await self.bot.get_service(TeamService).approve(application, approver.id)
+
+        if decided is None:
+            return None
+
+        team, application = decided
+
+        create_logged_task(self.announce(team, application), name=f"announce-team-{team.id}")
+        create_logged_task(self.dm_owner(team, application), name=f"dm-owner-{team.id}")
+        create_logged_task(
+            self.mark_decision(
+                application,
+                f"<@{application.approved_by}>",
+                decision="Approved",
+                footer_note=f"team #{team.id}",
+            ),
+            name=f"mark-request-{team.id}",
+        )
+
+        return team
+
+    async def run_denial(
+        self, application: ApplicationRow, approver: str, reason: str | None
+    ) -> ApplicationRow | None:
+        """Deny *application* and launch the follow-ups.  ``None`` means a concurrent decision won.
+
+        The follow-ups run in the background, so a closed DM or a deleted
+        message can't undo the denial.
+        """
+        decided = await self.bot.get_service(TeamService).deny(application)
+
+        if decided is None:
+            return None
+
+        create_logged_task(self.dm_denial(application, reason), name=f"dm-denial-{application.id}")
+        create_logged_task(
+            self.mark_decision(application, approver, decision="Denied"),
+            name=f"mark-denial-{application.id}",
+        )
+
+        return decided
+
+    def guild_emoji_for(self, team: TeamRow) -> discord.Emoji | None:
+        """The team's guild emoji, resolved for display, or ``None`` when it has none or the guild is gone."""
+        if team.emoji_snowflake is None:
+            return None
+
+        guild = self.bot.get_guild(self.bot.config.guild_id)
+
+        if guild is None:
+            return None
+
+        return discord.utils.get(guild.emojis, id=team.emoji_snowflake)
+
+    async def announce(self, team: TeamRow, application: ApplicationRow) -> None:
+        """Post the approval announcement to the new-teams channel - the public record."""
+        channel = self.bot.get_channel(self.bot.config.league.new_teams_channel_id)
+
+        if not isinstance(channel, discord.TextChannel):
+            logger.warning(
+                "Could not announce team %d: channel %d not found",
+                team.id,
+                self.bot.config.league.new_teams_channel_id,
+            )
+            return
+
+        emoji = self.guild_emoji_for(team)
+
+        embed = discord.Embed(
+            title=f"{emoji} {team.name}" if emoji is not None else team.name,
+            description=(
+                f"**Owner:** <@{application.owner}>\n"
+                f"**Approved by:** <@{application.approved_by}>\n"
+                f"**Color:** `#{application.color:06X}`"
+            ),
+            color=Color(application.color),
+            timestamp=discord.utils.utcnow(),
+        )
+        embed.set_footer(text=f"Team #{team.id}")
+
+        if team.logo_url is not None:
+            embed.set_thumbnail(url=team.logo_url)
+
+        await channel.send(embed=embed)
+
+    async def dm_owner(self, team: TeamRow, application: ApplicationRow) -> None:
+        """DM the new owner with the decision and what they gained."""
+        owner = await self.bot.get_service(PlayerService).member(snowflake=application.owner)
+
+        if owner is None:
+            logger.warning("Could not DM owner %d of team %d: not in guild", application.owner, team.id)
+            return
+
+        description = f"**{team.name}** is now a league team!"
+
+        if team.role_snowflake is not None:
+            description += f"\nYour role: <@&{team.role_snowflake}>"
+
+        description += f"\nYour color: `#{application.color:06X}`"
+
+        embed = discord.Embed(
+            title="Application approved",
+            description=description,
+            color=Color.brand_green(),
+        )
+
+        await owner.send(embed=embed)
+
+    async def dm_denial(self, application: ApplicationRow, reason: str | None) -> None:
+        """DM the owner that their application was denied, with the reason."""
+        owner = await self.bot.get_service(PlayerService).member(snowflake=application.owner)
+
+        if owner is None:
+            logger.warning("Could not DM owner %d about denial: not in guild", application.owner)
+            return
+
+        description = f"**{application.name}** was denied."
+
+        if reason:
+            description += f"\n**Reason:** {reason}"
+
+        description += "\nYou can apply again with the same or a new name."
+
+        embed = discord.Embed(
+            title="Application denied",
+            description=description,
+            color=Color.brand_red(),
+        )
+
+        await owner.send(embed=embed)
+
+    async def mark_decision(
+        self, application: ApplicationRow, approver: str, *, decision: str, footer_note: str = ""
+    ) -> None:
+        """Update the request card in the pending-teams channel with the decision.
+
+        *decision* is "Approved" or "Denied".  The card is a layout, so it
+        is rebuilt from the application row with the decision accent and
+        line instead of being mutated in place.
+        """
+        if application.request_message_snowflake is None:
+            return
+
+        channel = self.bot.get_channel(self.bot.config.league.pending_teams_channel_id)
+
+        if not isinstance(channel, discord.TextChannel):
+            logger.warning(
+                "Could not update request card for application %d: channel %d not found",
+                application.id,
+                self.bot.config.league.pending_teams_channel_id,
+            )
+            return
+
+        try:
+            message = await channel.fetch_message(application.request_message_snowflake)
+        except (discord.NotFound, discord.Forbidden, discord.HTTPException) as e:
+            logger.warning("Could not fetch request message for application %d: %s", application.id, e)
+            return
+
+        if decision == "Approved":
+            prefix, color = CommonEmojis.SUCCESS, Color.brand_green()
+        else:
+            prefix, color = CommonEmojis.FAIL, Color.brand_red()
+
+        line = f"{decision} by {approver}"
+
+        if footer_note:
+            line += f" • {footer_note}"
+
+        previous = (
+            await self.bot.get_service(TeamService).get_team(application.previous_team_id)
+            if application.previous_team_id is not None
+            else None
+        )
+
+        layout = request_layout(
+            application,
+            application.owner,
+            previous,
+            application.logo_url,
+            accent=color,
+            decision_line=f"-# {prefix} {line}",
+        )
+
+        try:
+            await message.edit(view=layout)
+        except discord.HTTPException as e:
+            logger.warning("Could not update request card for application %d: %s", application.id, e)
+
+    # -- commands ------------------------------------------------------------
+
+    @pending.command(
+        name="teams",
+        description="List every pending team application.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @approver_only()
     async def pending_teams(self, interaction: Interaction):
         """The approver's queue: every pending application, oldest first."""
@@ -522,7 +552,11 @@ class TeamReview(commands.Cog):
 
         return embed
 
-    @approve.command(name="team", description="Approve a pending team application.", extras=DEFER)
+    @approve.command(
+        name="team",
+        description="Approve a pending team application.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @describe(name="The pending application's team name.")
     @autocomplete(name=pending_names_autocomplete)
     @approver_only()
@@ -535,7 +569,7 @@ class TeamReview(commands.Cog):
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No pending application named `{name}`.**")
 
-        team = await run_approval(self.bot, application, interaction.user)
+        team = await self.run_approval(application, interaction.user)
 
         if team is None:
             return await interaction.failure(
@@ -547,12 +581,16 @@ class TeamReview(commands.Cog):
                 application,
                 interaction.user.id,
                 team=team,
-                emoji=guild_emoji_for(self.bot, team),
+                emoji=self.guild_emoji_for(team),
             ),
             ephemeral=True,
         )
 
-    @deny.command(name="team", description="Deny a pending team application.", extras=DEFER)
+    @deny.command(
+        name="team",
+        description="Deny a pending team application.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @describe(
         name="The pending application's team name.",
         reason="Why the application is being denied. Sent to the owner.",
@@ -568,7 +606,7 @@ class TeamReview(commands.Cog):
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No pending application named `{name}`.**")
 
-        decided = await run_denial(self.bot, application, interaction.user.display_name, reason)
+        decided = await self.run_denial(application, interaction.user.display_name, reason)
 
         if decided is None:
             return await interaction.failure(

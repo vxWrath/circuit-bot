@@ -1,6 +1,6 @@
 import asyncio
 from collections.abc import Awaitable
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 from unicodedata import normalize as unicode_normalize
 
 import discord
@@ -9,8 +9,10 @@ from ..logging import get_logger
 from .app_commands import CheckFailure, CheckType, check
 from .interaction import Interaction
 
+if TYPE_CHECKING:
+    from .bot import CircuitBot
+
 __all__ = (
-    "DEV_IDS",
     "MINIMUM_PERMISSIONS",
     "approver_only",
     "create_logged_task",
@@ -25,11 +27,6 @@ __all__ = (
 
 logger = get_logger("utils")
 
-DEV_IDS = [
-    1104883688279384156,  # godmadewrath
-    450136921327271946,  # wrath
-]
-
 MINIMUM_PERMISSIONS = {
     p: status
     for p, status in discord.Permissions(
@@ -39,8 +36,9 @@ MINIMUM_PERMISSIONS = {
 }
 
 
-def is_developer(user: discord.User | discord.Member) -> bool:
-    return user.id in DEV_IDS
+def is_developer(bot: "CircuitBot", user: discord.User | discord.Member) -> bool:
+    """Whether *user* is one of the developer ids in ``config.toml``."""
+    return user.id in bot.config.league.developer_ids
 
 
 def is_managed_role(role: discord.Role) -> bool:
@@ -120,7 +118,7 @@ def create_logged_task[T](
 
 def developer_only():
     async def pred(interaction: Interaction) -> Literal[True]:
-        if is_developer(interaction.user):
+        if is_developer(interaction.client, interaction.user):
             return True
         raise CheckFailure(CheckType.DEVELOPER)
 
@@ -144,7 +142,7 @@ def ensure_approver(interaction: Interaction) -> Literal[True]:
     """The approver predicate, shared by the commands and the decision buttons."""
     # Developers are individuals, not holders of the approver role, so the
     # role check would wrongly refuse them.
-    if is_developer(interaction.user):
+    if is_developer(interaction.client, interaction.user):
         return True
 
     if not isinstance(interaction.user, discord.Member):
@@ -162,7 +160,7 @@ def approver_only():
 
 def verified_only():
     def pred(interaction: Interaction) -> Literal[True]:
-        if is_developer(interaction.user):
+        if is_developer(interaction.client, interaction.user):
             return True
 
         if not isinstance(interaction.user, discord.Member):

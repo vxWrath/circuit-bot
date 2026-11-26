@@ -21,8 +21,6 @@ from ..modules import PlayerService, roblox
 
 logger = get_logger("force")
 
-DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
-
 
 class Force(commands.Cog):
     def __init__(self, bot: CircuitBot):
@@ -40,14 +38,22 @@ class Force(commands.Cog):
         guild_only=True,
     )
 
-    @roblox_group.command(name="update", description="Set a player's linked Roblox account.", extras=DEFER)
+    @roblox_group.command(
+        name="update",
+        description="Set a player's linked Roblox account.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @describe(member="The member to update", roblox_id="The Roblox ID to link")
     @developer_only()
     @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     async def roblox_update(self, interaction: Interaction, member: discord.Member, roblox_id: int):
         await self.link_roblox(interaction, member, roblox_id)
 
-    @roblox_group.command(name="unlink", description="Drop a player's linked Roblox account.", extras=DEFER)
+    @roblox_group.command(
+        name="unlink",
+        description="Drop a player's linked Roblox account.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @describe(member="The member to update")
     @developer_only()
     async def roblox_unlink(self, interaction: Interaction, member: discord.Member):
@@ -96,7 +102,9 @@ class Force(commands.Cog):
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unlinked {member.mention} from `{previous_roblox_id}`.**")
 
     @bloxlink.command(
-        name="update", description="Update a player's linked Roblox account from Bloxlink's records.", extras=DEFER
+        name="update",
+        description="Update a player's linked Roblox account from Bloxlink's records.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
     )
     @describe(member="The member to update")
     @developer_only()

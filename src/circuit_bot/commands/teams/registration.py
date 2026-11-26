@@ -25,8 +25,6 @@ from .review import request_layout
 
 logger = get_logger("teams_commands")
 
-DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
-
 
 def parse_hex_color(raw: str) -> int:
     """*raw* as an RGB int - ``5865F2`` or ``#5865F2``.  Raises ``ValueError`` on garbage."""
@@ -57,12 +55,26 @@ class Teams(commands.Cog):
         # Each call wraps the same function in its own Command, so the checks,
         # autocompletes, and body stay defined once.
         self.register.command(
-            name="team", description="Register your team and apply to join the league.", extras=DEFER
+            name="team",
+            description="Register your team and apply to join the league.",
+            extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
         )(self.create_team)
 
-        self.create.command(name="team", description="Alias for /register team", extras=DEFER)(self.create_team)
-        self.start.command(name="team", description="Alias for /register team", extras=DEFER)(self.create_team)
-        self.apply_for.command(name="owner", description="Alias for /register team", extras=DEFER)(self.create_team)
+        self.create.command(
+            name="team",
+            description="Alias for /register team",
+            extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+        )(self.create_team)
+        self.start.command(
+            name="team",
+            description="Alias for /register team",
+            extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+        )(self.create_team)
+        self.apply_for.command(
+            name="owner",
+            description="Alias for /register team",
+            extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+        )(self.create_team)
 
     @describe(
         name="The team name, 2 to 32 characters.",
@@ -165,7 +177,7 @@ class Teams(commands.Cog):
                 request_message_snowflake=request_message.id,
                 logo_url=request_message.attachments[0].url if request_message.attachments else None,
             )
-        
+
         details = (
             f"**Name:** `{application.name}`\n"
             f"**Color:** `{Color(color_value)}`\n"
@@ -178,14 +190,14 @@ class Teams(commands.Cog):
         layout = LayoutBuilder().container(accent_color=Color(color_value))
         layout.text(f"## Application {application.id}\n")
         layout.separator()
-        
+
         if logo is not None:
             section = layout.section().text(details)
             section.accessory(ui.Thumbnail(logo.url))
             section.done()
         else:
             layout.text(details)
-            
+
         layout.separator()
         layout.text(
             "## What next?\n"

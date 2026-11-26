@@ -15,8 +15,6 @@ from ..core import (
 )
 from ..modules import PlayerService, roblox
 
-DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
-
 
 class Update(commands.Cog):
     def __init__(self, bot: CircuitBot):
@@ -24,7 +22,11 @@ class Update(commands.Cog):
 
     update = CircuitGroup(name="update", description="Update your own data.", guild_only=True)
 
-    @update.command(name="roblox", description="Update your linked Roblox account.", extras=DEFER)
+    @update.command(
+        name="roblox",
+        description="Update your linked Roblox account.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @shared_cooldown("bloxlink", limit=1, duration=timedelta(minutes=1))
     @shared_cooldown("roblox", limit=1, duration=timedelta(minutes=1))
     @cooldown("weekly", limit=1, duration=timedelta(days=7))

@@ -13,8 +13,6 @@ from ..core import (
     developer_only,
 )
 
-DEFER = {"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))}
-
 
 async def guild_autocomplete(interaction: Interaction, current_value: str) -> list[Choice[str]]:
     if current_value.isdigit():
@@ -31,19 +29,31 @@ class Extensions(commands.Cog):
 
     ext = CircuitGroup(name="ext", description="Manage the bot's command and event extensions.", guild_only=True)
 
-    @ext.command(name="reload", description="Reload every command extension.", extras=DEFER)
+    @ext.command(
+        name="reload",
+        description="Reload every command extension.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @developer_only()
     async def reload(self, interaction: Interaction):
         await self.bot.load_commands_and_events()
         await interaction.success(f"{CommonEmojis.SUCCESS} **Reloaded command & event extensions**")
 
-    @ext.command(name="unload", description="Unload every command extension.", extras=DEFER)
+    @ext.command(
+        name="unload",
+        description="Unload every command extension.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @developer_only()
     async def unload(self, interaction: Interaction):
         await self.bot.unload_commands_and_events()
         await interaction.success(f"{CommonEmojis.SUCCESS} **Unloaded command & event extensions**")
 
-    @ext.command(name="sync", description="Sync the bot's commands with Discord.", extras=DEFER)
+    @ext.command(
+        name="sync",
+        description="Sync the bot's commands with Discord.",
+        extras={"options": InteractionOptions(defer=DeferOptions(defer=True, ephemeral=True))},
+    )
     @describe(guild_id="The guild to use")
     @rename(guild_id="guild")
     @autocomplete(guild_id=guild_autocomplete)

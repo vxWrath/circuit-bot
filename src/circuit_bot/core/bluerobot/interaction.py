@@ -303,18 +303,6 @@ class BaseItem(ABC, DynamicItem[BaseT], template=BASE_TEMPLATE):
             "Dynamic items must implement build() method to parse custom_id and return an instance"
         )
 
-    def require_guild(self, interaction: Interaction) -> discord.Guild:
-        if interaction.guild is None:
-            raise GuildOnly(interaction=True)
-
-        return interaction.guild
-
-    def require_user(self, interaction: Interaction) -> discord.User:
-        if interaction.user is None or not isinstance(interaction.user, discord.User):
-            raise UserOnly(interaction=True)
-
-        return interaction.user
-
     def require_member(self, interaction: Interaction) -> discord.Member:
         if interaction.user is None or not isinstance(interaction.user, discord.Member):
             raise MemberOnly(interaction=True)
@@ -337,15 +325,19 @@ class BaseItem(ABC, DynamicItem[BaseT], template=BASE_TEMPLATE):
         return True
 
 
-class BaseView(discord.ui.View):
-    children: list[DynamicItem[Button[Self] | BaseSelect[Self]]]
+class ViewErrorHandler:
+    """The ``on_error`` every view shares: hand the failure to the bot's handler."""
 
     async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any]) -> None:
         source = f"item:{getattr(item, 'custom_id', None) or type(item).__name__}"
         await interaction.client.error_handler.handle(interaction, error, source=source)
 
 
-class BaseLayoutView(discord.ui.LayoutView):
+class BaseView(ViewErrorHandler, discord.ui.View):
+    children: list[DynamicItem[Button[Self] | BaseSelect[Self]]]
+
+
+class BaseLayoutView(ViewErrorHandler, discord.ui.LayoutView):
     children: list[
         DynamicItem[Button[Self] | BaseSelect[Self]]
         | File[Self]
@@ -355,10 +347,6 @@ class BaseLayoutView(discord.ui.LayoutView):
         | TextDisplay[Self]
         | Thumbnail[Self]
     ]
-
-    async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any]) -> None:
-        source = f"item:{getattr(item, 'custom_id', None) or type(item).__name__}"
-        await interaction.client.error_handler.handle(interaction, error, source=source)
 
 
 class BaseModal(ABC, Modal):
