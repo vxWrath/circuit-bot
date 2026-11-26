@@ -72,11 +72,15 @@ class Repository[R: Row]:
         """Render the equality ``WHERE`` clause over the columns in *filters*.
 
         Values go separately and in the same order, so the clause only ever holds
-        column names.
+        column names.  A list or tuple value matches any of its elements, rendered
+        as ``= ANY(...)``, so a status filter stays one read.
         """
 
         self.check_columns(filters)
-        return " AND ".join(f"{column} = ${i}" for i, column in enumerate(filters, start=1))
+        return " AND ".join(
+            f"{column} = ANY(${i})" if isinstance(value, (list, tuple)) else f"{column} = ${i}"
+            for i, (column, value) in enumerate(filters.items(), start=1)
+        )
 
     def column_values(self, obj: R, columns: Sequence[str]) -> list[Any]:
         """The values *columns* take on *obj*, in the order they were given.
@@ -132,12 +136,21 @@ class Repository[R: Row]:
 
         return self.from_records(records)
 
-    async def find_by(self, **filters: Any) -> list[R]:
-        """Look up rows matching every equality filter, e.g. ``find_by(user_id=5, active=True)``."""
+    async def find_by(self, *order_by: str, **filters: Any) -> list[R]:
+        """Look up rows matching every equality filter, e.g. ``find_by(user_id=5, active=True)``.
+
+        A list or tuple value matches any of its elements.  Leading positional
+        arguments name columns for ``ORDER BY``, applied in the order given.
+        """
         if not filters:
             raise RepositoryError("find_by() called with no filters")
 
+        self.check_columns(order_by)
+
         query = f"SELECT * FROM {self.table_name} WHERE {self.where_clause(filters)}"
+
+        if order_by:
+            query += " ORDER BY " + ", ".join(order_by)
 
         async with self.database.acquire() as conn:
             records = await conn.fetch(query, *filters.values())

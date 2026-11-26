@@ -184,11 +184,7 @@ class TeamService(Service):
 
     async def pending_applications(self) -> list[ApplicationRow]:
         """Every pending application, oldest first - the approver's queue."""
-        return self.application.from_records(
-            await self.bot.database.fetch(
-                "SELECT * FROM team_applications WHERE status = 'pending' ORDER BY created_at, id"
-            )
-        )
+        return await self.application.find_by("created_at", "id", status="pending")
 
     async def find_application_by_owner(self, owner: int) -> ApplicationRow | None:
         """*owner*'s live application - pending or approved - or ``None``.
@@ -196,16 +192,16 @@ class TeamService(Service):
         One live application per owner is the schema's rule, so this answers
         both "already applied" and "already owns a team" with one read.
         """
-        rows = self.application.from_records(
-            await self.bot.database.fetch(
-                "SELECT * FROM team_applications WHERE owner = $1 AND status IN ('pending', 'approved')", owner
-            )
-        )
+        rows = await self.application.find_by(owner=owner, status=("pending", "approved"))
 
         return rows[0] if rows else None
 
     async def find_application_by_name(self, name: str) -> ApplicationRow | None:
-        """The pending application named *name*, case-insensitively, or ``None``."""
+        """The pending application named *name*, case-insensitively, or ``None``.
+
+        The unique index keys the lowercased name, and the repository cannot
+        express a function call, so this read stays raw.
+        """
         rows = self.application.from_records(
             await self.bot.database.fetch(
                 "SELECT * FROM team_applications WHERE lower(name) = lower($1) AND status = 'pending'", name
@@ -220,11 +216,7 @@ class TeamService(Service):
         A stale button press on a decided card must read as "already
         decided", so decided rows are filtered out here.
         """
-        rows = self.application.from_records(
-            await self.bot.database.fetch(
-                "SELECT * FROM team_applications WHERE id = $1 AND status = 'pending'", application_id
-            )
-        )
+        rows = await self.application.find_by(id=application_id, status="pending")
 
         return rows[0] if rows else None
 
@@ -423,13 +415,21 @@ class TeamService(Service):
         """Take back down what this approval attempt created, never raising.
 
         A role or emoji reused from a crashed attempt predates this call and
-        stays for the retry to reuse again.
+        stays for the retry to reuse again.  An object a concurrent winning
+        approval adopted is also kept: the winning team's row references it,
+        so deleting it would leave that team without its role or emoji.
         """
         if emoji_is_new and emoji is not None:
-            await self.delete_emoji(emoji)
+            if await self.bot.database.fetchval("SELECT 1 FROM teams WHERE emoji_snowflake = $1", emoji.id) is None:
+                await self.delete_emoji(emoji)
+            else:
+                logger.warning("Emoji %d is referenced by a team, keeping it", emoji.id)
 
         if role_is_new:
-            await self.delete_role(role)
+            if await self.bot.database.fetchval("SELECT 1 FROM teams WHERE role_snowflake = $1", role.id) is None:
+                await self.delete_role(role)
+            else:
+                logger.warning("Role %d is referenced by a team, keeping it", role.id)
 
     async def delete_role(self, role: discord.Role) -> None:
         """Delete *role*, never raising."""
