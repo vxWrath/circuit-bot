@@ -47,7 +47,7 @@ class PlayerProfile(Profile["PlayerService"]):
         """The player's full row, or ``None`` if there's no such player."""
         return await self.ensure_part(PlayerRow, self.service.find_player, snowflake=self.snowflake)
 
-    async def require_player(self) -> PlayerRow:
+    async def retrieve_player(self) -> PlayerRow:
         """The player's full row, or raise ``RecordNotFoundError``."""
         player = await self.player()
 
@@ -64,7 +64,7 @@ class PlayerProfile(Profile["PlayerService"]):
             await self.service.create(snowflake=self.snowflake)
             # player() cached the miss as None, so drop it before re-reading
             self.invalidate_parts(PlayerRow)
-            player = await self.require_player()
+            player = await self.retrieve_player()
 
         return player
 
@@ -213,7 +213,7 @@ class RobloxProfile:
 
         return await self.player.ensure_part("headshot_url", self.player.service.headshot_url, roblox_id=roblox_id)
 
-    async def headshot_or_none(self) -> str | None:
+    async def get_headshot(self) -> str | None:
         """The player's headshot, or ``None`` when it can't be fetched."""
         try:
             return await self.headshot()

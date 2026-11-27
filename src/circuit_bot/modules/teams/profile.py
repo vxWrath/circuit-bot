@@ -4,6 +4,7 @@ import discord
 
 from ...core.database import RecordNotFoundError
 from ...core.profile import Profile
+from .errors import TeamWithoutRole
 from .models import TeamRow
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ class TeamProfile(Profile["TeamService"]):
         """The team's row, or ``None`` if there's no such team."""
         return await self.ensure_part(TeamRow, self.service.get_team, self.team_id)
 
-    async def require_team(self) -> TeamRow:
+    async def retrieve_team(self) -> TeamRow:
         """The team's row, or raise ``RecordNotFoundError``."""
         team = await self.team()
 
@@ -38,18 +39,17 @@ class TeamProfile(Profile["TeamService"]):
 
         return team
 
-    async def role(self) -> discord.Role | None:
-        """The team's Discord role, or ``None`` once it has been unlinked."""
-        team = await self.team()
-
-        if team is None:
-            return None
+    async def role(self) -> discord.Role:
+        """The team's Discord role.  A team without one raises ``TeamWithoutRole``."""
+        team = await self.retrieve_team()
 
         role = await self.ensure_part(discord.Role, self.service.role_for, team)
 
-        if role is None and team.role_snowflake is not None:
-            # The service unlinked a role deleted on Discord - drop the stale row.
-            self.invalidate_parts(TeamRow)
+        if role is None:
+            if team.role_snowflake is not None:
+                # The service unlinked a role deleted on Discord - drop the stale row.
+                self.invalidate_parts(TeamRow)
+            raise TeamWithoutRole("That team has no Discord role.")
 
         return role
 
@@ -69,20 +69,14 @@ class TeamProfile(Profile["TeamService"]):
 
     async def format_name(self) -> str:
         """The team's display name, emoji first when there is one."""
-        team = await self.require_team()
         role = await self.role()
         emoji = await self.emoji()
 
-        name = role.name if role is not None else team.name
-        return f"{emoji} {name}" if emoji is not None else name
+        return f"{emoji} {role.name}" if emoji is not None else role.name
 
     async def format_mention(self) -> str:
-        """The team's mention with its emoji, or the plain name when the role is gone."""
-        team = await self.require_team()
+        """The team's mention with its emoji."""
         role = await self.role()
         emoji = await self.emoji()
-
-        if role is None:
-            return team.name
 
         return f"{emoji} {role.mention}" if emoji is not None else role.mention

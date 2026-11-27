@@ -80,7 +80,7 @@ class Force(commands.Cog):
             logger.warning("Could not fetch Roblox user %d before unlinking: %s", previous_roblox_id, e)
             rblx = None
 
-        headshot = await profile.roblox.headshot_or_none()
+        headshot = await profile.roblox.get_headshot()
 
         await profile.unlink_roblox()
 
@@ -168,7 +168,7 @@ class Force(commands.Cog):
         # Discord failure there can't read as a failed link.
         create_logged_task(profile.set_nickname_from_roblox(), name=f"nickname-{member.id}")
 
-        headshot = await profile.roblox.headshot_or_none()
+        headshot = await profile.roblox.get_headshot()
         invoker = interaction.require_member()
 
         embed = roblox.build_embed(

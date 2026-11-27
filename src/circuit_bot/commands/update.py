@@ -74,7 +74,7 @@ class Update(commands.Cog):
         # Discord failure there can't read as a failed link.
         create_logged_task(profile.set_nickname_from_roblox(), name=f"nickname-{member.id}")
 
-        headshot = await profile.roblox.headshot_or_none()
+        headshot = await profile.roblox.get_headshot()
 
         embed = roblox.build_embed(
             "Member Self-Linked",

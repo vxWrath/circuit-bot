@@ -184,7 +184,7 @@ class PlayerService(Service):
         await profile.link_roblox(roblox_id)
         logger.debug(f"Linked {member.id} to Roblox ID {roblox_id}")
 
-        hs_url = await profile.roblox.headshot_or_none()
+        hs_url = await profile.roblox.get_headshot()
 
         if not hs_url:
             logger.debug(f"Could not fetch roblox headshot for roblox id {roblox_id}")

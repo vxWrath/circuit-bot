@@ -10,11 +10,15 @@ from ...core.exception import CircuitException
 if TYPE_CHECKING:
     from ...core.bluerobot import Interaction
 
-__all__ = ("TeamError", "TeamErrorFormatter", "TeamUniqueViolationFormatter")
+__all__ = ("TeamError", "TeamErrorFormatter", "TeamUniqueViolationFormatter", "TeamWithoutRole")
 
 
 class TeamError(CircuitException):
     """A team rule the service refused, with the reply as the message."""
+
+
+class TeamWithoutRole(TeamError):
+    """A team that has no Discord role.  Every team needs one, so callers raise instead of guessing."""
 
 
 class TeamErrorFormatter(ErrorFormatter):
