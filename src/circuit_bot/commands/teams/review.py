@@ -21,6 +21,7 @@ from ...core import (
     LayoutBuilder,
     approver_only,
     autocomplete,
+    context,
     create_logged_task,
     ensure_approver,
     get_logger,
@@ -225,7 +226,7 @@ class DenyTeamButton(DecisionCheck, BaseItem[ui.Button], template=r"team:deny:(\
         await interaction.response.send_modal(DenyReasonModal(self.application_id))
 
 
-class DenyReasonModal(BaseModal, title="Deny application"):
+class DenyReasonModal(DecisionCheck, BaseModal, title="Deny application"):
     modal_source = "team-denial"
 
     reason = ui.TextInput(
@@ -282,7 +283,7 @@ class TeamReview(commands.Cog):
         The follow-ups run in the background, so a closed DM or a deleted
         message can't undo the approval.
         """
-        decided = await self.bot.get_service(TeamService).approve(application, approver.id)
+        decided = await self.bot.get_service(TeamService).approve_application(application, approver.id)
 
         if decided is None:
             return None
@@ -311,7 +312,7 @@ class TeamReview(commands.Cog):
         The follow-ups run in the background, so a closed DM or a deleted
         message can't undo the denial.
         """
-        decided = await self.bot.get_service(TeamService).deny(application)
+        decided = await self.bot.get_service(TeamService).deny_application(application)
 
         if decided is None:
             return None
@@ -425,11 +426,8 @@ class TeamReview(commands.Cog):
             )
             return
 
-        try:
+        async with context("fetching request message", application=application.id):
             message = await channel.fetch_message(application.request_message_snowflake)
-        except (discord.NotFound, discord.Forbidden, discord.HTTPException) as e:
-            logger.warning("Could not fetch request message for application %d: %s", application.id, e)
-            return
 
         if decision == "Approved":
             prefix, color = CommonEmojis.SUCCESS, Color.brand_green()
@@ -456,10 +454,8 @@ class TeamReview(commands.Cog):
             decision_line=f"-# {prefix} {line}",
         )
 
-        try:
+        async with context("updating request card", application=application.id):
             await message.edit(view=layout)
-        except discord.HTTPException as e:
-            logger.warning("Could not update request card for application %d: %s", application.id, e)
 
     # -- commands ------------------------------------------------------------
 
@@ -539,7 +535,7 @@ class TeamReview(commands.Cog):
         """Approve a pending application: the team, its role, and its logo come into existence."""
         team_service = self.bot.get_service(TeamService)
 
-        application = await team_service.find_application_by_name(name)
+        application = await team_service.find_application_by_team_name(name)
 
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No pending application named `{name}`.**")
@@ -580,7 +576,7 @@ class TeamReview(commands.Cog):
         """Deny a pending application, freeing the name and the owner's slot."""
         team_service = self.bot.get_service(TeamService)
 
-        application = await team_service.find_application_by_name(name)
+        application = await team_service.find_application_by_team_name(name)
 
         if application is None:
             return await interaction.failure(f"{CommonEmojis.FAIL} **No pending application named `{name}`.**")

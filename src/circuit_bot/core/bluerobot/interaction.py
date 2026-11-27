@@ -357,6 +357,39 @@ class BaseModal(ABC, Modal):
     """
 
     modal_source: ClassVar[str] = ""
+    checks: ClassVar[list[Callable[[Any, Interaction], bool]]] = []
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        # shortcut: copies BaseItem's collection loop, extract a shared helper if a third copy appears
+        cls.checks = []
+        for attr_name in dir(cls):
+            attr = getattr(cls, attr_name, None)
+
+            if attr is not None and callable(attr) and getattr(attr, "__is_check__", False):
+                cls.checks.append(attr)  # type: ignore
+
+        return super().__init_subclass__(**kwargs)
+
+    async def interaction_check(self, interaction: Interaction) -> bool:
+        """Run the tree check and the modal's checks before the submit handler.
+
+        Discord calls this before ``on_submit``, so the relabel has to happen
+        here for the tree check to see one of our interactions.
+        """
+
+        interaction.__class__ = Interaction
+
+        if not await interaction.client.tree.interaction_check(interaction):
+            return False
+
+        if interaction.channel and interaction.channel.type == discord.ChannelType.private:
+            return True
+
+        for check in self.checks:
+            if not await discord.utils.maybe_coroutine(check, self, interaction):
+                return False
+
+        return True
 
     @final
     async def on_submit(self, interaction: Interaction) -> None:

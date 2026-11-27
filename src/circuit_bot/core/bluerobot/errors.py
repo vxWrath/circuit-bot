@@ -50,6 +50,20 @@ class ApiErrorFormatter(ErrorFormatter):
         return None
 
 
+# Discord JSON error codes worth a specific reply.  Anything else gets the
+# generic message, so only codes the user can act on belong here.
+HTTP_CODE_REPLIES = {
+    10008: "That message no longer exists.",  # unknown message, deleted mid-flow
+    10062: "This interaction has expired. Please try again.",  # unknown interaction
+    30005: "The server has hit Discord's role limit. An admin needs to free up some roles first.",  # max guild roles
+    30008: "The server has hit Discord's emoji limit. An admin needs to free up some emojis first.",  # max emojis
+    40060: "This interaction was already handled.",  # already acknowledged
+    50007: "I couldn't DM that user. They may have DMs closed.",  # cannot send messages to this user
+    50013: "I'm missing the permission to do that.",  # you lack permissions
+    130000: "Discord is overloaded right now. Try again in a little while.",  # API resource overloaded
+}
+
+
 class DiscordErrorFormatter(ErrorFormatter):
     """The reply for a Discord call that failed inside a command.
 
@@ -64,6 +78,11 @@ class DiscordErrorFormatter(ErrorFormatter):
     def format(self, _: Interaction, error: Exception) -> str | None:
         if not isinstance(error, discord.HTTPException):
             return None
+
+        message = HTTP_CODE_REPLIES.get(error.code)
+
+        if message is not None:
+            return format_fail(message)
 
         return format_fail("The bot had trouble talking to Discord. Try again later.")
 
@@ -97,6 +116,21 @@ class RecordNotFoundFormatter(ErrorFormatter):
         if not isinstance(error, RecordNotFoundError):
             return None
         return format_fail(f"Couldn't find a `{error.table}` with `{error.key}` equal to `{error.value}`")
+
+
+def with_notes(message: str, error: Exception) -> str:
+    """*message* plus the operation notes *error* picked up on its way out.
+
+    Notes come from ``context`` blocks, so a reply names what the bot was
+    doing when the failure hit without any formatter knowing about it.
+    """
+
+    notes = getattr(error, "__notes__", ())
+
+    if not notes:
+        return message
+
+    return f"{message}\n-# {'; '.join(notes)}"
 
 
 class ErrorHandler:
@@ -142,7 +176,7 @@ class ErrorHandler:
                 message = formatter.format(interaction, error)
 
                 if message is not None:
-                    await self.respond(interaction, message)
+                    await self.respond(interaction, with_notes(message, error))
 
                     if formatter.report:
                         await self.report_notice(source, error)
@@ -199,8 +233,10 @@ class ErrorHandler:
         trace = "".join(traceback.format_exception(error))
 
         if interaction is not None:
+            message = with_notes("Something went wrong. The developers have been notified.", error)
+
             try:
-                await interaction.failure("Something went wrong. The developers have been notified.")
+                await interaction.failure(message)
             except discord.HTTPException:
                 pass
 

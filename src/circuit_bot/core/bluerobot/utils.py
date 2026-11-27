@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import Awaitable
+from types import TracebackType
 from typing import TYPE_CHECKING, Literal
 from unicodedata import normalize as unicode_normalize
 
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "MINIMUM_PERMISSIONS",
+    "context",
     "approver_only",
     "create_logged_task",
     "developer_only",
@@ -114,6 +116,49 @@ def create_logged_task[T](
             raise
 
     return asyncio.create_task(wrapper(), name=name)
+
+
+class context:
+    """Name the operation a block is running, so any exception it raises
+    carries that context to whoever handles it.
+
+    The note rides the exception to the task log, the error webhook, and
+    the user-facing reply, so a call site never needs its own try/except
+    just to say what it was doing.  *suppress* lists the exceptions that
+    are expected here and get a warning instead of propagating.  *details*
+    join the action as ``key=value`` pairs, for the ids and names a log
+    or reply should carry.
+    """
+
+    def __init__(
+        self, action: str, *, suppress: tuple[type[Exception], ...] = (), **details: object
+    ) -> None:
+        if details:
+            action += " (" + ", ".join(f"{key}={value}" for key, value in details.items()) + ")"
+
+        self.action = action
+        self.suppress = suppress
+
+    async def __aenter__(self) -> None:
+        return None
+
+    async def __aexit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        _tb: TracebackType | None,
+    ) -> bool:
+        # Cancels are control flow, not failures, so they pass through un-noted.
+        if exc is None or not isinstance(exc, Exception):
+            return False
+
+        exc.add_note(self.action)
+
+        if isinstance(exc, self.suppress):
+            logger.warning("%s failed: %s", self.action, exc)
+            return True
+
+        return False
 
 
 def developer_only():

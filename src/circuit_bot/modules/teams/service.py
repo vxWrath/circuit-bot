@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 import aiohttp
 import discord
 
-from ...core.bluerobot.utils import is_managed_role, normalize
+from ...core.bluerobot.utils import context, is_managed_role, normalize
 from ...core.database import DatabaseConnection
 from ...core.logging import get_logger
 from ...core.service import Service
@@ -196,7 +196,7 @@ class TeamService(Service):
 
         return rows[0] if rows else None
 
-    async def find_application_by_name(self, name: str) -> ApplicationRow | None:
+    async def find_application_by_team_name(self, name: str) -> ApplicationRow | None:
         """The pending application named *name*, case-insensitively, or ``None``.
 
         The unique index keys the lowercased name, and the repository cannot
@@ -220,7 +220,7 @@ class TeamService(Service):
 
         return rows[0] if rows else None
 
-    async def deny(self, application: ApplicationRow) -> ApplicationRow | None:
+    async def deny_application(self, application: ApplicationRow) -> ApplicationRow | None:
         """Refuse *application*, freeing its name and owner slot for a resubmission.
 
         Conditional on the row still being ``pending`` - ``None`` means a
@@ -234,7 +234,7 @@ class TeamService(Service):
 
         return self.application.from_record(record)
 
-    async def approve(self, application: ApplicationRow, approver_id: int) -> tuple[TeamRow, ApplicationRow] | None:
+    async def approve_application(self, application: ApplicationRow, approver_id: int) -> tuple[TeamRow, ApplicationRow] | None:
         """Approve *application*: ensure its Discord role and emoji, then bring the team into existence.
 
         The role is required, so a failure to create it aborts the approval.
@@ -266,7 +266,7 @@ class TeamService(Service):
         emoji_is_new = False
 
         try:
-            logo_url = await self.fresh_logo_url(application) or application.logo_url
+            logo_url = await self.fetch_logo_from_message(application) or application.logo_url
 
             if logo_url is not None:
                 # Emoji names are unique per guild, so a same-named one is a
@@ -278,15 +278,18 @@ class TeamService(Service):
                 if existing is not None:
                     emoji = existing
                 else:
-                    try:
+                    async with context(
+                        "creating emoji",
+                        suppress=(aiohttp.ClientError, discord.HTTPException),
+                        team=application.name,
+                        emoji=emoji_name,
+                    ):
                         async with self.bot.session.get(logo_url) as response:
                             response.raise_for_status()
                             image = await response.read()
 
                         emoji = await guild.create_custom_emoji(name=emoji_name, image=image)
                         emoji_is_new = True
-                    except (aiohttp.ClientError, discord.HTTPException) as e:
-                        logger.warning("Could not create emoji for team %r: %s", emoji_name, e)
 
             decided = await self.approve_write(application, role, emoji, logo_url, approver_id)
         except Exception:
@@ -298,7 +301,7 @@ class TeamService(Service):
 
         return decided
 
-    async def fresh_logo_url(self, application: ApplicationRow) -> str | None:
+    async def fetch_logo_from_message(self, application: ApplicationRow) -> str | None:
         """The request message's first attachment URL, refetched so the signature is fresh.
 
         ``None`` when there is no message, it is gone, or it has no
@@ -397,29 +400,17 @@ class TeamService(Service):
         """
         if emoji_is_new and emoji is not None:
             if await self.bot.database.fetchval("SELECT 1 FROM teams WHERE emoji_snowflake = $1", emoji.id) is None:
-                await self.delete_emoji(emoji)
+                async with context("deleting emoji", suppress=(discord.HTTPException,), emoji=emoji.id):
+                    await emoji.delete()
             else:
                 logger.warning("Emoji %d is referenced by a team, keeping it", emoji.id)
 
         if role_is_new:
             if await self.bot.database.fetchval("SELECT 1 FROM teams WHERE role_snowflake = $1", role.id) is None:
-                await self.delete_role(role)
+                async with context("deleting role", suppress=(discord.HTTPException,), role=role.id):
+                    await role.delete()
             else:
                 logger.warning("Role %d is referenced by a team, keeping it", role.id)
-
-    async def delete_role(self, role: discord.Role) -> None:
-        """Delete *role*, never raising."""
-        try:
-            await role.delete()
-        except discord.HTTPException as e:
-            logger.warning("Could not delete role %d: %s", role.id, e)
-
-    async def delete_emoji(self, emoji: discord.Emoji) -> None:
-        """Delete *emoji*, never raising."""
-        try:
-            await emoji.delete()
-        except discord.HTTPException as e:
-            logger.warning("Could not delete emoji %d: %s", emoji.id, e)
 
     async def role_for(self, team: TeamRow) -> discord.Role | None:
         """The team's Discord role, or ``None`` - one deleted by hand or owned by Discord is unlinked, not repaired.
